@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using pharmacyBackend.Enums;
 namespace pharmacyBackend.Models
 {
     public class User
@@ -20,6 +21,6 @@ namespace pharmacyBackend.Models
         public string Password { get; set; } = string.Empty;
 
         [Required]
-        public string Role {  get; set; } = "User";
+        public UserRole Role {  get; set; } = UserRole.User;
     }
 }

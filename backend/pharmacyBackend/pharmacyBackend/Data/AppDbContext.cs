@@ -29,6 +29,10 @@ namespace pharmacyBackend.Data
                 .HasConversion<string>();
 
             modelBuilder.Entity<User>()
+                .Property(u => u.Role)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<User>()
                 .HasIndex(u => u.Phone)
                 .IsUnique();
         }

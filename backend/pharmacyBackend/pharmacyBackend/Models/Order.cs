@@ -1,17 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using pharmacyBackend.Enums;
 namespace pharmacyBackend.Models
 {
-    public enum OrderStatus
-    {
-        Pending = 0,
-        Ready = 1,
-        Completed = 2,
-        Cancelled = 3,
-        Expired = 4,
-        Failed = 5
-    }
-
     public class Order
     {
         [Key]
