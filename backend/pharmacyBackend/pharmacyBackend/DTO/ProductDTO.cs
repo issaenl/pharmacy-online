@@ -21,7 +21,7 @@
 
     public class ProductLongDTO : ProductMediumDTO
     {
-        public int ExpirationDate { get; set; }
+        public DateOnly ExpirationDate { get; set; }
         public string? PdfUrl { get; set; }
         public List<PharmacyStockDTO> AvailableIn { get; set; } = new();
     }

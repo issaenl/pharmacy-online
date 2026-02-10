@@ -12,7 +12,7 @@ using pharmacyBackend.Data;
 namespace pharmacyBackend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260205182848_InitialCreate")]
+    [Migration("20260210174101_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -261,8 +261,11 @@ namespace pharmacyBackend.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("ExpirationDate")
-                        .HasColumnType("integer");
+                    b.Property<DateOnly>("ExpirationDate")
+                        .HasColumnType("date");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsPrescription")
                         .HasColumnType("boolean");

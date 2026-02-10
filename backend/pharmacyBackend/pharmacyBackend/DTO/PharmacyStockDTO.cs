@@ -1,4 +1,4 @@
-﻿using pharmacyBackend.Models;
+using pharmacyBackend.Models;
 
 namespace pharmacyBackend.DTO
 {
@@ -22,6 +22,8 @@ namespace pharmacyBackend.DTO
     {
         public int PharmacyId { get; set; }
         public string PharmacyName { get; set; } = string.Empty;
+        public string PharmacyAddress { get; set; } = string.Empty;
+        public string? PharmacyPhone { get; set; }
 
         public decimal Price { get; set; }
         public int Quantity { get; set; }

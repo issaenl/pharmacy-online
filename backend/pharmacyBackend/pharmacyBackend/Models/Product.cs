@@ -22,8 +22,7 @@ namespace pharmacyBackend.Models
         [Required]
         public string DosageForm { get; set; } = string.Empty;
        
-        [Required]
-        public int ExpirationDate { get; set; } 
+        public DateOnly ExpirationDate { get; set; } 
         
         public string? PdfUrl { get; set; }
        

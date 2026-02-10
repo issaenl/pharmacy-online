@@ -87,9 +87,10 @@ namespace pharmacyBackend.Migrations
                     Country = table.Column<string>(type: "text", nullable: false),
                     IsPrescription = table.Column<bool>(type: "boolean", nullable: false),
                     DosageForm = table.Column<string>(type: "text", nullable: false),
-                    ExpirationDate = table.Column<int>(type: "integer", nullable: false),
+                    ExpirationDate = table.Column<DateOnly>(type: "date", nullable: false),
                     PdfUrl = table.Column<string>(type: "text", nullable: true),
                     PictureUrl = table.Column<string>(type: "text", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
                     CategoryId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
