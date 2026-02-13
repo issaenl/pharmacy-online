@@ -104,6 +104,10 @@ namespace pharmacyBackend.Data
                 var coughCat = context.Categories.First(c => c.Name == "Препараты от кашля");
                 var vitaminsCat = context.Categories.First(c => c.Name == "Витамины");
                 var probioticCat = context.Categories.First(c => c.Name == "Препараты при диарее, кишечных расстройствах");
+                var hemorrhoidCat = context.Categories.First(c => c.Name == "Препараты от геморроя");
+                var bronchialasthmaCat = context.Categories.First(c => c.Name == "Препараты для лечения бронхиальной астмы");
+                var sedativesCat = context.Categories.First(c => c.Name == "Снотворные и успокоительные средства");
+
                 var pharmacy1 = context.Pharmacies.First(p => p.Name == "Планета здоровья Аптека №1");
                 var pharmacy2 = context.Pharmacies.First(p => p.Name == "Планета Здоровья Аптека №14");
 
@@ -115,10 +119,11 @@ namespace pharmacyBackend.Data
                         Manufacturer = "Бионорика",
                         Country = "Германия",
                         IsPrescription = false,
-                        DosageForm = "таблетки ×30",
+                        DosageForm = "таблетки",
                         ExpirationDate = new DateOnly(2027, 12, 1),
                         IsActive = true,
-                        CategoryId = urologyCat.Id
+                        CategoryId = urologyCat.Id,
+                        PictureUrl = "/products/enterol.jpg"
                     },
                     new Product
                     {
@@ -126,7 +131,7 @@ namespace pharmacyBackend.Data
                         Manufacturer = "Бионорика",
                         Country = "Германия",
                         IsPrescription = false,
-                        DosageForm = "раствор 100 мл ×1",
+                        DosageForm = "раствор 100 мл",
                         ExpirationDate = new DateOnly(2026, 6, 1),
                         IsActive = true,
                         CategoryId = coughCat.Id
@@ -137,10 +142,43 @@ namespace pharmacyBackend.Data
                         Manufacturer = "Санофи",
                         Country = "Франция",
                         IsPrescription = false,
-                        DosageForm = "таблетки ×60",
+                        DosageForm = "таблетки",
                         ExpirationDate = new DateOnly(2027, 3, 1),
                         IsActive = true,
                         CategoryId = vitaminsCat.Id
+                    },
+		            new Product
+                    {
+                        Name = "Детралекс",
+                        Manufacturer = "Сервье рус",
+                        Country = "Россия",
+                        IsPrescription = false,
+                        DosageForm = "таблетки",
+                        ExpirationDate = new DateOnly(2026, 10, 10),
+                        IsActive = true,
+                        CategoryId = hemorrhoidCat.Id
+                    },
+                    new Product
+                    {
+                        Name = "Фликсотид",
+                        Manufacturer = "ГСК Фармасьютикалз",
+                        Country = "Великобритания",
+                        IsPrescription = true,
+                        DosageForm = "аэрозоль 125 мкг",
+                        ExpirationDate = new DateOnly(2026, 11, 11),
+                        IsActive = true,
+                        CategoryId = bronchialasthmaCat.Id
+                    },
+                    new Product
+                    {
+                        Name = "Дексмедетомидин эвер фарма",
+                        Manufacturer = "Эвер Нейро Фарма",
+                        Country = "Австрия",
+                        IsPrescription = true,
+                        DosageForm = "концентрат 100 мкг",
+                        ExpirationDate = new DateOnly(2028, 10 , 22),
+                        IsActive = true,
+                        CategoryId = sedativesCat.Id
                     },
                     new Product
                     {
@@ -148,10 +186,11 @@ namespace pharmacyBackend.Data
                         Manufacturer = "Биокодекс",
                         Country = "Франция",
                         IsPrescription = false,
-                        DosageForm = "капсулы 250 мг ×30",
+                        DosageForm = "капсулы 250 мг",
                         ExpirationDate = new DateOnly(2026, 9, 1),
                         IsActive = true,
-                        CategoryId = probioticCat.Id
+                        CategoryId = probioticCat.Id,
+                        PictureUrl = "/products/enterol.jpg"
                     }
                 };
 
@@ -162,6 +201,10 @@ namespace pharmacyBackend.Data
                 var bronchipret = context.Products.First(p => p.Name == "Бронхипрет");
                 var magneB6 = context.Products.First(p => p.Name == "Магне b6");
                 var enterol = context.Products.First(p => p.Name == "Энтерол");
+		        var detraleks= context.Products.First(p => p.Name == "Детралекс");
+                var flixotide= context.Products.First(p => p.Name == "Фликсотид");
+                var dexmedetomidine= context.Products.First(p => p.Name == "Дексмедетомидин эвер фарма");
+
 
                 var stocks = new Stock[]
                 {
@@ -172,7 +215,13 @@ namespace pharmacyBackend.Data
                     new Stock { ProductId = magneB6.Id, PharmacyId = pharmacy1.Id, Price = 27.90m, Quantity = 6 },
                     new Stock { ProductId = magneB6.Id, PharmacyId = pharmacy2.Id, Price = 29.50m, Quantity = 4 },
                     new Stock { ProductId = enterol.Id, PharmacyId = pharmacy1.Id, Price = 26.22m, Quantity = 12 },
-                    new Stock { ProductId = enterol.Id, PharmacyId = pharmacy2.Id, Price = 28.00m, Quantity = 7 }
+                    new Stock { ProductId = enterol.Id, PharmacyId = pharmacy2.Id, Price = 28.00m, Quantity = 7 },
+                    new Stock { ProductId = detraleks.Id, PharmacyId = pharmacy1.Id, Price = 70.89m, Quantity = 4 },
+                    new Stock { ProductId = detraleks.Id, PharmacyId = pharmacy2.Id, Price = 75.89m, Quantity = 5 },
+                    new Stock { ProductId = flixotide.Id, PharmacyId = pharmacy1.Id, Price = 54.64m, Quantity = 10 },
+                    new Stock { ProductId = flixotide.Id, PharmacyId = pharmacy2.Id, Price = 65.75m, Quantity = 4 },
+                    new Stock { ProductId = dexmedetomidine.Id, PharmacyId = pharmacy1.Id, Price = 77.03m, Quantity = 13 },
+                    new Stock { ProductId = dexmedetomidine.Id, PharmacyId = pharmacy2.Id, Price = 84.30m, Quantity = 9 },
                 };
 
                 context.Stocks.AddRange(stocks);

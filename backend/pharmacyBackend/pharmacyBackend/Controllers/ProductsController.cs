@@ -45,7 +45,7 @@ namespace pharmacyBackend.Controllers
             return Ok(_mapper.Map<ProductLongDTO>(product));
         }
 
-        [HttpGet("{id}/avalibility")]
+        [HttpGet("{id}/availibility")]
         public async Task<ActionResult<IEnumerable<PharmacyStockDTO>>> GetProductAvalibility(int id)
         {
             var avalibility = await _context.Stocks
@@ -54,12 +54,47 @@ namespace pharmacyBackend.Controllers
                 .ProjectTo<PharmacyStockDTO>(_mapper.ConfigurationProvider)
                 .ToListAsync();
 
-            if (avalibility == null)
+            if (!avalibility.Any())
             {
                 return NotFound(new {Message = "Товар временно отсутствует"});
             }
 
             return Ok(avalibility);
+        }
+
+        [HttpGet("popular")]
+        public async Task<ActionResult<IEnumerable<ProductShortDTO>>> GetPopularProducts()
+        {
+            var products = await _context.Products
+                .Include(p => p.Stocks)
+                .OrderByDescending(p => p.Stocks.Count(s => s.Quantity > 0))
+                .Take(20)
+                .ProjectTo<ProductShortDTO>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+
+            if (!products.Any()) {
+                return NotFound(new { Message = "Популярные товары не найдены"});
+            }
+
+            return Ok(products);
+        }
+
+        [HttpGet("new")]
+        public async Task<ActionResult<IEnumerable<ProductShortDTO>>> GetNewProducts()
+        {
+            var products = await _context.Products
+                .Include(p => p.Stocks)
+                .OrderByDescending(p => p.Id)
+                .Take(20)
+                .ProjectTo<ProductShortDTO>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+
+            if (!products.Any())
+            {
+                return NotFound(new { Message = "Новые товары не найдены"});
+            }
+
+            return Ok(products);
         }
     }
 }
