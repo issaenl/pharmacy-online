@@ -1,6 +1,6 @@
 <template>
-  <div class="card">
-    <button class="wishlist-btn">
+  <div class="card" @click="goToProduct">
+    <button class="wishlist-btn" @click.stop="toggleWishlist">
       <img src="/assets/HeartEmpty.svg" alt="Сердце">
     </button>
     
@@ -13,7 +13,7 @@
       <div class="price">от {{ product.minPrice }} р.</div>
     </div>
 
-    <button class="cart-btn">
+    <button class="cart-btn" @click.stop="addToCart">
       <img src="/assets/Cart.svg" alt="Тележка" class="icon-cart">
       В корзину
     </button>
@@ -21,6 +21,8 @@
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router';
+
 const props = defineProps({
   product: {
     type: Object,
@@ -28,17 +30,26 @@ const props = defineProps({
     default: () => ({})
   }
 });
+
+const router = useRouter();
+
+const goToProduct = () => {
+  router.push(`/product/${props.product.id}`);
+};
+
+/*пока без логики позже реализую*/
+const toggleWishlist = () => {};
+const addToCart = () => {};
 </script>
 
 <style scoped>
   .card {
     background: #fff;
-    border-radius: 35px;
+    border-radius: 25px;
     padding: 25px 20px;
     text-align: left;
     position: relative;
     transition: 0.3s;
-    border: 1px solid #fff;
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -81,10 +92,10 @@ const props = defineProps({
   }
 
   .title { 
-    font-size: 20px; 
+    font-size: 18px; 
     color: #000000; 
     margin: 0 0 5px; 
-    height: 50px; 
+    height: 40px; 
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -120,8 +131,29 @@ const props = defineProps({
     font-weight:600px;
   }
 
-  .icon-small, .icon-cart { 
+  .icon-cart { 
     width: 18px; 
     height: 18px; 
+  }
+
+  @media (max-width: 1024px) {
+    .title { font-size: 16px; height: 42px; }
+    .price { font-size: 18px; }
+    .card__image { height: 150px; }
+  }
+
+  @media (max-width: 600px) {
+    .card { padding: 12px; border-radius: 20px; }
+    .card__image { height: 120px; margin-bottom: 10px; }
+    .title { font-size: 14px; height: 36px; margin-bottom: 5px; }
+    .price { font-size: 16px; margin-bottom: 10px; }
+    .cart-btn { font-size: 14px; padding: 10px 5px; border-radius: 12px; }
+    .cart-btn span { display: block; } 
+    .wishlist-btn img { width: 20px; }
+  }
+
+  @media (max-width: 400px) {
+    .cart-btn span { display: none; }
+    
   }
 </style>

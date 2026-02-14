@@ -42,7 +42,7 @@ namespace pharmacyBackend.Mappers
             //хранение
             CreateMap<Stock, PharmacyStockDTO>()
                 .ForMember(dest => dest.PharmacyName, opt => opt.MapFrom(src => src.Pharmacy.Name))
-                .ForMember(dest => dest.PharmacyAddress, opt => opt.MapFrom(src => src.Pharmacy.Address))
+                .ForMember(dest => dest.PharmacyAddress, opt => opt.MapFrom(src => $"{src.Pharmacy.District}, {src.Pharmacy.Address}"))
                 .ForMember(dest => dest.PharmacyPhone, opt => opt.MapFrom(src => src.Pharmacy.Phone))
                 .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Price));
 
