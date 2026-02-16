@@ -62,35 +62,41 @@ onMounted(fetchData);
 </script>
 
 <style scoped>
-    .list-header {
+  .list-header {
     margin-bottom: 30px;
-    }
+  }
 
-    .back-link {
+  .back-link {
     color: #666;
     text-decoration: none;
     font-size: 20px;
     display: block;
     margin-bottom: 10px;
-    }
+  }
 
-    .products-grid-full {
+  .products-grid-full {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 25px;
-    }
+  }
 
-    .empty-msg {
+  .empty-msg {
     text-align: center;
     padding: 50px;
     color: #666;
-    }
+  }
 
-    @media (max-width: 1024px) {
-    .products-grid-full { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 1024px) {
+    .products-grid-full 
+    { 
+      grid-template-columns: repeat(3, 1fr); 
     }
+  }
 
-    @media (max-width: 768px) {
-    .products-grid-full { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 768px) {
+    .products-grid-full 
+    { 
+      grid-template-columns: repeat(2, 1fr); 
     }
+  }
 </style>

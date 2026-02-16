@@ -40,7 +40,7 @@
     </section>
 
     <div class="pharmacy-list">
-      <div v-if="pharmacies.length === 0" class="no-stock">Товар временно отсутствует в аптеках</div>
+      <div v-if="pharmacies.length === 0" class="no-stock">Товар временно отсутствует в аптеках!</div>
       <PharmacyItem 
         v-for="shop in paginatedPharmacies" 
         :key="shop.id" 
@@ -128,6 +128,13 @@ onMounted(async () => {
     text-align: center; 
     font-size: 20px; 
   }
+
+  .no-stock {
+    font-size: 20px;
+    color:#BB4E58;
+    font-weight: 600;
+    justify-self: center;
+  }
   
   .breadcrumbs { 
     color: #888; 
@@ -163,7 +170,12 @@ onMounted(async () => {
   .product-details h1 { font-size: 28px; 
     font-weight: 700; 
     margin: 0; 
+    line-height: 1.2;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
+
   .manufacturer { 
     color: #B4AFAC; 
     font-size: 18px; 

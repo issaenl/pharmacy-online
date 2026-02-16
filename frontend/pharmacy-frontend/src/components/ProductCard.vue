@@ -9,7 +9,8 @@
     </div>
 
     <div class="card__info">
-      <h4 class="title">{{ product.name }}, {{ product.dosageForm }}</h4>
+      <h4 class="title">{{ product.name }}</h4>
+      <div class="dosage">{{ product.dosageForm }}</div>
       <div class="price">от {{ product.minPrice }} р.</div>
     </div>
 
@@ -96,10 +97,25 @@ const addToCart = () => {};
     color: #000000; 
     margin: 0 0 5px; 
     height: 40px; 
+    line-height: 1.2;
+    height: 2.4em;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+  }
+
+  .dosage {
+    font-size: 14px;
+    color: #999;
+    margin-bottom: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height: 1.2em;
   }
 
   /*не используется, для побочного текста типо количества в упаковке*/

@@ -9,14 +9,16 @@
         </button>
 
         <transition name="slide">
-        <nav v-if="isMenuOpen" class="mobile-menu">
-            <router-link to="/catalog" @click="isMenuOpen = false">Каталог</router-link>
-            <a href="#">Лекарства</a>
-            <a href="#">Витамины и БАДы</a>
-            <a href="#">Медицинские изделия</a>
-            <a href="#">Гигиена</a>
-            <a href="#">Косметика</a>
-        </nav>
+            <nav v-if="isMenuOpen" class="mobile-menu">
+                <router-link to="/catalog" @click="isMenuOpen = false">Все товары</router-link>
+                <router-link 
+                v-for="cat in navCategories" 
+                :key="cat.id"
+                :to="{ path: '/catalog', query: { categoryId: cat.id, categoryName: cat.name }}"
+                @click="isMenuOpen = false">
+                {{ cat.name }}
+                </router-link>
+            </nav>
         </transition>
 
         <router-link to="/" class="logo">УниМед</router-link>
@@ -26,10 +28,7 @@
             <span class="catalog-text">Каталог</span>
         </button>
 
-        <div class="search-bar">
-          <input type="text" placeholder="Поиск лекарств" />
-          <button class="search-btn">Найти</button>
-        </div>
+        <SearchBar />
 
         <div class="user-menu">
             <div class="menu-item">
@@ -50,24 +49,59 @@
 
     <nav class="header__nav desktop-only">
       <div class="container nav-list">
-        <a href="#">Лекарства</a>
-        <a href="#">Витамины и БАДы</a>
-        <a href="#">Медицинские изделия</a>
-        <a href="#">Гигиена</a>
-        <a href="#">Косметика</a>
+        <router-link 
+          v-for="cat in navCategories" 
+          :key="cat.id"
+          :to="{ path: '/catalog', query: { categoryId: cat.id, categoryName: cat.name }}">
+          {{ cat.name }}
+        </router-link>
       </div>
     </nav>
   </header>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, computed } from 'vue';
+import SearchBar from '@/components/SearchBar.vue';
+import api from '@/api/api';
 
 const isMenuOpen = ref(false);
+const allCategories = ref([]);
 
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value;
 };
+
+const targetCategories = [
+  { label: 'Лекарства', dbNames: ['Жаропонижающие', 'Антибиотики'] }, 
+  { label: 'Витамины и БАДы', dbNames: ['Витамины', 'Минеральные добавки'] },
+  { label: 'Нервная система', dbNames: ['Антидепрессанты', 'Снотворные и успокоительные средства'] },
+  { label: 'Гигиена', dbNames: ['Антисептики'] },
+  { label: 'Косметика', dbNames: ['Препараты для лечения акне'] }
+];
+
+onMounted(async () => {
+  try {
+    const response = await api.get('/Categories');
+    allCategories.value = response.data;
+  } catch (error) {
+    console.error("Ошибка загрузки:", error);
+  }
+});
+
+
+const navCategories = computed(() => {
+  return targetCategories.map(target => {
+    const foundIds = allCategories.value
+      .filter(c => target.dbNames.includes(c.name))
+      .map(c => c.id);
+
+    return {
+      id: foundIds.join(','), 
+      name: target.label 
+    };
+  }).filter(c => c.id !== "");
+});
 </script>
 
 <style scoped>
@@ -149,31 +183,7 @@ const toggleMenu = () => {
         font-size: 20px;
     }
 
-    .search-bar {
-        display: flex;
-        flex: 1;
-        min-width: 280px;
-    }
-
-    .search-bar input {
-        flex: 1;
-        padding: 10px;
-        border: none;
-        border-radius: 10px 0 0 10px;
-        font-family: var(--main-font);
-        font-size: 20px;
-    }
-
-    .search-btn {
-        background: #B3CCAE;
-        color: white;
-        border: none;
-        padding: 0 20px;
-        border-radius: 0 10px 10px 0;
-        font-family: var(--main-font);
-        font-size: 20px;
-        cursor: pointer;
-    }
+    
 
     .user-menu {
         display: flex;
