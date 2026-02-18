@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue';
 import ProductDetailView from '../views/ProductDetailView.vue';
 import ProductListView from '../views/ProductListView.vue'
 import CatalogView from '../views/CatalogView.vue'
+import FilterCatalogView from '../views/FilterCatalogView.vue';
 
 const routes = [
   {
@@ -29,6 +30,11 @@ const routes = [
     path: '/catalog',
     name: 'catalog',
     component: CatalogView
+  },
+  {
+    path: '/full-catalog',
+    name: 'full-catalog',
+    component: FilterCatalogView
   }
 ];
 

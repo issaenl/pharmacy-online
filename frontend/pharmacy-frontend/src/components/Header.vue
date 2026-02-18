@@ -10,7 +10,7 @@
 
         <transition name="slide">
             <nav v-if="isMenuOpen" class="mobile-menu">
-                <router-link to="/catalog" @click="isMenuOpen = false">Все товары</router-link>
+                <router-link to='/full-catalog' @click="isMenuOpen = false">Все товары</router-link>
                 <router-link 
                 v-for="cat in navCategories" 
                 :key="cat.id"
@@ -23,10 +23,10 @@
 
         <router-link to="/" class="logo">УниМед</router-link>
         
-        <button class="catalog-btn desktop-only">
+        <router-link to="/full-catalog" class="catalog-btn desktop-only">
             <img src="/assets/FilterLeft.svg" alt="Каталог">
             <span class="catalog-text">Каталог</span>
-        </button>
+        </router-link>
 
         <SearchBar />
 
@@ -172,6 +172,7 @@ const navCategories = computed(() => {
     .catalog-btn {
         background: #B3CCAE;
         color: white;
+        text-decoration: none;
         border: none;
         padding: 10px 20px;
         border-radius: 10px;
@@ -181,9 +182,9 @@ const navCategories = computed(() => {
         cursor: pointer;
         font-family: var(--main-font);
         font-size: 20px;
+        font-weight: 500;
     }
 
-    
 
     .user-menu {
         display: flex;

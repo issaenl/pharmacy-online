@@ -10,7 +10,7 @@
     </div>
     
     <div class="pharmacy-pricing">
-      <div class="pharmacy-price">{{ pharmacy.price }} р.</div>
+      <div class="pharmacy-price">{{ formatPrice(pharmacy.price) }} р.</div>
       <div :class="['pharmacy-quantity', { 'low-stock': pharmacy.quantity < 10 }]">
         {{ pharmacy.quantity }} шт.
       </div>
@@ -32,6 +32,11 @@ const props = defineProps({
     required: true
   }
 });
+
+const formatPrice = (price) => {
+  if (price == null) return '0.00';
+  return Number(price).toFixed(2);
+};
 
 const formatDate = (dateString) => {
     if (!dateString) return 'н/д';
@@ -125,7 +130,7 @@ const formatDate = (dateString) => {
         color: white;
         border: none;
         padding: 8px 20px;
-        border-radius: 20px;
+        border-radius: 15px;
         cursor: pointer;
         font-weight: 500;
         font-size: 20px;

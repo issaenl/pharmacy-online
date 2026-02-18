@@ -21,7 +21,7 @@
         </div>
 
         <div class="purchase-group">
-          <div class="price-range">{{ product.minPrice }} — {{ product.maxPrice }} р.</div>
+          <div class="price-range">{{ formatPrice(product.minPrice) }} — {{ formatPrice(product.maxPrice) }} р.</div>
           <p class="disclaimer">Внешний вид товара может отличаться от изображенного на фотографии</p>
         </div>
       </div>
@@ -102,6 +102,11 @@ const setPage = (page) => {
   }
 }
 
+const formatPrice = (price) => {
+  if (price == null) return '0.00';
+  return Number(price).toFixed(2);
+};
+
 onMounted(async () => {
   const id = route.params.id;
   try {
@@ -139,7 +144,7 @@ onMounted(async () => {
   .breadcrumbs { 
     color: #888; 
     margin-bottom: 25px; 
-    font-size: 14px; 
+    font-size: 18px; 
   }
 
   .product-main {
@@ -215,7 +220,7 @@ onMounted(async () => {
     color: #BB4E58;
     background: #fff;
     padding: 12px 25px;
-    border-radius: 25px;
+    border-radius: 20px;
     font-weight: 600;
     text-decoration: none;
     text-align: center;
@@ -229,7 +234,7 @@ onMounted(async () => {
     color: #fff;
     border: none;
     padding: 14px 25px;
-    border-radius: 25px;
+    border-radius: 20px;
     font-family: var(--main-font);
     font-size: 20px;
     cursor: pointer;
@@ -310,6 +315,10 @@ onMounted(async () => {
   }
 
   @media (max-width: 600px) {
+    .breadcrumbs { 
+      font-size: 14px;
+    }
+
     .product-page { 
       padding: 20px 10px; 
     }

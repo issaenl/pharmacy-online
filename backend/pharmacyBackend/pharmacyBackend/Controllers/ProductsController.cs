@@ -22,18 +22,68 @@ namespace pharmacyBackend.Controllers
             _mapper = mapper;
         }
 
+        // [HttpGet]
+        // public async Task<ActionResult<IEnumerable<ProductShortDTO>>> GetProducts([FromQuery] string? categoryIds)
+        // {
+        //     var query = _context.Products.AsQueryable();
+
+        //     if (!string.IsNullOrWhiteSpace(categoryIds))
+        //     {
+        //         var ids = categoryIds.Split(',')
+        //                              .Select(int.Parse)
+        //                              .ToList();
+
+        //         query = query.Where(p => ids.Contains(p.CategoryId));
+        //     }
+
+        //     var products = await query
+        //         .Include(p => p.Stocks)
+        //         .ProjectTo<ProductShortDTO>(_mapper.ConfigurationProvider)
+        //         .ToListAsync();
+
+        //     return Ok(products);
+        // }
+
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProductShortDTO>>> GetProducts([FromQuery] string? categoryIds)
+        public async Task<ActionResult<IEnumerable<ProductShortDTO>>> GetProducts([FromQuery] ProductFilterParams filters)
         {
             var query = _context.Products.AsQueryable();
 
-            if (!string.IsNullOrWhiteSpace(categoryIds))
+            if (!string.IsNullOrWhiteSpace(filters.CategoryIds))
             {
-                var ids = categoryIds.Split(',')
-                                     .Select(int.Parse)
-                                     .ToList();
-
+                var ids = filters.CategoryIds.Split(',').Select(int.Parse).ToList();
                 query = query.Where(p => ids.Contains(p.CategoryId));
+            }
+
+            if (filters.IsPrescription.HasValue)
+            {
+                query = query.Where(p => p.IsPrescription == filters.IsPrescription.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(filters.Country))
+            {
+                query = query.Where(p => p.Country.ToLower() == filters.Country.ToLower());
+            }
+
+            if (!string.IsNullOrWhiteSpace(filters.Manufacturer))
+            {
+                query = query.Where(p => p.Manufacturer.ToLower() == filters.Manufacturer.ToLower());
+            }
+
+            if (!string.IsNullOrWhiteSpace(filters.District))
+            {
+                query = query.Where(p => p.Stocks.Any(s => 
+                    s.Pharmacy.District.ToLower() == filters.District.ToLower() && s.Quantity > 0));
+            }
+
+            if (filters.PriceMin.HasValue)
+            {
+                query = query.Where(p => p.Stocks.Any(s => s.Quantity > 0 && s.Price >= filters.PriceMin.Value));
+            }
+
+            if (filters.PriceMax.HasValue)
+            {
+                query = query.Where(p => p.Stocks.Any(s => s.Quantity > 0 && s.Price <= filters.PriceMax.Value));
             }
 
             var products = await query
@@ -140,7 +190,7 @@ namespace pharmacyBackend.Controllers
                         Distance = Math.Min(SearchHelper.LevensheteinAlgorithm(originalQuery, p.Name),
                     SearchHelper.LevensheteinAlgorithm(otherLayoutQuery, p.Name))
                     })
-                    .Where(x => x.Distance <= (originalQuery.Length > 4 ? 2 : 1))
+                    .Where(x => x.Distance <= (originalQuery.Length > 4 ? 4 : 2))
                     .OrderBy(x => x.Distance)
                     .Take(10)
                     .Select(x => x.Id)
