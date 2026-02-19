@@ -6,7 +6,7 @@ namespace pharmacyBackend.Models
         [Key]
         public int Id { get; set; }
        
-        [Required, MinLength(2)]
+        [Required]
         public string Name { get; set; } = string.Empty;
 
         public ICollection<CategoryTag> CategotyTags { get; set; }

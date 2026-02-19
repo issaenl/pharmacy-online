@@ -329,7 +329,7 @@ onBeforeRouteLeave((to, from, next) => {
     .reset-btn {
       width: 100%;
       padding: 12px;
-      background: #d6d6d6;
+      background: #f0f0f0;
       color: #000;
       border: none;
       border-radius: 15px;

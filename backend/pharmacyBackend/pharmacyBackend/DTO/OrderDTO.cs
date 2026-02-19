@@ -1,7 +1,14 @@
 ﻿using pharmacyBackend.Enums;
+using System.ComponentModel.DataAnnotations;
 using System.Data;
 namespace pharmacyBackend.DTO
 {
+    public class CreateOrderDTO
+    {
+        [Required(ErrorMessage = "Выберите аптеку для самовывоза.")]
+        public int PharmacyId { get; set; }
+    }
+
     public class OrderDTO
     {
         public int Id { get; set; }

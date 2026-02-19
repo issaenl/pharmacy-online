@@ -7,7 +7,7 @@ namespace pharmacyBackend.Models
         [Key]
         public int Id { get; set; }
 
-        [Required, MinLength(2), MaxLength(100)]
+        [Required, MaxLength(100)]
         public string FirstName { get; set; } = string.Empty;
 
         public string? LastName { get; set; }
@@ -17,7 +17,7 @@ namespace pharmacyBackend.Models
 
         public string? Email { get; set; }
 
-        [Required, MinLength(8)]
+        [Required]
         public string Password { get; set; } = string.Empty;
 
         [Required]

@@ -39,10 +39,10 @@
                 <img src="/assets/Basket.svg" alt="Корзина" class="icon-img">
                 <span class="desktop-only">Корзина</span>
             </div>
-            <div class="menu-item">
-                <img src="/assets/User.svg" alt="Войти" class="icon-img">
-                <span class="desktop-only">Войти</span>
-            </div>
+            <router-link :to="authStore.user ? '/profile' : '/login'" class="menu-item" style="text-decoration: none;">
+                <img src="/assets/User.svg" alt="Профиль" class="icon-img">
+                <span class="desktop-only">{{ authStore.user ? authStore.user.firstName : 'Войти' }}</span>
+            </router-link>
         </div>
       </div>
     </div>
@@ -64,7 +64,9 @@
 import { ref, onMounted, computed } from 'vue';
 import SearchBar from '@/components/SearchBar.vue';
 import api from '@/api/api';
+import { useAuthStore } from '@/stores/authStore';
 
+const authStore = useAuthStore();
 const isMenuOpen = ref(false);
 const allCategories = ref([]);
 

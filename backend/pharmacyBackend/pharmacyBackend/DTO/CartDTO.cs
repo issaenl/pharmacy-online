@@ -1,7 +1,18 @@
 ﻿using pharmacyBackend.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace pharmacyBackend.DTO
 {
+    public class AddToCartDTO
+    {
+        [Required]
+        public int ProductId { get; set; }
+
+        [Required]
+        [Range(1, 100, ErrorMessage = "Количество должно быть от 1 до 100.")]
+        public int Quantity { get; set; }
+    }
+
     public class CartItemDTO
     {
         public int ProductId { get; set; }

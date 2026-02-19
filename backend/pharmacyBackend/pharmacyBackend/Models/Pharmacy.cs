@@ -6,15 +6,15 @@ namespace pharmacyBackend.Models
         [Key]
         public int Id { get; set; }
 
-        [Required, MinLength(2)]
+        [Required]
         public string Name { get; set; } = string.Empty;
-        [Required, MinLength(2)]
+        [Required]
         public string Address { get; set; } = string.Empty;
         
-        [Required, MinLength(2)] 
+        [Required] 
         public string District { get; set; } = string.Empty;
 
-        [Required, MinLength(2)]
+        [Required]
         public string Phone { get; set; } = string.Empty;
         
         public double? Latitude { get; set; }

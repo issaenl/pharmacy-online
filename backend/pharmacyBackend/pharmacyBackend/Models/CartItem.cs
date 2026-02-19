@@ -15,7 +15,6 @@ namespace pharmacyBackend.Models
         public Cart Cart { get; set; } = null!;
 
         [Required]
-        [Range(1, 100)]
         public int Quantity { get; set; } 
     }
 }
