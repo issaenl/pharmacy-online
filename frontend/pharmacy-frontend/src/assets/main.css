@@ -1,16 +1,32 @@
 @import url('https://fonts.googleapis.com/css2?family=Advent+Pro:wght@100..900&family=Russo+One&display=swap');
 
 :root {
-    --main-font: 'Advent Pro', sans-serif;
-    --logo-font: 'Russo One', sans-serif;
+  --main-font: 'Advent Pro', sans-serif;
+  --logo-font: 'Russo One', sans-serif;
+
+  --primary-color: #689D6D;
+  --primary-light: #B3CCAE;    
+  --accent-color: #BB4E58;    
+  --background-color: #F5F5F5; 
 }
 
 *{
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-    font-family: var(--main-font);
+  font-family: var(--main-font);
+}
+
+.v-toast__item--success {
+  background-color: #689D6D !important;
+  border-radius: 12px !important; 
+}
+
+.v-toast__item--info {
+  background-color: #B3CCAE !important; 
+  color: #333 !important; 
+  border-radius: 12px !important;
 }

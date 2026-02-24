@@ -7,6 +7,7 @@ import FilterCatalogView from '../views/FilterCatalogView.vue';
 import LoginView from '@/views/LoginView.vue';
 import RegisterView from '@/views/RegisterView.vue';
 import ProfileView from '@/views/ProfileView.vue';
+import CartView from '@/views/CartView.vue';
 
 const routes = [
   {
@@ -53,6 +54,11 @@ const routes = [
     path: '/profile',
     name: 'profile',
     component: ProfileView
+  },
+  {
+    path: '/cart',
+    name: 'cart',
+    component: CartView
   }
 ];
 

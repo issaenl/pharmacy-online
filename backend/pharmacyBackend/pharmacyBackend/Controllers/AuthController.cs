@@ -18,7 +18,7 @@ namespace pharmacyBackend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController : Controller
+    public class AuthController : BaseController
     {
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
@@ -113,22 +113,12 @@ namespace pharmacyBackend.Controllers
         [HttpPut("update-profile")]
         public async Task<ActionResult<UserDataDTO>> UpdateProfile (UserUpdateDTO newData)
         {
-            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst(ClaimTypes.Name)?.Value;
-
-            if (string.IsNullOrEmpty(userIdString))
-            {
-                return Unauthorized("Не удалось получить ID пользователя из токена. Пожалуйста, перезайдите в аккаунт.");
-            }
-
-            var userId = int.Parse(userIdString);
-
+            var userId = GetUserId();
             var user = await _context.Users.FindAsync(userId);
-            if (user == null)
-            {
-                return NotFound("Пользователь не найден");
-            }
 
-            if(user.Phone != newData.Phone && await _context.Users.AnyAsync(u => u.Phone == newData.Phone))
+            if (user == null) return NotFound("Пользователь не найден");
+
+            if (user.Phone != newData.Phone && await _context.Users.AnyAsync(u => u.Phone == newData.Phone))
             {
                 return BadRequest("Этот номер телефона уже занят");
             }
@@ -145,23 +135,12 @@ namespace pharmacyBackend.Controllers
         [HttpPut("change-password")]
         public async Task<ActionResult> ChangePassword(ChangePasswordDTO newData)
         {
-            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst(ClaimTypes.Name)?.Value;
-
-            if (string.IsNullOrEmpty(userIdString))
-            {
-                return Unauthorized("Не удалось получить ID пользователя из токена. Пожалуйста, перезайдите в аккаунт.");
-            }
-
-            var userId = int.Parse(userIdString);
-
+            var userId = GetUserId();
             var user = await _context.Users.FindAsync(userId);
 
-            if (user == null)
-            {
-                return NotFound("Пользователь не найден");
-            }
+            if (user == null) return NotFound("Пользователь не найден");
 
-            if(!BCrypt.Net.BCrypt.Verify(newData.OldPassword, user.Password))
+            if (!BCrypt.Net.BCrypt.Verify(newData.OldPassword, user.Password))
             {
                 return BadRequest("Старый пароль неверен");
             }
@@ -175,21 +154,10 @@ namespace pharmacyBackend.Controllers
         [HttpDelete("delete")]
         public async Task<ActionResult> DeleteAccount()
         {
-            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst(ClaimTypes.Name)?.Value;
-
-            if (string.IsNullOrEmpty(userIdString))
-            {
-                return Unauthorized("Не удалось получить ID пользователя из токена. Пожалуйста, перезайдите в аккаунт.");
-            }
-
-            var userId = int.Parse(userIdString);
-
+            var userId = GetUserId();
             var user = await _context.Users.FindAsync(userId);
 
-            if (user == null)
-            {
-                return NotFound("Пользователь не найден");
-            }
+            if (user == null) return NotFound("Пользователь не найден");
 
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();

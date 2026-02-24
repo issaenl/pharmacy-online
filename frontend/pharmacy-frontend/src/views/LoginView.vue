@@ -66,7 +66,7 @@ const handleLogin = async () => {
     await authStore.login(phone.value, password.value);
     router.push('/'); 
   } catch (error) {
-    errorMessage.value = error.response?.data || 'Ошибка авторизации. Проверьте данные.';
+    errorMessage.value = error
   } finally {
     isLoading.value = false;
   }

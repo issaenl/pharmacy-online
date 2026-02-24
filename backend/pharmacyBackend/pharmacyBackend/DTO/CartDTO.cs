@@ -20,6 +20,7 @@ namespace pharmacyBackend.DTO
         public decimal UnitPrice { get; set; }
         public int Quantity { get; set; }
         public decimal Price => UnitPrice * Quantity;
+        public string? PictureUrl { get; set; }
 
     }
 
@@ -28,5 +29,7 @@ namespace pharmacyBackend.DTO
         public List<CartItemDTO> Items { get; set; } = new();
         public decimal TotalPrice => Items.Sum(i => i.Price);
         public int? PharmacyId { get; set; }
+
+        public PharmacyDTO? Pharmacy { get; set; }
     }
 }

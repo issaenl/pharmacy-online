@@ -32,7 +32,7 @@
         </a>
         <button v-else class="btn-outline instruction-btn" disabled>Инструкция ></button>
         
-        <button class="btn-primary cart-btn">
+        <button class="btn-primary cart-btn" @click="addToCart">
           <img src="/assets/Cart.svg" alt="" class="cart-icon-white">
           В корзину
         </button>
@@ -76,6 +76,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
+import { useCartStore } from '@/stores/cartStore';
 import PharmacyItem from '@/components/PharmacyItem.vue';
 import TheHeader from '@/components/Header.vue';
 import api from '@/api/api';
@@ -86,6 +87,7 @@ const pharmacies = ref([]);
 const loading = ref(true);
 const currentPage = ref(1);
 const itemsPerPage = 1;
+const cartStore = useCartStore();
 
 const paginatedPharmacies = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage;
@@ -105,6 +107,16 @@ const setPage = (page) => {
 const formatPrice = (price) => {
   if (price == null) return '0.00';
   return Number(price).toFixed(2);
+};
+
+const addToCart = () => {
+  if (!product.value) return;
+  cartStore.addToCart({
+    id: product.value.id,
+    name: product.value.name,
+    price: product.value.minPrice, 
+    imageUrl: product.value.pictureUrl
+  });
 };
 
 onMounted(async () => {

@@ -64,7 +64,7 @@ const handleRegister = async () => {
     await authStore.register(form.value);
     router.push('/');
   } catch (error) {
-    errorMessage.value = error.response?.data || 'Ошибка при регистрации. Проверьте данные.';
+    errorMessage.value = error;
   } finally {
     isLoading.value = false;
   }

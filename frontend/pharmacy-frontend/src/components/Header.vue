@@ -32,13 +32,28 @@
 
         <div class="user-menu">
             <div class="menu-item">
-                <img src="/assets/Heart.svg" alt="Избранное" class="icon-img">
+                    <svg class="icon-img"
+                        width="24" 
+                        height="24" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        stroke-width="2" 
+                        stroke-linecap="round" 
+                        stroke-linejoin="round">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
                 <span class="desktop-only">Избранное</span>
             </div>
-            <div class="menu-item">
-                <img src="/assets/Basket.svg" alt="Корзина" class="icon-img">
+
+
+            <router-link to="/cart" class="menu-item" style="text-decoration: none;">
+                <div class="icon-container">
+                    <img src="/assets/Basket.svg" alt="Корзина" class="icon-img">
+                    <span v-if="cartStore.totalItems > 0" class="cart-badge">{{ cartStore.totalItems }}</span>
+                </div>
                 <span class="desktop-only">Корзина</span>
-            </div>
+            </router-link>
             <router-link :to="authStore.user ? '/profile' : '/login'" class="menu-item" style="text-decoration: none;">
                 <img src="/assets/User.svg" alt="Профиль" class="icon-img">
                 <span class="desktop-only">{{ authStore.user ? authStore.user.firstName : 'Войти' }}</span>
@@ -65,8 +80,10 @@ import { ref, onMounted, computed } from 'vue';
 import SearchBar from '@/components/SearchBar.vue';
 import api from '@/api/api';
 import { useAuthStore } from '@/stores/authStore';
+import { useCartStore } from '@/stores/cartStore';
 
 const authStore = useAuthStore();
+const cartStore = useCartStore();
 const isMenuOpen = ref(false);
 const allCategories = ref([]);
 
@@ -89,6 +106,8 @@ onMounted(async () => {
   } catch (error) {
     console.error("Ошибка загрузки:", error);
   }
+
+  await cartStore.loadCart();
 });
 
 
@@ -200,6 +219,25 @@ const navCategories = computed(() => {
         color: #fff;
         cursor: pointer;
         font-size: 16px;
+    }
+
+    .icon-container {
+        position: relative;
+        display: flex;
+    }
+
+    .cart-badge {
+        position: absolute;
+        top: -6px;
+        right: -10px;
+        background-color: #BB4E58; 
+        color: white;
+        font-size: 14px;
+        font-weight: 600;
+        padding: 2px 6px;
+        border-radius: 12px;
+        line-height: 1;
+        border: 2px solid #689D6D; 
     }
 
     .icon-img {
