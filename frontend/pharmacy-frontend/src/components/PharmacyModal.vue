@@ -3,7 +3,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h2>Выберите аптеку</h2>
-        <button @click="closeModal" class="close-btn">✕</button>
+        <button @click="closeModal" class="close-btn">×</button>
       </div>
       
       <div v-if="pharmacies.length === 0 && !isLoadingScript" class="no-pharmacies-msg">
@@ -136,7 +136,7 @@ watch(() => props.isOpen, async (newVal) => {
         const ymaps = await loadYandexMapScript();
         ymaps.ready(initMap);
       } catch (e) {
-        console.error("Не удалось загрузить Яндекс Карты", e);
+        console.error("Не удалось загрузить карту", e);
       }
     }
   } else {
@@ -156,121 +156,121 @@ const confirmSelection = () => {
 
 <style scoped>
     .modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 2000;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
     }
 
     .modal-content {
-        background: white;
-        border-radius: 20px;
-        width: 90%;
-        max-width: 800px;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
+      background: white;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 800px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
 
     .modal-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 20px;
-        background: #ffffff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      background: #ffffff;
     }
 
     .modal-header h3 {
-        margin: 0;
-        color: #000;
-        font-family: var(--main-font);
+      margin: 0;
+      color: #000;
+      font-family: var(--main-font);
     }
 
     .close-btn {
-        background: none;
-        border: none;
-        font-size: 24px;
-        cursor: pointer;
-        color: #888;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #888;
     }
 
     .close-btn:hover {
-        color: var(--accent-color);
+      color: var(--accent-color);
     }
 
     .no-pharmacies-msg {
-        padding: 40px 20px;
-        text-align: center;
-        color: var(--accent-color);
-        font-weight: 600;
-        font-size: 20px;
-        font-family: var(--main-font);
+      padding: 40px 20px;
+      text-align: center;
+      color: var(--accent-color);
+      font-weight: 600;
+      font-size: 20px;
+      font-family: var(--main-font);
     }
 
     .map-container {
-        width: 100%;
-        height: 500px;
-        background: #fff;
-        position: relative;
+      width: 100%;
+      height: 500px;
+      background: #fff;
+      position: relative;
     }
 
     .loading-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(255, 255, 255, 0.8);
-        font-family: var(--main-font);
-        font-weight: 600;
-        z-index: 10;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.8);
+      font-family: var(--main-font);
+      font-weight: 600;
+      z-index: 10;
     }
 
     .selected-info {
-        padding: 20px;
-        background: white;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        border-top: 1px solid #eee;
-        font-family: var(--main-font);
+      padding: 20px;
+      background: white;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      border-top: 1px solid #eee;
+      font-family: var(--main-font);
     }
 
     .selected-info p {
-        margin: 0;
-        font-size: 16px;
-        color: #000;
+      margin: 0;
+      font-size: 16px;
+      color: #000;
     }
 
     .confirm-btn {
-        background: var(--primary-color);
-        color: white;
-        border: none;
-        padding: 12px;
-        border-radius: 10px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        align-self: flex-start;
-        font-family: var(--main-font);
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      align-self: flex-start;
+      font-family: var(--main-font);
     }
 
     .confirm-btn:hover {
-        background: var(--primary-color);
+      background: var(--primary-color);
     }
 
     @media (max-width: 600px) {
-        .map-container {
-            height: 350px;
-        }
+      .map-container {
+        height: 350px;
+      }
     }
 </style>

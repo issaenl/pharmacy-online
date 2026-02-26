@@ -30,3 +30,8 @@ body {
   color: #333 !important; 
   border-radius: 12px !important;
 }
+
+.v-toast__item--error {
+  background-color: #BB4E58 !important; 
+  border-radius: 12px !important;
+}

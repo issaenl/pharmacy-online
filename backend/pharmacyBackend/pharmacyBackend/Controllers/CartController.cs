@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using pharmacyBackend.Data;
 using pharmacyBackend.DTO;
 using pharmacyBackend.Models;
@@ -42,14 +43,29 @@ namespace pharmacyBackend.Controllers
         {
             var cart = await GetOrCreateCartAsync(GetUserId());
 
+            PharmacyDTO? pharmacyDto = null;
+            if (cart.PharmacyId.HasValue)
+            {
+                var p = await _context.Pharmacies.FindAsync(cart.PharmacyId.Value);
+                if (p != null)
+                {
+                    pharmacyDto = new PharmacyDTO { Id = p.Id, Name = p.Name, Address = p.Address, District = p.District };
+                }
+            }
+
             var cartDto = new CartDTO
             {
                 PharmacyId = cart.PharmacyId,
+                Pharmacy = pharmacyDto,
                 Items = cart.CartItems.Select(ci => new CartItemDTO
                 {
                     ProductId = ci.ProductId,
                     ProductName = ci.Product.Name,
-                    UnitPrice = ci.Product.Stocks.Any() ? ci.Product.Stocks.Min(s => s.Price) : 0,
+
+                    UnitPrice = cart.PharmacyId.HasValue
+                        ? (ci.Product.Stocks.FirstOrDefault(s => s.PharmacyId == cart.PharmacyId.Value)?.Price ?? 0)
+                        : (ci.Product.Stocks.Any() ? ci.Product.Stocks.Min(s => s.Price) : 0),
+
                     PictureUrl = ci.Product.PictureUrl,
                     Quantity = ci.Quantity
                 }).ToList()
@@ -131,5 +147,37 @@ namespace pharmacyBackend.Controllers
             await _context.SaveChangesAsync();
             return Ok();
         }
+
+        [AllowAnonymous]
+        [HttpPost("recalculate/{pharmacyId}")]
+        public async Task<ActionResult<List<CartItemDTO>>> RecalculatePrice(int pharmacyId, [FromBody] List<AddToCartDTO> items)
+        {
+            var result = new List<CartItemDTO>();
+            foreach (var item in items)
+            {
+                var product = await _context.Products.Include(p => p.Stocks).FirstOrDefaultAsync(p => p.Id == item.ProductId);
+                var price = product.Stocks.FirstOrDefault(s => s.PharmacyId == pharmacyId)?.Price ?? 0;
+
+                result.Add(new CartItemDTO
+                {
+                    ProductId = product.Id,
+                    ProductName = product.Name,
+                    UnitPrice = price,
+                    PictureUrl = product.PictureUrl,
+                    Quantity = item.Quantity
+                });
+            }
+            return Ok(result);
+        }
+
+        [HttpPut("pharmacy/{pharmacyId}")]
+        public async Task<ActionResult> SetPharmacy(int pharmacyId)
+        {
+            var cart = await GetOrCreateCartAsync(GetUserId());
+            cart.PharmacyId = pharmacyId;
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
     }
 }

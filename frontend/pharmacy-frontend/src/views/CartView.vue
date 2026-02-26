@@ -37,7 +37,10 @@
         </div>
         
         <div class="summary-row total-price-row">
-          <span class="total-price">от {{ cartStore.totalPrice.toFixed(2) }} р.</span>
+          <span class="total-price">
+            <template v-if="!cartStore.selectedPharmacy">от </template>
+            {{ cartStore.totalPrice.toFixed(2) }} р.
+          </span>
         </div>
 
         <div class="pharmacy-selection">
@@ -57,8 +60,8 @@
             <p class="sp-address">{{ cartStore.selectedPharmacy.address }}</p>
             <p class="sp-name">{{ cartStore.selectedPharmacy.name }}</p>
             
-            <button class="checkout-btn confirm-btn" @click="cartStore.checkout">
-              Оформить заказ
+            <button class="checkout-btn confirm-btn" @click="handleCheckout">
+                Забронировать
             </button>
           </div>
         </div>
@@ -76,17 +79,34 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { useCartStore } from '@/stores/cartStore';
+import { useAuthStore } from '@/stores/authStore';
 import TheHeader from '@/components/Header.vue';
 import CartItem from '@/components/CartItem.vue';
 import PharmacyModal from '@/components/PharmacyModal.vue';
+import { useToast } from 'vue-toast-notification';
 
 const cartStore = useCartStore();
+const authStore = useAuthStore();
+const router = useRouter();
 const isMapOpen = ref(false);
+const toast = useToast({ position: 'bottom-right' });
 
 const handlePharmacySelect = (pharmacy) => {
   cartStore.setPharmacy(pharmacy);
   isMapOpen.value = false;
+};
+
+const handleCheckout = () => {
+    if(!authStore.token){
+        localStorage.setItem('redirectAfterLogin', '/cart');
+        toast.info('Для оформления брони необходимо авторизироваться');
+        router.push('/login');
+    }
+    else{
+        cartStore.checkout();
+    }
 };
 
 onMounted(async () => {
@@ -280,20 +300,21 @@ onMounted(async () => {
         background: none;
         border: none;
         color: var(--primary-color);
-        font-size: 12px;
+        font-size: 16px;
+        font-family: var(--main-font);
         cursor: pointer;
         text-decoration: underline;
     }
 
     .sp-address {
-        font-size: 14px;
+        font-size: 16px;
         color: #333;
         font-weight: 600;
         margin: 0 0 5px 0;
     }
 
     .sp-name {
-        font-size: 12px;
+        font-size: 14px;
         color: #666;
         margin: 0 0 15px 0;
     }
