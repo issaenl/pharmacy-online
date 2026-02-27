@@ -26,7 +26,7 @@ body {
 }
 
 .v-toast__item--info {
-  background-color: #B3CCAE !important; 
+  background-color: #f0d159 !important; 
   color: #333 !important; 
   border-radius: 12px !important;
 }

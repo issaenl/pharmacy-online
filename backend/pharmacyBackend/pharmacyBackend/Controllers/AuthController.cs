@@ -97,7 +97,12 @@ namespace pharmacyBackend.Controllers
                 new Claim(ClaimTypes.Role, user.Role.ToString())
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Token").Value!));
+            var tokenKey = _configuration.GetValue<string>("AppSettings:Token");
+            if (string.IsNullOrEmpty(tokenKey))
+            {
+                throw new Exception("JWT отсутствует в конфигурации");
+            }
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenKey));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var jwt = new JwtSecurityToken(

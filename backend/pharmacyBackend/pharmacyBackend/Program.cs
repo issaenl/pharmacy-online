@@ -6,12 +6,20 @@ using Microsoft.OpenApi.Models;
 using pharmacyBackend.Data;
 using pharmacyBackend.Mappers;
 using System.Text;
+using pharmacyBackend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+if (string.IsNullOrEmpty(connectionString))
+{
+    // Это поможет тебе понять, что данные не считались
+    throw new Exception("Критическая ошибка: Строка подключения DefaultConnection не найдена в конфигурации!");
+}
+
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 
 builder.Services.AddCors(cors =>
@@ -54,11 +62,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetSection("AppSettings:Token").Value!)),
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetValue<string>("AppSettings:Token") ?? throw new InvalidOperationException("JWT не найден"))),
         ValidateAudience = false,
         ValidateIssuer = false
     };
 });
+
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IEmailGenerator, EmailGenerator>();
 
 var app = builder.Build();
 
