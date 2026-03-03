@@ -48,13 +48,13 @@ namespace pharmacyBackend.Services
                 case OrderStatus.Cancelled:
                     subject = $"Заказ №{order.Id} отменен";
                     statusText = "ОТМЕНЕН";
-                    messageBody = "Ваш заказ был отменен. Если вы не отменяли заказ самостоятельно, пожалуйста, свяжитесь с нашей поддержкой.";
+                    messageBody = "Ваш заказ был отменен.";
                     break;
 
                 case OrderStatus.Expired:
                     subject = $"Истек срок хранения заказа №{order.Id}";
                     statusText = "ИСТЕК СРОК ХРАНЕНИЯ";
-                    messageBody = "Срок хранения вашего заказа истек, и он был расформирован. Вы всегда можете оформить новый заказ на нашем сайте.";
+                    messageBody = "Срок хранения вашего заказа истек, и он был расформирован.";
                     break;
 
                 default:

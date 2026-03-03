@@ -70,6 +70,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IEmailGenerator, EmailGenerator>();
+builder.Services.AddScoped<ICloudService, CloudService>();
 
 var app = builder.Build();
 

@@ -9,8 +9,29 @@
 
     <section class="product-main card">
       <div class="product-visual">
+        <button 
+          class="wishlist-btn" 
+          :class="{ 'is-favorite': isFavorite }" 
+          @click="toggleFavorite"
+          title="Добавить в избранное"
+        >
+          <svg 
+            width="32" 
+            height="32" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            stroke-width="2" 
+            stroke-linecap="round" 
+            stroke-linejoin="round"
+          >
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          </svg>
+        </button>
+        
         <img :src="product.pictureUrl || '/assets/no-image.jpg'" :alt="product.name">
       </div>
+
       <div class="product-details">
         <div class="info-group">
           <h1>{{ product.name }}, {{ product.dosageForm }}</h1>
@@ -27,10 +48,17 @@
       </div>
 
       <div class="action-column">
-        <a v-if="product.pdfUrl" :href="product.pdfUrl" target="_blank" class="btn-outline instruction-btn">
+        <button 
+          v-if="product.pdfUrl" 
+          class="btn-outline instruction-btn" 
+          @click="openInstruction"
+        >
           Инструкция <span class="arrow">></span>
-        </a>
-        <button v-else class="btn-outline instruction-btn" disabled>Инструкция ></button>
+        </button>
+        
+        <button v-else class="btn-outline instruction-btn" disabled>
+          Инструкция <span class="arrow">></span>
+        </button>
         
         <button class="btn-primary cart-btn" @click="addToCart">
           <img src="/assets/Cart.svg" alt="" class="cart-icon-white">
@@ -39,6 +67,23 @@
       </div>
     </section>
 
+    <div class="pdf-fullscreen-overlay" v-if="isPdfOpen">
+      <div class="pdf-toolbar">
+        <span class="pdf-title">Инструкция: {{ product.name }}</span>
+        <button class="pdf-close-btn" @click="closeInstruction">
+          Закрыть ✕
+        </button>
+      </div>
+      
+      <iframe 
+        :src="product.pdfUrl" 
+        class="pdf-iframe"
+        title="Инструкция по применению"
+      >
+        <p>Ваш браузер не поддерживает предпросмотр PDF. <a :href="product.pdfUrl" target="_blank">Скачать файл</a></p>
+      </iframe>
+    </div>
+    
     <div class="pharmacy-list">
       <div v-if="pharmacies.length === 0" class="no-stock">Товар временно отсутствует в аптеках!</div>
       <PharmacyItem 
@@ -49,32 +94,15 @@
     </div>
     
     <div v-if="pharmacies.length > itemsPerPage" class="pagination">
-      <button 
-        class="page-arrow" 
-        @click="setPage(currentPage - 1)"
-        :disabled="currentPage === 1"
-      >‹</button>
-      
-      <button 
-        v-for="page in totalPages" 
-        :key="page"
-        :class="['page-num', { active: currentPage === page }]"
-        @click="setPage(page)"
-      >
-        {{ page }}
-      </button>
-
-      <button 
-        class="page-arrow" 
-        @click="setPage(currentPage + 1)"
-        :disabled="currentPage === totalPages"
-      >›</button>
+      <button class="page-arrow" @click="setPage(currentPage - 1)" :disabled="currentPage === 1">‹</button>
+      <button v-for="page in totalPages" :key="page" :class="['page-num', { active: currentPage === page }]" @click="setPage(page)">{{ page }}</button>
+      <button class="page-arrow" @click="setPage(currentPage + 1)" :disabled="currentPage === totalPages">›</button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useCartStore } from '@/stores/cartStore';
 import PharmacyItem from '@/components/PharmacyItem.vue';
@@ -88,6 +116,27 @@ const loading = ref(true);
 const currentPage = ref(1);
 const itemsPerPage = 1;
 const cartStore = useCartStore();
+const isPdfOpen = ref(false);
+
+const isFavorite = ref(false);
+
+const toggleFavorite = () => {
+  isFavorite.value = !isFavorite.value;
+};
+
+const openInstruction = () => {
+  isPdfOpen.value = true;
+  document.body.style.overflow = 'hidden'; 
+};
+
+const closeInstruction = () => {
+  isPdfOpen.value = false;
+  document.body.style.overflow = ''; 
+};
+
+onUnmounted(() => {
+  document.body.style.overflow = '';
+});
 
 const paginatedPharmacies = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage;
@@ -140,36 +189,72 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+  .product-visual {
+    position: relative; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0; 
+  }
+
+  .wishlist-btn {
+    position: absolute; 
+    top: 0px; 
+    left: 0px; 
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #B4AFAC; 
+    padding: 0;
+    z-index: 2; 
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .wishlist-btn:hover {
+    transform: scale(1.1);
+    color: #BB4E58; 
+  }
+
+  .wishlist-btn.is-favorite {
+    color: #BB4E58; 
+  }
+
+  .wishlist-btn.is-favorite svg {
+    fill: currentColor; 
+  }
+
   .loading-text { 
     padding: 50px; 
     text-align: center; 
     font-size: 20px; 
   }
 
-  .no-stock {
-    font-size: 20px;
-    color:#BB4E58;
-    font-weight: 600;
-    justify-self: center;
+  .no-stock { 
+    font-size: 20px; 
+    color: #BB4E58; 
+    font-weight: 600; 
+    justify-self: center; 
   }
-  
+
   .breadcrumbs { 
     color: #888; 
     margin-bottom: 25px; 
     font-size: 18px; 
   }
 
-  .product-main {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 40px;
-    padding: 40px;
-    background: #fff;
+  .product-main { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    gap: 40px; 
+    padding: 40px; 
+    background: #fff; 
     border-radius: 40px; 
-    margin-bottom: 50px;
-    position: relative;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    margin-bottom: 50px; 
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03); 
   }
 
   .product-visual img { 
@@ -183,14 +268,15 @@ onMounted(async () => {
     flex-direction: column; 
     gap: 30px; 
   }
-  
-  .product-details h1 { font-size: 28px; 
+
+  .product-details h1 { 
+    font-size: 28px; 
     font-weight: 700; 
     margin: 0; 
-    line-height: 1.2;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    word-break: break-word;
+    line-height: 1.2; 
+    word-wrap: break-word; 
+    overflow-wrap: break-word; 
+    word-break: break-word; 
   }
 
   .manufacturer { 
@@ -198,14 +284,14 @@ onMounted(async () => {
     font-size: 18px; 
     margin: 5px 0; 
   }
-  
+
   .prescription-status { 
     color: #689D6D; 
     font-size: 18px; 
     font-weight: 500; 
   }
 
-  .prescription-status.is-red {
+  .prescription-status.is-red { 
     color: #BB4E58; 
   }
 
@@ -214,6 +300,7 @@ onMounted(async () => {
     font-weight: 500; 
     color: #333; 
   }
+
   .disclaimer { 
     font-size: 14px; 
     color: #ccc; 
@@ -227,123 +314,200 @@ onMounted(async () => {
     min-width: 200px; 
   }
 
-  .btn-outline {
-    border: 2.5px solid #BB4E58;
-    color: #BB4E58;
-    background: #fff;
-    padding: 12px 25px;
-    border-radius: 20px;
-    font-weight: 600;
-    text-decoration: none;
-    text-align: center;
-    cursor: pointer;
-    font-family: var(--main-font);
-    font-size: 20px;
+  .btn-outline { 
+    border: 2.5px solid #BB4E58; 
+    color: #BB4E58; 
+    background: #fff; 
+    padding: 12px 25px; 
+    border-radius: 20px; 
+    font-weight: 600; 
+    text-align: center; 
+    cursor: pointer; 
+    font-family: var(--main-font); 
+    font-size: 20px; 
+    width: 100%; 
+    display: block; 
+    box-sizing: border-box; 
   }
 
-  .btn-primary {
-    background: #BB4E58;
-    color: #fff;
-    border: none;
-    padding: 14px 25px;
-    border-radius: 20px;
-    font-family: var(--main-font);
-    font-size: 20px;
-    cursor: pointer;
+  .btn-outline:hover:not(:disabled) { 
+    background: #fff5f6; 
+  }
+
+  .btn-outline:disabled { 
+    border-color: #ccc; 
+    color: #ccc; 
+    cursor: not-allowed; 
+  }
+
+  .btn-primary { 
+    background: #BB4E58; 
+    color: #fff; 
+    border: none; 
+    padding: 14px 25px; 
+    border-radius: 20px; 
+    font-family: var(--main-font); 
+    font-size: 20px; 
+    cursor: pointer; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 10px; 
+    width: 100%; 
+  }
+
+  .btn-primary:hover { 
+    filter: brightness(0.9); 
+  }
+
+  .pdf-fullscreen-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #525659; 
+    z-index: 9999; 
     display: flex;
+    flex-direction: column;
+  }
+
+  .pdf-toolbar {
+    height: 60px;
+    background: #323639; 
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    gap: 10px;
+    padding: 0 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    flex-shrink: 0; 
   }
 
-  .page-num, .page-arrow {
-      width: 44px;
-      height: 44px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      border: none;
-      cursor: pointer;
-      font-size: 16px;
-      font-weight: 600;
-      transition: all 0.2s ease;
-      background: #f0f0f0; 
-      color: #333;
+  .pdf-title {
+    color: white;
+    font-size: 16px;
+    font-weight: 500;
+    font-family: var(--main-font);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 70%;
   }
 
-  .page-arrow {
-    color: #888;
-    background: #f0f0f0;
+  .pdf-close-btn {
+    background: #BB4E58;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+    font-family: var(--main-font);
   }
 
-  .page-arrow:not(:disabled):hover {
-    background: #e0e0e0;
-    color: #000;
+  .pdf-close-btn:hover {
+    background: #9a3d46;
   }
 
-  .page-arrow:disabled {
-      cursor: not-allowed;
-      opacity: 0.5;
+  .pdf-iframe {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: white;
   }
 
-  .page-num.active {
-      background: #689D6D; 
-      color: #fff;
+  .page-num, .page-arrow { 
+    width: 44px; 
+    height: 44px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    border-radius: 50%; 
+    border: none; 
+    cursor: pointer; 
+    font-size: 16px; 
+    font-weight: 600; 
+    transition: all 0.2s ease; 
+    background: #f0f0f0; 
+    color: #333; 
   }
 
-  .page-num:not(.active):hover {
-      background: #e5e5e5;
+  .page-arrow { 
+    color: #888; 
+    background: #f0f0f0; 
   }
 
-  .pagination {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 12px;
-      margin: 40px 0;
+  .page-arrow:not(:disabled):hover { 
+    background: #e0e0e0; 
+    color: #000; 
+  }
+
+  .page-arrow:disabled { 
+    cursor: not-allowed; 
+    opacity: 0.5; 
+  }
+
+  .page-num.active { 
+    background: #689D6D; 
+    color: #fff; 
+  }
+
+  .page-num:not(.active):hover { 
+    background: #e5e5e5; 
+  }
+
+  .pagination { 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    gap: 12px; 
+    margin: 40px 0; 
   }
 
   @media (max-width: 992px) {
-    .product-main {
+    .product-main { 
       flex-direction: column; 
-      align-items: flex-start;
-      padding: 30px;
-      gap: 30px;
+      align-items: flex-start; 
+      padding: 30px; 
+      gap: 30px; 
     }
-
-    .product-visual {
+    
+    .product-visual { 
       align-self: center; 
     }
-
-    .action-column {
-      width: 100%;
+    
+    .action-column { 
+      width: 100%; 
       flex-direction: row; 
     }
-
-    .btn-outline, .btn-primary {
+    
+    .btn-outline, .btn-primary { 
       flex: 1; 
     }
   }
 
   @media (max-width: 600px) {
-    .breadcrumbs { 
-      font-size: 14px;
-    }
 
+    .breadcrumbs { 
+      font-size: 14px; 
+    }
+    
     .product-page { 
       padding: 20px 10px; 
     }
     
-    .product-main {
-      padding: 20px;
+    .product-main { 
+      padding: 20px; 
       border-radius: 20px; 
     }
-
+    
     .product-details h1 { 
       font-size: 22px; 
     }
-
+    
     .price-range { 
       font-size: 26px; 
     }
@@ -351,26 +515,35 @@ onMounted(async () => {
     .product-visual img { 
       width: 150px; 
     }
-
-    .action-column {
-      flex-direction: column;
+    
+    .action-column { 
+      flex-direction: column; 
     }
-
-    .btn-outline, .btn-primary {
-      width: 100%;
-      font-size: 16px;
-      padding: 12px;
+    
+    .btn-outline, .btn-primary { 
+      width: 100%; 
+      font-size: 16px; 
+      padding: 12px; 
     }
-
-    .pagination {
-      gap: 6px;
+    
+    .pagination { 
+      gap: 6px; 
       flex-wrap: wrap; 
     }
-
-    .page-num, .page-arrow {
-      width: 38px;
-      height: 38px;
-      font-size: 14px;
+    
+    .page-num, .page-arrow { 
+      width: 38px; 
+      height: 38px; 
+      font-size: 14px; 
+    }
+    
+    .pdf-title { 
+      font-size: 14px; 
+    }
+    
+    .pdf-close-btn { 
+      font-size: 14px; 
+      padding: 6px 12px; 
     }
   }
 </style>

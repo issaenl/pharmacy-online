@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using pharmacyBackend.Data;
 using pharmacyBackend.DTO;
 using pharmacyBackend.Helpers;
+using pharmacyBackend.Services;
 
 namespace pharmacyBackend.Controllers
 {
@@ -15,11 +16,13 @@ namespace pharmacyBackend.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
+        private readonly ICloudService _cloud;
 
-        public ProductsController(AppDbContext context, IMapper mapper)
+        public ProductsController(AppDbContext context, IMapper mapper, ICloudService cloud)
         {
             _context = context;
             _mapper = mapper;
+            _cloud = cloud;
         }
 
         // [HttpGet]
