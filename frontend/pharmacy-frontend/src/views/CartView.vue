@@ -57,8 +57,8 @@
               <span class="sp-label">Пункт самовывоза:</span>
               <button class="sp-change" @click="isMapOpen = true">Изменить</button>
             </div>
-            <p class="sp-address">{{ cartStore.selectedPharmacy.address }}</p>
-            <p class="sp-name">{{ cartStore.selectedPharmacy.name }}</p>
+            <p class="sp-address">{{ orderStore.selectedPharmacy.address }}</p>
+            <p class="sp-name">{{ orderStore.selectedPharmacy.name }}</p>
             
             <button class="checkout-btn confirm-btn" @click="handleCheckout">
                 Забронировать
@@ -82,6 +82,7 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
+import { useOrderStore } from '@/stores/orderStore';
 import TheHeader from '@/components/Header.vue';
 import CartItem from '@/components/CartItem.vue';
 import PharmacyModal from '@/components/PharmacyModal.vue';
@@ -89,12 +90,13 @@ import { useToast } from 'vue-toast-notification';
 
 const cartStore = useCartStore();
 const authStore = useAuthStore();
+const orderStore = useOrderStore();
 const router = useRouter();
 const isMapOpen = ref(false);
 const toast = useToast({ position: 'bottom-right' });
 
 const handlePharmacySelect = (pharmacy) => {
-  cartStore.setPharmacy(pharmacy);
+  orderStore.setPharmacy(pharmacy);
   isMapOpen.value = false;
 };
 
@@ -105,7 +107,7 @@ const handleCheckout = () => {
         router.push('/login');
     }
     else{
-        cartStore.checkout();
+        orderStore.checkout();
     }
 };
 

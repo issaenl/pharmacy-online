@@ -6,7 +6,6 @@ import { useToast } from 'vue-toast-notification';
 
 export const useCartStore = defineStore('cart', () => {
   const items = ref([]);
-  const selectedPharmacy = ref(null);
   const authStore = useAuthStore();
   const toast = useToast({ position: 'bottom-right' });
 
@@ -15,9 +14,6 @@ export const useCartStore = defineStore('cart', () => {
       try {
         const response = await api.get('/Cart');
         items.value = response.data.items; 
-        if (response.data.pharmacy) {
-            selectedPharmacy.value = response.data.pharmacy;
-        }
       } catch (error) {
         console.error("Ошибка загрузки корзины с сервера:", error);
       }
@@ -27,32 +23,22 @@ export const useCartStore = defineStore('cart', () => {
     }
   };
 
-  const setPharmacy = async (pharmacy) => {
-    selectedPharmacy.value = pharmacy;
-    if(authStore.token) {
-      await api.put(`/Cart/pharmacy/${pharmacy.id}`);
-      await loadCart();
-    }
-    else {
-      localStorage.setItem('selectedPharmacy', JSON.stringify(pharmacy));
-        if (items.value.length > 0) {
-          try {
-            const requestData = items.value.map(i => ({ productId: i.productId, quantity: i.quantity }));
-            const response = await api.post(`/Cart/recalculate/${pharmacy.id}`, requestData);
-            items.value = response.data; 
-            saveLocalCart();
-          } 
-          catch (e) {
-            console.error("Ошибка пересчета цен:", e);
-          }
-        }
-      toast.success(`Выбрана ${pharmacy.name}`);
-    }
-  };
-
   const saveLocalCart = () => {
     if (!authStore.token) {
       localStorage.setItem('cart', JSON.stringify(items.value));
+    }
+  };
+
+  const recalculatePrices = async (pharmacyId) => {
+    if (items.value.length > 0) {
+      try {
+        const requestData = items.value.map(i => ({ productId: i.productId, quantity: i.quantity }));
+        const response = await api.post(`/Cart/recalculate/${pharmacyId}`, requestData);
+        items.value = response.data; 
+        saveLocalCart();
+      } catch (e) {
+        console.error("Ошибка пересчета цен:", e);
+      }
     }
   };
 
@@ -125,36 +111,8 @@ export const useCartStore = defineStore('cart', () => {
     await loadCart();
   };
 
-  const checkout = async () => {
-    if(!authStore.token){
-      toast.info('Для оформления заказа нужно войти в аккаунт');
-      return;
-    }
-    if(!selectedPharmacy.value){
-      toast.error('Аптека не выбрана');
-      return;
-    }
-
-    try{
-      const response = await api.post('/Orders/checkout');
-      toast.success(response.data.message || 'Бронь успешно оформлена!', { duration: 5000 } );
-      items.value = [];
-      selectedPharmacy.value = null;
-      window.location.href = '/';
-    }
-    catch (error){
-      if (error.response && error.response.data) {
-             toast.error(error.response.data); 
-        } else {
-             toast.error('Произошла ошибка при оформлении брони.');
-        }
-        console.error(error);
-    }
-  }
-
   const totalItems = computed(() => items.value.reduce((sum, item) => sum + item.quantity, 0));
   const totalPrice = computed(() => items.value.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0));
 
-  return { items, selectedPharmacy, totalItems, totalPrice,
-    loadCart, addToCart, updateQuantity, removeFromCart, clearCart, syncCart, setPharmacy, checkout};
+  return { items, totalItems, totalPrice, loadCart, addToCart, updateQuantity, removeFromCart, clearCart, syncCart, recalculatePrices };
 });

@@ -16,10 +16,12 @@ namespace pharmacyBackend.Models
 
         [Required]
         public string Phone { get; set; } = string.Empty;
-        
-        public double? Latitude { get; set; }
-        
-        public double? Longitude { get; set; }
+
+        [Required]
+        public double Latitude { get; set; }
+
+        [Required]
+        public double Longitude { get; set; }
         
         public double? Rating { get; set; }
 

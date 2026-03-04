@@ -89,16 +89,16 @@ namespace pharmacyBackend.Data
                 var pharmacies = new Pharmacy[]
                 {
                     new Pharmacy { Name = "Планета здоровья Аптека №1", Address = "пр-т Независимости, д. 18",
-                        District = "Минск", Phone = "+375 (17) 3521781"},
+                        District = "Минск", Phone = "+375 (17) 3521781", Latitude=53.89944, Longitude=27.557492},
                     new Pharmacy { Name = "Планета Здоровья Аптека №14", Address = "ул. П. Глебки, д. 2",
-                        District = "Минск", Phone = "+375 (17) 3609006"}
+                        District = "Минск", Phone = "+375 (17) 3609006", Latitude=53.908872, Longitude=27.473805}
                 };
 
                 context.Pharmacies.AddRange(pharmacies);
                 context.SaveChanges();
             }
 
-            if (!context.Products.Any(p => p.Name == "Канефрон форте"))
+            if (!context.Products.Any(p => p.Name == "Канефрон Н"))
             {
                 var urologyCat = context.Categories.First(c => c.Name == "Препараты для лечения урологических заболеваний");
                 var coughCat = context.Categories.First(c => c.Name == "Препараты от кашля");
@@ -115,7 +115,7 @@ namespace pharmacyBackend.Data
                 {
                     new Product
                     {
-                        Name = "Канефрон форте",
+                        Name = "Канефрон Н",
                         Manufacturer = "Бионорика",
                         Country = "Германия",
                         IsPrescription = false,
@@ -123,7 +123,8 @@ namespace pharmacyBackend.Data
                         ExpirationDate = new DateOnly(2027, 12, 1),
                         IsActive = true,
                         CategoryId = urologyCat.Id,
-                        PictureUrl = "/products/enterol.jpg"
+                        PdfUrl = "https://res.cloudinary.com/dvsftlg7d/image/upload/v1772550649/2373_97_01_02_06_11_13_16_24_p_nhs8xo.pdf",
+                        PictureUrl = "https://res.cloudinary.com/dvsftlg7d/image/upload/v1772548850/canefron_onewkl.jpg"
                     },
                     new Product
                     {
@@ -190,14 +191,14 @@ namespace pharmacyBackend.Data
                         ExpirationDate = new DateOnly(2026, 9, 1),
                         IsActive = true,
                         CategoryId = probioticCat.Id,
-                        PictureUrl = "/products/enterol.jpg"
+                        PictureUrl = "https://res.cloudinary.com/dvsftlg7d/image/upload/v1772548850/enterol_qkfkhz.jpg"
                     }
                 };
 
                 context.Products.AddRange(products);
                 context.SaveChanges();
 
-                var canephron = context.Products.First(p => p.Name == "Канефрон форте");
+                var canephron = context.Products.First(p => p.Name == "Канефрон Н");
                 var bronchipret = context.Products.First(p => p.Name == "Бронхипрет");
                 var magneB6 = context.Products.First(p => p.Name == "Магне b6");
                 var enterol = context.Products.First(p => p.Name == "Энтерол");

@@ -17,7 +17,7 @@
     </div>
 
     <div class="pharmacy-actions">
-      <button class="book-btn">Забронировать</button>
+      <button class="book-btn" @click="$emit('book', pharmacy)">Забронировать</button>
       <button class="call-btn" :title="pharmacy.pharmacyPhone">
         <img src="/assets/Phone.svg" alt="Позвонить" class="phone-icon">
       </button>
@@ -32,6 +32,8 @@ const props = defineProps({
     required: true
   }
 });
+
+defineEmits(['book']);
 
 const formatPrice = (price) => {
   if (price == null) return '0.00';

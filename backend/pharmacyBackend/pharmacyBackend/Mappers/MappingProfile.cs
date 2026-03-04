@@ -36,7 +36,7 @@ namespace pharmacyBackend.Mappers
 
             //аптеки
             CreateMap<Pharmacy, PharmacyDTO>();
-
+            CreateMap<PharmacyCreateDTO, Pharmacy>();
             CreateMap<Pharmacy, PharmacyFullDTO>();
 
             //хранение

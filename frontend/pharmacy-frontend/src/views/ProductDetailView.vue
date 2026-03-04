@@ -6,7 +6,7 @@
     <nav class="breadcrumbs">
       Каталог > {{ product.categoryName || 'Лекарства' }} > {{ product.name }}
     </nav>
-
+    
     <section class="product-main card">
       <div class="product-visual">
         <button 
@@ -89,8 +89,8 @@
       <PharmacyItem 
         v-for="shop in paginatedPharmacies" 
         :key="shop.id" 
-        :pharmacy="shop" 
-      />
+        :pharmacy="shop"
+        @book="handleBookClick"/>
     </div>
     
     <div v-if="pharmacies.length > itemsPerPage" class="pagination">
@@ -98,25 +98,46 @@
       <button v-for="page in totalPages" :key="page" :class="['page-num', { active: currentPage === page }]" @click="setPage(page)">{{ page }}</button>
       <button class="page-arrow" @click="setPage(currentPage + 1)" :disabled="currentPage === totalPages">›</button>
     </div>
+
+    <QuickOrderModal
+      :is-open="isCheckoutModalOpen"
+      :product="product"
+      :pharmacy="selectedCheckoutPharmacy"
+      :is-loading="isCheckoutLoading"
+      @close="isCheckoutModalOpen = false"
+      @confirm="submitQuickCheckout"/>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useCartStore } from '@/stores/cartStore';
+import { useAuthStore } from '@/stores/authStore';
+import { useToast } from 'vue-toast-notification';
+import { useOrderStore } from '@/stores/orderStore';
 import PharmacyItem from '@/components/PharmacyItem.vue';
 import TheHeader from '@/components/Header.vue';
+import QuickOrderModal from '@/components/QuickOrderModal.vue';
 import api from '@/api/api';
 
 const route = useRoute();
+const router = useRouter();
+const cartStore = useCartStore();
+const authStore = useAuthStore();
+const orderStore = useOrderStore();
+const toast = useToast({ position: 'bottom-right' });
+
 const product = ref(null);
 const pharmacies = ref([]);
 const loading = ref(true);
 const currentPage = ref(1);
-const itemsPerPage = 1;
-const cartStore = useCartStore();
+const itemsPerPage = 10;
+
 const isPdfOpen = ref(false);
+const isCheckoutModalOpen = ref(false);
+const selectedCheckoutPharmacy = ref(null);
+const isCheckoutLoading = ref(false);
 
 const isFavorite = ref(false);
 
@@ -166,6 +187,32 @@ const addToCart = () => {
     price: product.value.minPrice, 
     imageUrl: product.value.pictureUrl
   });
+};
+
+const handleBookClick = (pharmacy) => {
+  if (!authStore.token) {
+    router.push('/login');
+    return;
+  }
+  selectedCheckoutPharmacy.value = pharmacy;
+  isCheckoutModalOpen.value = true;
+};
+
+const submitQuickCheckout = async (quantity) => {
+  if (!product.value || !selectedCheckoutPharmacy.value) return;
+
+  isCheckoutLoading.value = true;
+  const success = await orderStore.quickCheckout(
+    product.value.id, 
+    selectedCheckoutPharmacy.value.pharmacyId, 
+    quantity
+  );
+  
+  isCheckoutLoading.value = false;
+  if (success) {
+    isCheckoutModalOpen.value = false;
+    router.push('/');
+  }
 };
 
 onMounted(async () => {

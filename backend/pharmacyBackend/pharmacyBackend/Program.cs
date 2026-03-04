@@ -71,6 +71,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IEmailGenerator, EmailGenerator>();
 builder.Services.AddScoped<ICloudService, CloudService>();
+builder.Services.AddHttpClient<GeocodeService>();
 
 var app = builder.Build();
 

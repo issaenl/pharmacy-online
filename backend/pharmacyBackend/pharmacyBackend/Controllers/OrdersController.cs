@@ -109,6 +109,83 @@ namespace pharmacyBackend.Controllers
             return Ok(new { orderId = order.Id, message = "Бронь успешно оформлена" });
         }
 
+        [HttpPost("quick-checkout")]
+        public async Task<ActionResult> QuickCheckout([FromBody] QuickCheckoutDTO request)
+        {
+            var userId = GetUserId();
+            var user = await _context.Users.FindAsync(userId);
+
+            var product = await _context.Products
+                .Include(p => p.Stocks)
+                .FirstOrDefaultAsync(p => p.Id == request.ProductId);
+
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            var stock = product.Stocks.FirstOrDefault(s => s.PharmacyId == request.PharmacyId);
+
+            if (stock == null || stock.Quantity < request.Quantity)
+            {
+                return BadRequest();
+            }
+
+            var pharmacy = await _context.Pharmacies.FindAsync(request.PharmacyId);
+
+            if (pharmacy == null)
+            {
+                return NotFound();
+            }
+
+            var order = new Order
+            {
+                UserId = userId,
+                PharmacyId = request.PharmacyId,
+                OrderDate = DateTime.UtcNow,
+                Status = OrderStatus.Pending,
+                OrderItems = new List<OrderItem>()
+            };
+
+            order.OrderItems.Add(new OrderItem
+            {
+                ProductId = request.ProductId,
+                Quantity = request.Quantity,
+                Price = stock.Price
+            });
+
+            order.TotalPrice = stock.Price * request.Quantity;
+            stock.Quantity -= request.Quantity;
+
+            _context.Orders.Add(order);
+            await _context.SaveChangesAsync();
+
+            if (user != null && !string.IsNullOrEmpty(user.Email))
+            {
+                var emailItemsList = new StringBuilder();
+                emailItemsList.AppendLine($"<li>{product.Name} - {request.Quantity} шт. x {stock.Price:F2} р.</li>");
+
+                var cart = new Cart { Pharmacy = pharmacy };
+
+                var (subject, htmlBody) = _generator.GenerateStatusEmail(
+                    user,
+                    order,
+                    OrderStatus.Pending,
+                    cart,
+                    emailItemsList.ToString(),
+                    order.TotalPrice
+                );
+
+                if (!string.IsNullOrEmpty(subject))
+                {
+                    _ = _email.SendEmailAsync(user.Email, subject, htmlBody);
+                }
+            }
+
+            return Ok(new { orderId = order.Id, message = "Бронь успешно оформлена" });
+        }
+
+
         [HttpGet("my-orders")]
         public async Task<ActionResult<IEnumerable<OrderWithItemsDTO>>> GetUserOrders()
         {
