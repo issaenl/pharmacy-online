@@ -14,32 +14,53 @@
     </div>
 
     <transition name="fade">
-      <div v-if="showDropdown && (results.length || isLoading)" class="search-dropdown">
-        <div v-if="isLoading" class="search-message">Ищем лучшие варианты...</div>
+      <div v-if="showDropdown && (results.length || isLoading || showHistoryCondition)" class="search-dropdown">
         
-        <div v-else-if="results.length">
+        <div v-if="showHistoryCondition" class="history-section">
+          <div class="history-header">
+            <span>Вы искали</span>
+            <button @click.stop="clearHistory" class="clear-history-btn">Очистить</button>
+          </div>
           <div 
-            v-for="product in results.slice(0, 8)" 
-            :key="product.id" 
-            class="search-result-item"
-            @click="handleSelect(product.id)"
+            v-for="(item, index) in searchHistory" 
+            :key="index" 
+            class="history-item"
+            @click="handleHistorySelect(item)"
           >
-            <img :src="product.pictureUrl || '/assets/no-image.jpg'" class="item-img" />
-            <div class="item-info">
-              <span class="item-name">{{ product.name }}</span>
-              <span class="item-dosage">{{ product.dosageForm }}</span>
-            </div>
-            <div class="item-price">от {{ product.minPrice }} р.</div>
+            <svg class="history-icon" viewBox="0 0 24 24" width="16" height="16">
+              <path fill="currentColor" d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+            </svg>
+            <span>{{ item }}</span>
           </div>
         </div>
-        <div v-else class="search-message">Ничего не найдено</div>
+
+        <template v-else-if="searchQuery.length >= 2">
+          <div v-if="isLoading" class="search-message">Ищем лучшие варианты...</div>
+          
+          <div v-else-if="results.length">
+            <div 
+              v-for="product in results.slice(0, 8)" 
+              :key="product.id" 
+              class="search-result-item"
+              @click="handleSelect(product.id)"
+            >
+              <img :src="product.pictureUrl || '/assets/no-image.jpg'" class="item-img" />
+              <div class="item-info">
+                <span class="item-name">{{ product.name }}</span>
+                <span class="item-dosage">{{ product.dosageForm }}</span>
+              </div>
+              <div class="item-price">от {{ product.minPrice }} р.</div>
+            </div>
+          </div>
+          <div v-else class="search-message">Ничего не найдено</div>
+        </template>
+
       </div>
     </transition>
   </div>
 </template>
-
 <script setup>
-import { ref, watch, onMounted, onUnmounted } from 'vue';
+import { ref, watch, onMounted, onUnmounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '@/api/api';
 
@@ -50,12 +71,52 @@ const searchQuery = ref('');
 const results = ref([]);
 const isLoading = ref(false);
 const showDropdown = ref(false);
+const searchHistory = ref([]);
+const MAX_HISTORY_ITEMS = 5;
 let debounceTimer = null;
+
+const showHistoryCondition = computed(() => {
+  return searchQuery.value.trim().length < 2 && searchHistory.value.length > 0;
+});
+
+const loadHistory = () => {
+  const saved = localStorage.getItem('searchHistory');
+  if (saved) {
+    try {
+      searchHistory.value = JSON.parse(saved);
+    } catch (e) {
+      searchHistory.value = [];
+    }
+  }
+};
+
+const saveToHistory = (query) => {
+  const q = query.trim();
+  if (!q) return;
+
+  searchHistory.value = searchHistory.value.filter(item => item !== q);
+  searchHistory.value.unshift(q);
+
+  if (searchHistory.value.length > MAX_HISTORY_ITEMS) {
+    searchHistory.value.pop();
+  }
+
+  localStorage.setItem('searchHistory', JSON.stringify(searchHistory.value));
+};
+
+const clearHistory = () => {
+  searchHistory.value = [];
+  localStorage.removeItem('searchHistory');
+};
+
+const handleHistorySelect = (item) => {
+  searchQuery.value = item;
+  goToSearchPage(); 
+};
 
 const performSearch = async () => {
   if (searchQuery.value.trim().length < 2) {
     results.value = [];
-    showDropdown.value = false;
     return;
   }
 
@@ -78,10 +139,13 @@ watch(searchQuery, () => {
 });
 
 const handleFocus = () => {
-  if (searchQuery.value.length >= 2) showDropdown.value = true;
+  if (searchQuery.value.length >= 2 || searchHistory.value.length > 0) {
+    showDropdown.value = true;
+  }
 };
 
 const handleSelect = (id) => {
+  saveToHistory(searchQuery.value);
   showDropdown.value = false;
   searchQuery.value = '';
   router.push(`/product/${id}`);
@@ -89,6 +153,7 @@ const handleSelect = (id) => {
 
 const goToSearchPage = () => {
   if (!searchQuery.value.trim()) return;
+  saveToHistory(searchQuery.value);
   showDropdown.value = false;
   router.push({ path: '/catalog', query: { q: searchQuery.value } });
 };
@@ -99,7 +164,10 @@ const handleClickOutside = (event) => {
   }
 };
 
-onMounted(() => document.addEventListener('click', handleClickOutside));
+onMounted(() => {
+  loadHistory(); 
+  document.addEventListener('click', handleClickOutside);
+});
 onUnmounted(() => document.removeEventListener('click', handleClickOutside));
 </script>
 
@@ -166,6 +234,52 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside));
         padding: 20px;
         text-align: center;
         color: #888;
+    }
+
+    .history-section {
+        padding: 10px 0;
+    }
+
+    .history-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 5px 20px 10px;
+        font-size: 13px;
+        color: #888;
+        font-weight: 500;
+    }
+
+    .clear-history-btn {
+        background: none;
+        border: none;
+        color: #B3CCAE;
+        cursor: pointer;
+        font-size: 13px;
+        padding: 0;
+        font: var(--main-font);
+    }
+
+    .clear-history-btn:hover {
+        text-decoration: underline;
+    }
+
+    .history-item {
+        display: flex;
+        align-items: center;
+        padding: 10px 20px;
+        gap: 12px;
+        cursor: pointer;
+        color: #333;
+        transition: background 0.2s;
+    }
+
+    .history-item:hover {
+        background: #f9fbf9;
+    }
+
+    .history-icon {
+        color: #ccc;
     }
 
     .search-result-item {
