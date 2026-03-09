@@ -2,6 +2,9 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import api from '@/api/api';
 
+import { useCartStore } from './cartStore';
+import { useFavoriteStore } from './favoriteStore';
+
 const extractErrorMessage = (error) => {
   if (error.response && error.response.data) {
     const data = error.response.data;
@@ -45,7 +48,9 @@ export const useAuthStore = defineStore('auth', () => {
 
       try {
         const cartStore = useCartStore();
+        const favoriteStore = useFavoriteStore();
         await cartStore.syncCart();
+        await favoriteStore.syncFavorites();
       } catch (error) {
         console.error('Ошибка при синхронизации корзины:', error);
       }
@@ -73,7 +78,9 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       import('@/stores/cartStore').then(({ useCartStore }) => {
         const cartStore = useCartStore();
+        const favoriteStore = useFavoriteStore();
         cartStore.items = [];
+        favoriteStore.items = [];
       });
     } catch (error) {
       console.error('Ошибка при очистке корзины:', error);

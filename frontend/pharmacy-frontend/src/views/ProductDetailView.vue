@@ -11,7 +11,7 @@
       <div class="product-visual">
         <button 
           class="wishlist-btn" 
-          :class="{ 'is-favorite': isFavorite }" 
+          :class="{ 'is-favorite': product && favoriteStore.isFavorite(product.id) }" 
           @click="toggleFavorite"
           title="Добавить в избранное"
         >
@@ -114,6 +114,7 @@ import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
+import { useFavoriteStore } from '@/stores/favoriteStore';
 import { useToast } from 'vue-toast-notification';
 import { useOrderStore } from '@/stores/orderStore';
 import PharmacyItem from '@/components/PharmacyItem.vue';
@@ -125,6 +126,7 @@ const route = useRoute();
 const router = useRouter();
 const cartStore = useCartStore();
 const authStore = useAuthStore();
+const favoriteStore = useFavoriteStore();
 const orderStore = useOrderStore();
 const toast = useToast({ position: 'bottom-right' });
 
@@ -139,10 +141,10 @@ const isCheckoutModalOpen = ref(false);
 const selectedCheckoutPharmacy = ref(null);
 const isCheckoutLoading = ref(false);
 
-const isFavorite = ref(false);
-
 const toggleFavorite = () => {
-  isFavorite.value = !isFavorite.value;
+  if (product.value) {
+    favoriteStore.toggleFavorite(product.value);
+  }
 };
 
 const openInstruction = () => {

@@ -18,13 +18,18 @@
     </div>
 
     <div class="item-actions">
-      <button class="action-btn" title="В избранное">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#A0A0A0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <button 
+        class="action-btn" 
+        :class="{ 'is-favorite': favoriteStore.isFavorite(item.productId) }"
+        @click="favoriteStore.toggleFavorite(item)"
+        title="В избранное">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
         </svg>
       </button>
+
       <button @click="cartStore.removeFromCart(item.productId)" class="action-btn" title="Удалить">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#A0A0A0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="3 6 5 6 21 6"></polyline>
           <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
           <line x1="10" y1="11" x2="10" y2="17"></line>
@@ -38,6 +43,7 @@
 <script setup>
 import { defineProps } from 'vue';
 import { useCartStore } from '@/stores/cartStore';
+import { useFavoriteStore } from '@/stores/favoriteStore';
 
 const props = defineProps({
   item: {
@@ -47,6 +53,7 @@ const props = defineProps({
 });
 
 const cartStore = useCartStore();
+const favoriteStore = useFavoriteStore();
 </script>
 
 <style scoped>
@@ -132,10 +139,20 @@ const cartStore = useCartStore();
         padding: 5px; 
         opacity: 0.6; 
         transition: 0.2s; 
+        color: #A0A0A0;
     }
     
     .action-btn:hover { 
         opacity: 1;
+    }
+
+    .action-btn.is-favorite {
+        color: #BB4E58;
+        opacity: 1;
+    }
+
+    .action-btn.is-favorite svg {
+        fill: currentColor;
     }
 
     @media (max-width: 800px) {

@@ -76,6 +76,14 @@ namespace pharmacyBackend.Mappers
 
             //пользователь
             CreateMap<User, UserDataDTO>();
+
+            //избранное
+            CreateMap<Favorite, FavoriteDTO>()
+                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name))
+                .ForMember(dest => dest.DosageForm, opt => opt.MapFrom(src => src.Product.DosageForm))
+                .ForMember(dest => dest.PictureUrl, opt => opt.MapFrom(src => src.Product.PictureUrl))
+                .ForMember(dest => dest.Price, opt => opt.MapFrom(src =>
+                    src.Product.Stocks.Any() ? src.Product.Stocks.Min(s => s.Price) : 0));
         } 
     }
 }

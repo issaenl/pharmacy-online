@@ -1,6 +1,9 @@
 <template>
   <div class="card" @click="goToProduct">
-    <button class="wishlist-btn" @click.stop="toggleWishlist">
+    <button 
+      class="wishlist-btn" 
+      :class="{ 'is-favorite': favoriteStore.isFavorite(product.id) }"
+      @click.stop="toggleWishlist">
       <svg 
       width="32" 
       height="32" 
@@ -44,6 +47,7 @@
 <script setup>
 import { useRouter } from 'vue-router';
 import { useCartStore } from '@/stores/cartStore';
+import { useFavoriteStore } from '@/stores/favoriteStore';
 
 const props = defineProps({
   product: {
@@ -55,13 +59,15 @@ const props = defineProps({
 
 const router = useRouter();
 const cartStore = useCartStore();
+const favoriteStore = useFavoriteStore();
 
 const goToProduct = () => {
   router.push(`/product/${props.product.id}`);
 };
 
-/*пока без логики позже реализую*/
-const toggleWishlist = () => {};
+const toggleWishlist = () => {
+  favoriteStore.toggleFavorite(props.product);
+};
 
 const addToCart = () => {
   cartStore.addToCart({
@@ -110,6 +116,14 @@ const formatPrice = (price) => {
 
   .wishlist-btn:hover {
     color: #BB4E58; 
+  }
+
+  .wishlist-btn.is-favorite {
+    color: #BB4E58; 
+  }
+
+  .wishlist-btn.is-favorite svg {
+    fill: currentColor; 
   }
 
   .card__image { 
