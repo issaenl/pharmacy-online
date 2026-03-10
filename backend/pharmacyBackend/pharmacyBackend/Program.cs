@@ -5,8 +5,9 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using pharmacyBackend.Data;
 using pharmacyBackend.Mappers;
-using System.Text;
 using pharmacyBackend.Services;
+using System.Security.Claims;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddAutoMapper(typeof(MappingProfile));
@@ -64,7 +65,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetValue<string>("AppSettings:Token") ?? throw new InvalidOperationException("JWT не найден"))),
         ValidateAudience = false,
-        ValidateIssuer = false
+        ValidateIssuer = false,
+        RoleClaimType = ClaimTypes.Role
     };
 });
 

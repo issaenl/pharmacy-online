@@ -1,3 +1,4 @@
+using pharmacyBackend.Enums;
 using pharmacyBackend.Models;
 using System.Diagnostics;
 
@@ -226,6 +227,25 @@ namespace pharmacyBackend.Data
                 };
 
                 context.Stocks.AddRange(stocks);
+                context.SaveChanges();
+            }
+
+            if (!context.Users.Any(u => u.Role == UserRole.Admin))
+            {
+                var adminPhone = "+375298707424"; 
+                var adminPassword = "Aa1111!!"; 
+
+                var superAdmin = new User
+                {
+                    FirstName = "Главный",
+                    LastName = "Администратор",
+                    Phone = adminPhone,
+                    Email = "admin@unimed.pharmacy",
+                    Password = BCrypt.Net.BCrypt.HashPassword(adminPassword),
+                    Role = UserRole.Admin
+                };
+
+                context.Users.Add(superAdmin);
                 context.SaveChanges();
             }
         }

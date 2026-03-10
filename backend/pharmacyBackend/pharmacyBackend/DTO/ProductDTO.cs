@@ -25,6 +25,7 @@ namespace pharmacyBackend.DTO
     {
         public DateOnly ExpirationDate { get; set; }
         public string? PdfUrl { get; set; }
+        public int CategoryId { get; set; }
         public List<PharmacyStockDTO> AvailableIn { get; set; } = new();
     }
 
@@ -34,38 +35,53 @@ namespace pharmacyBackend.DTO
     }
 
 
-    public class ProductCreateDTO
+    //public class ProductCreateDTO
+    //{
+    //    [Required(ErrorMessage = "Название товара обязательно.")]
+    //    [StringLength(200, MinimumLength = 2)]
+    //    public string Name { get; set; } = string.Empty;
+
+    //    [Required(ErrorMessage = "Производитель обязателен.")]
+    //    [MaxLength(100)]
+    //    public string Manufacturer { get; set; } = string.Empty;
+
+    //    [Required(ErrorMessage = "Страна обязательна.")]
+    //    [MaxLength(50)]
+    //    public string Country { get; set; } = string.Empty;
+
+    //    public bool IsPrescription { get; set; }
+
+    //    [Required(ErrorMessage = "Укажите форму выпуска (таблетки, сироп и т.д.).")]
+    //    [MaxLength(50)]
+    //    public string DosageForm { get; set; } = string.Empty;
+
+    //    public DateOnly? ExpirationDate { get; set; }
+
+    //    public string? PdfUrl { get; set; }
+    //    public string? PictureUrl { get; set; }
+
+    //    [Required(ErrorMessage = "Товар должен принадлежать категории.")]
+    //    public int CategoryId { get; set; }
+    //}
+
+    //public class ProductUpdateDTO : ProductCreateDTO
+    //{
+    //    [Required]
+    //    public bool IsActive { get; set; }
+    //}
+
+    public class ProductUploadDTO
     {
-        [Required(ErrorMessage = "Название товара обязательно.")]
-        [StringLength(200, MinimumLength = 2)]
-        public string Name { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Производитель обязателен.")]
-        [MaxLength(100)]
-        public string Manufacturer { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Страна обязательна.")]
-        [MaxLength(50)]
-        public string Country { get; set; } = string.Empty;
-
+        [Required] public string Name { get; set; } = string.Empty;
+        [Required] public string Manufacturer { get; set; } = string.Empty;
+        [Required] public string Country { get; set; } = string.Empty;
         public bool IsPrescription { get; set; }
-
-        [Required(ErrorMessage = "Укажите форму выпуска (таблетки, сироп и т.д.).")]
-        [MaxLength(50)]
-        public string DosageForm { get; set; } = string.Empty;
-
-        public DateOnly? ExpirationDate { get; set; }
-
-        public string? PdfUrl { get; set; }
-        public string? PictureUrl { get; set; }
-
-        [Required(ErrorMessage = "Товар должен принадлежать категории.")]
+        [Required] public string DosageForm { get; set; } = string.Empty;
+        public string? ExpirationDate { get; set; } 
         public int CategoryId { get; set; }
-    }
+        public bool IsActive { get; set; } = true;
 
-    public class ProductUpdateDTO : ProductCreateDTO
-    {
-        [Required]
-        public bool IsActive { get; set; }
+        public IFormFile? PictureFile { get; set; }
+        public IFormFile? PdfFile { get; set; }
     }
 }

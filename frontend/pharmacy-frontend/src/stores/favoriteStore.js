@@ -54,7 +54,8 @@ export const useFavoriteStore = defineStore('favorite', () => {
         productId: id,
         productName: product.name || product.productName,
         price: product.minPrice || product.price || product.unitPrice,
-        pictureUrl: product.pictureUrl || product.imageUrl
+        pictureUrl: product.pictureUrl || product.imageUrl,
+        dosageForm: product.dosageForm
       });
 
       if (authStore.token) {

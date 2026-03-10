@@ -37,6 +37,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore';
 import TheHeader from '@/components/Header.vue';
 
@@ -47,6 +48,7 @@ const isLoading = ref(false);
 
 const authStore = useAuthStore();
 const router = useRouter();
+const route = useRoute();
 
 const handlePhoneInput = (event) => {
   let inputDigits = event.target.value.replace(/[^\d]/g, '');
@@ -64,7 +66,18 @@ const handleLogin = async () => {
   
   try {
     await authStore.login(phone.value, password.value);
-    router.push('/'); 
+    const redirectPath = route.query.redirect;
+
+    if (redirectPath) {
+      router.push(redirectPath); 
+    } else {
+      const userRole = authStore.user?.role;
+      if (userRole === 2 || userRole === 'Admin') {
+         router.push('/admin');
+      } else {
+         router.push('/'); 
+      }
+    }
   } catch (error) {
     errorMessage.value = error
   } finally {

@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { useAuthStore } from '@/stores/authStore';
 import HomeView from '../views/HomeView.vue'; 
 import ProductDetailView from '../views/ProductDetailView.vue';
 import ProductListView from '../views/ProductListView.vue'
@@ -9,6 +10,8 @@ import RegisterView from '@/views/RegisterView.vue';
 import ProfileView from '@/views/ProfileView.vue';
 import CartView from '@/views/CartView.vue';
 import FavoriteView from '@/views/FavoriteView.vue';
+import AdminMain from '@/views/admin/AdminMain.vue';
+import AdminProducts from '@/views/admin/AdminProducts.vue';
 
 const routes = [
   {
@@ -65,12 +68,48 @@ const routes = [
     path: '/favorites',
     name: 'favorites',
     component: FavoriteView
+  },
+
+
+  {
+    path: '/admin',
+    component: AdminMain,
+    meta: { requiresAuth: true, requiresAdmin: true }, 
+    children: [
+      {
+        path: 'products',
+        name: 'admin-products',
+        component: AdminProducts
+      }
+    ]
   }
 ];
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes
+});
+
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore();
+  const isAuthenticated = !!authStore.token;
+
+  const userRole = authStore.user?.role; 
+  const isSuperAdmin = userRole === 2 || userRole === 'Admin';
+
+  if (to.meta.requiresAdmin) {
+    if (!isAuthenticated) {
+      next({ name: 'login', query: { redirect: to.fullPath } });
+    } else if (!isSuperAdmin) {
+      next({ name: 'home' });
+    } else {
+      next();
+    }
+  } else if (to.meta.requiresAuth && !isAuthenticated) {
+    next({ name: 'login', query: { redirect: to.fullPath } });
+  } else {
+    next();
+  }
 });
 
 export default router;

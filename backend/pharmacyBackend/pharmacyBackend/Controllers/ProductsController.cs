@@ -1,12 +1,15 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using pharmacyBackend.Data;
 using pharmacyBackend.DTO;
 using pharmacyBackend.Helpers;
+using pharmacyBackend.Models;
 using pharmacyBackend.Services;
+using System.Globalization;
 
 namespace pharmacyBackend.Controllers
 {
@@ -75,7 +78,7 @@ namespace pharmacyBackend.Controllers
 
             if (!string.IsNullOrWhiteSpace(filters.District))
             {
-                query = query.Where(p => p.Stocks.Any(s => 
+                query = query.Where(p => p.Stocks.Any(s =>
                     s.Pharmacy.District.ToLower() == filters.District.ToLower() && s.Quantity > 0));
             }
 
@@ -101,6 +104,7 @@ namespace pharmacyBackend.Controllers
         public async Task<ActionResult<ProductLongDTO>> GetProduct(int id)
         {
             var product = await _context.Products
+                .Where(p => p.IsActive == true)
                 .Include(p => p.Category)
                 .Include(p => p.Stocks)
                     .ThenInclude(s => s.Pharmacy)
@@ -132,6 +136,7 @@ namespace pharmacyBackend.Controllers
         public async Task<ActionResult<IEnumerable<ProductShortDTO>>> GetPopularProducts()
         {
             var products = await _context.Products
+                .Where(p => p.IsActive == true)
                 .Include(p => p.Stocks)
                 .OrderByDescending(p => p.Stocks.Count(s => s.Quantity > 0))
                 .Take(20)
@@ -149,6 +154,7 @@ namespace pharmacyBackend.Controllers
         public async Task<ActionResult<IEnumerable<ProductShortDTO>>> GetNewProducts()
         {
             var products = await _context.Products
+                .Where(p => p.IsActive == true)
                 .Include(p => p.Stocks)
                 .OrderByDescending(p => p.Id)
                 .Take(20)
@@ -166,7 +172,7 @@ namespace pharmacyBackend.Controllers
         [HttpGet("search")]
         public async Task<ActionResult<IEnumerable<ProductShortDTO>>> SearchProducts([FromQuery] string query)
         {
-            if(string.IsNullOrWhiteSpace(query))
+            if (string.IsNullOrWhiteSpace(query))
             {
                 return Ok(new List<ProductShortDTO>());
             }
@@ -175,7 +181,7 @@ namespace pharmacyBackend.Controllers
             string otherLayoutQuery = SearchHelper.ConvertLayout(query);
 
             var products = await _context.Products
-                .Where(p => p.Name.ToLower().Contains(originalQuery) || p.Name.ToLower().Contains(otherLayoutQuery))
+                .Where(p => p.Name.ToLower().Contains(originalQuery) || p.Name.ToLower().Contains(otherLayoutQuery) && p.IsActive == true)
                 .Include(p => p.Stocks)
                 .ProjectTo<ProductShortDTO>(_mapper.ConfigurationProvider)
                 .ToListAsync();
@@ -183,7 +189,8 @@ namespace pharmacyBackend.Controllers
             if (!products.Any())
             {
                 var allProducts = await _context.Products
-                    .Select(p => new { p.Id, Name = p.Name.ToLower()})
+                    .Where( p => p.IsActive == true)
+                    .Select(p => new { p.Id, Name = p.Name.ToLower() })
                     .ToListAsync();
 
                 var matches = allProducts
@@ -201,7 +208,7 @@ namespace pharmacyBackend.Controllers
 
                 products = await _context.Products
                     .Where(p => matches.Contains(p.Id))
-                    .Include (p => p.Stocks)
+                    .Include(p => p.Stocks)
                     .ProjectTo<ProductShortDTO>(_mapper.ConfigurationProvider)
                     .ToListAsync();
 
@@ -209,6 +216,107 @@ namespace pharmacyBackend.Controllers
             }
 
             return Ok(products);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("admin-all-products")]
+        public async Task<ActionResult<IEnumerable<ProductFullDTO>>> GetAllForAdmins()
+        {
+            var product = await _context.Products
+                .Include(p => p.Category)
+                .ProjectTo<ProductFullDTO>(_mapper.ConfigurationProvider)
+                .OrderByDescending(p => p.Id)
+                .ToListAsync();
+            return Ok(product);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public async Task<ActionResult> CreateProduct([FromForm] ProductUploadDTO upload)
+        {
+            var product = new Product
+            {
+                Name = upload.Name,
+                Manufacturer = upload.Manufacturer,
+                Country = upload.Country,
+                IsPrescription = upload.IsPrescription,
+                DosageForm = upload.DosageForm,
+                CategoryId = upload.CategoryId,
+                IsActive = upload.IsActive,
+            };
+
+            if (DateOnly.TryParse(upload.ExpirationDate, out var expDate))
+            {
+                product.ExpirationDate = expDate;
+            }
+
+            if (upload.PictureFile != null)
+            {
+                product.PictureUrl = await _cloud.UploadFileAsync(upload.PictureFile);
+            }
+
+            if (upload.PdfFile != null)
+            {
+                product.PdfUrl = await _cloud.UploadFileAsync(upload.PdfFile);
+            }
+
+            _context.Products.Add(product);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { Message = "Продукт успешно создан!" });
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPut("{id}")]
+        public async Task<ActionResult> UpdateProduct(int id, [FromForm] ProductUploadDTO upload)
+        {
+            var product = await _context.Products.FindAsync(id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            product.Name = upload.Name;
+            product.Manufacturer = upload.Manufacturer;
+            product.Country = upload.Country;
+            product.IsPrescription = upload.IsPrescription;
+            product.DosageForm = upload.DosageForm;
+            product.CategoryId = upload.CategoryId;
+            product.IsActive = upload.IsActive;
+
+            if (DateOnly.TryParse(upload.ExpirationDate, out var expDate))
+            {
+                product.ExpirationDate = expDate;
+            }
+
+            if (upload.PictureFile != null)
+            {
+                product.PictureUrl = await _cloud.UploadFileAsync(upload.PictureFile);
+            }
+
+            if (upload.PdfFile != null)
+            {
+                product.PdfUrl = await _cloud.UploadFileAsync(upload.PdfFile);
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok(new { Message = "Продукт обновлен" });
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteProduct(int id)
+        {
+            var product = await _context.Products.FindAsync(id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            _context.Products.Remove(product);
+            await _context.SaveChangesAsync();
+            return Ok(new { Message = "Продукт удален" });
+
         }
     }
 }
