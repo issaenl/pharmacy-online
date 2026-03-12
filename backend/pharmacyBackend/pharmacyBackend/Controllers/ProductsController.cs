@@ -327,7 +327,9 @@ namespace pharmacyBackend.Controllers
         public async Task<IActionResult> Import(IFormFile file)
         {
             if (file == null || file.Length == 0)
+            {
                 return BadRequest(new { Message = "Файл пуст или не выбран." });
+            }
 
             var result = await _import.ImportProductsAsync(file);
 

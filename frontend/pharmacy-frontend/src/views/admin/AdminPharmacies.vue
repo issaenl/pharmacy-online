@@ -34,7 +34,7 @@
             <td>{{ pharmacy.address }}</td>
             <td>{{ pharmacy.phone }}</td>
             <td>
-              <span class="rating-badge" v-if="pharmacy.rating">⭐ {{ pharmacy.rating }}</span>
+              <span class="rating-badge" v-if="pharmacy.rating">{{ pharmacy.rating }}</span>
               <span v-else class="text-muted">—</span>
             </td>
             <td class="coords">

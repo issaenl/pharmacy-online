@@ -8,6 +8,7 @@
         <router-link to="/admin" exact-active-class="active">Главная</router-link>
         <router-link to="/admin/products" active-class="active">Продукты</router-link>
         <router-link to="/admin/pharmacies" active-class="active">Аптеки</router-link>
+        <router-link to="/admin/stocks" active-class="active">Наличие</router-link>
         </nav>
       <button @click="handleLogout" class="logout-btn">Выйти</button>
     </aside>

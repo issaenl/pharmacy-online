@@ -105,6 +105,16 @@ const initMap = () => {
     controls: ['zoomControl', 'fullscreenControl']
   });
 
+  const clusterer = new window.ymaps.Clusterer({
+      preset: 'islands#invertedRedClusterIcons',
+      groupByCoordinates: false,
+      clusterDisableClickZoom: false,
+      clusterHideIconOnBalloonOpen: false,
+      geoObjectHideIconOnBalloonOpen: false
+  });
+
+  const geoObjects = [];
+
   pharmacies.value.forEach(pharmacy => {
     if (pharmacy.latitude && pharmacy.longitude) {
       const placemark = new window.ymaps.Placemark([pharmacy.latitude, pharmacy.longitude], {
@@ -119,9 +129,22 @@ const initMap = () => {
         selectedPharmacy.value = pharmacy;
       });
 
-      myMap.geoObjects.add(placemark);
+     geoObjects.push(placemark);
+    } 
+    else {
+        console.warn('Аптека пропущена из-за отсутствия координат:', pharmacy.name);
     }
   });
+
+  clusterer.add(geoObjects);
+  myMap.geoObjects.add(clusterer);
+
+  if (geoObjects.length > 0) {
+      myMap.setBounds(clusterer.getBounds(), {
+          checkZoomRange: true,
+          zoomMargin: 20
+      });
+  }
 };
 
 watch(() => props.isOpen, async (newVal) => {

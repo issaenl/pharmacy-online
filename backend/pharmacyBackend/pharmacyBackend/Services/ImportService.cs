@@ -143,5 +143,126 @@ namespace pharmacyBackend.Services
                 errors.Add($"Строка {lineNumber}: ошибка форматов данных ({ex.Message}).");
             }
         }
+
+        public async Task<ImportDTO> ImportStocksAsync(IFormFile file)
+        {
+            var result = new ImportDTO();
+            var stocksToAdd = new List<Stock>();
+
+            var pharmaciesDict = await _context.Pharmacies
+                .GroupBy(p => p.Name.ToLower())
+                .ToDictionaryAsync(g => g.Key, g => g.First().Id);
+
+            var productsDict = await _context.Products
+                .GroupBy(p => p.Name.ToLower())
+                .ToDictionaryAsync(g => g.Key, g => g.First().Id);
+
+            var existingStocksList = await _context.Stocks
+                .Select(s => s.PharmacyId + "_" + s.ProductId)
+                .ToListAsync();
+            var existingStocks = existingStocksList.ToHashSet();
+
+            var extension = Path.GetExtension(file.FileName).ToLower();
+            using var stream = file.OpenReadStream();
+
+            if (extension == ".csv")
+            {
+                using var reader = new StreamReader(stream);
+                await reader.ReadLineAsync(); 
+                int lineNumber = 1;
+
+                while (!reader.EndOfStream)
+                {
+                    lineNumber++;
+                    var line = await reader.ReadLineAsync();
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+
+                    var values = line.Split(new[] { ',', ';' });
+                    ProcessStockRow(values, lineNumber, pharmaciesDict, productsDict, existingStocks, stocksToAdd, result.Errors);
+                }
+            }
+            else if (extension == ".xlsx" || extension == ".xls")
+            {
+                using var workbook = new XLWorkbook(stream);
+                var worksheet = workbook.Worksheet(1);
+                var rows = worksheet.RangeUsed().RowsUsed().Skip(1);
+
+                int lineNumber = 1;
+                foreach (var row in rows)
+                {
+                    lineNumber++;
+                    var values = new string[4];
+                    for (int i = 0; i < 4; i++) values[i] = row.Cell(i + 1).Value.ToString();
+
+                    ProcessStockRow(values, lineNumber, pharmaciesDict, productsDict, existingStocks, stocksToAdd, result.Errors);
+                }
+            }
+            else
+            {
+                result.Errors.Add("Неподдерживаемый формат файла.");
+                return result;
+            }
+
+            if (stocksToAdd.Any())
+            {
+                _context.Stocks.AddRange(stocksToAdd);
+                await _context.SaveChangesAsync();
+                result.AddedCount = stocksToAdd.Count;
+            }
+
+            return result;
+        }
+
+        private void ProcessStockRow(string[] values, int lineNumber,
+            Dictionary<string, int> pharmaciesDict, Dictionary<string, int> productsDict,
+            HashSet<string> existingStocks, List<Stock> stocksToAdd, List<string> errors)
+        {
+            if (values.Length < 4)
+            {
+                errors.Add($"Строка {lineNumber}: недостаточно колонок (ожидается 4).");
+                return;
+            }
+
+            try
+            {
+                var pharmacyName = values[0].Trim().ToLower();
+                var productName = values[1].Trim().ToLower();
+
+                if (!pharmaciesDict.TryGetValue(pharmacyName, out int pharmacyId))
+                {
+                    errors.Add($"Строка {lineNumber}: Аптека '{values[0]}' не найдена.");
+                    return;
+                }
+
+                if (!productsDict.TryGetValue(productName, out int productId))
+                {
+                    errors.Add($"Строка {lineNumber}: Товар '{values[1]}' не найден.");
+                    return;
+                }
+
+                var uniqueKey = $"{pharmacyId}_{productId}";
+                if (existingStocks.Contains(uniqueKey))
+                {
+                    errors.Add($"Строка {lineNumber}: Запас для товара '{values[1]}' в аптеке '{values[0]}' уже существует.");
+                    return;
+                }
+
+                var stock = new Stock
+                {
+                    PharmacyId = pharmacyId,
+                    ProductId = productId,
+                    Quantity = int.Parse(values[2].Trim()),
+                    Price = decimal.Parse(values[3].Trim().Replace(".", ",")),
+                    LastUpdate = DateTime.UtcNow
+                };
+
+                stocksToAdd.Add(stock);
+                existingStocks.Add(uniqueKey);
+            }
+            catch (Exception ex)
+            {
+                errors.Add($"Строка {lineNumber}: ошибка форматов данных ({ex.Message}).");
+            }
+        }
     }
 }
