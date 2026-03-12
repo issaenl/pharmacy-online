@@ -12,6 +12,7 @@ import CartView from '@/views/CartView.vue';
 import FavoriteView from '@/views/FavoriteView.vue';
 import AdminMain from '@/views/admin/AdminMain.vue';
 import AdminProducts from '@/views/admin/AdminProducts.vue';
+import AdminPharmacies from '@/views/admin/AdminPharmacies.vue';
 
 const routes = [
   {
@@ -80,6 +81,11 @@ const routes = [
         path: 'products',
         name: 'admin-products',
         component: AdminProducts
+      },
+      {
+        path: 'pharmacies',
+        name: 'admin-pharmacies',
+        component: AdminPharmacies
       }
     ]
   }

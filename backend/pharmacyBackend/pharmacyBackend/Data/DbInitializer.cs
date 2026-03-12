@@ -76,8 +76,7 @@ namespace pharmacyBackend.Data
                     new Category { Name = "Слабительные препараты", Description = "Лаксативы" },
                     new Category { Name = "Снотворные и успокоительные средства", Description = "Седативные, гипнотики" },
                     new Category { Name = "Ферменты, препараты для улучшения пищеварения", Description = "Энзимы" },
-                    new Category { Name = "Обезболивающие", Description = "Средства от боли и жара" },
-                    new Category { Name = "Витамины", Description = "Для укрепления иммунитета" }
+                    new Category { Name = "Обезболивающие", Description = "Средства от боли и жара" }
                 };
 
                 context.Categories.AddRange(categories);

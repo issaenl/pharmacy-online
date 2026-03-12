@@ -18,5 +18,6 @@ namespace pharmacyBackend.Controllers
 
             return int.Parse(userIdString);
         }
+
     }
 }

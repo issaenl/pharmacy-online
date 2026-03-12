@@ -74,6 +74,7 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IEmailGenerator, EmailGenerator>();
 builder.Services.AddScoped<ICloudService, CloudService>();
 builder.Services.AddHttpClient<GeocodeService>();
+builder.Services.AddScoped<IImportService, ImportService>();
 
 var app = builder.Build();
 

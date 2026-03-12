@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using pharmacyBackend.Data;
@@ -48,7 +49,7 @@ namespace pharmacyBackend.Controllers
             {
                 query = query.Where(p => p.Stocks.Any(s =>
                     s.ProductId == item.ProductId &&
-                    s.Quantity >= item.Quantity)); 
+                    s.Quantity >= item.Quantity));
             }
 
             var availablePharmacies = await query
@@ -58,6 +59,7 @@ namespace pharmacyBackend.Controllers
             return Ok(availablePharmacies);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<PharmacyFullDTO>> CreatePharmacy([FromBody] PharmacyCreateDTO pharma)
         {
@@ -93,6 +95,58 @@ namespace pharmacyBackend.Controllers
 
             var resultDto = _mapper.Map<PharmacyFullDTO>(pharmacy);
             return Ok(resultDto);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPut("{id}")]
+        public async Task<ActionResult> UpdatePharmacy(int id, [FromBody] PharmacyCreateDTO pharma)
+        {
+            var pharmacy = await _context.Pharmacies.FindAsync(id);
+            if(pharmacy == null)
+            {
+                return NotFound();
+            }
+
+            if (!pharma.Latitude.HasValue || !pharma.Longitude.HasValue)
+            {
+                var addressForGeocode = $"{pharma.District}, {pharma.Address}";
+                var (lat, lon) = await _geocoder.GetCoordinatesAync(addressForGeocode);
+
+                if (lat.HasValue && lon.HasValue)
+                {
+                    pharmacy.Latitude = lat.Value;
+                    pharmacy.Longitude = lon.Value;
+                }
+            }
+            else
+            {
+                pharmacy.Latitude = pharma.Latitude.Value;
+                pharmacy.Longitude = pharma.Longitude.Value;
+            }
+
+            pharmacy.Name = pharma.Name;
+            pharmacy.Address = pharma.Address;
+            pharmacy.District = pharma.District;
+            pharmacy.Phone = pharma.Phone;
+            pharmacy.Rating = pharma.Rating;
+
+            await _context.SaveChangesAsync();
+            return Ok(new { Message = "Аптека успешно обновлена" });
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeletePharmacy(int id)
+        {
+            var pharmacy = await _context.Pharmacies.FindAsync(id);
+            if (pharmacy == null)
+            {
+                return NotFound();
+            }
+
+            _context.Pharmacies.Remove(pharmacy);
+            await _context.SaveChangesAsync();
+            return Ok(new { Message = "Аптека удалена" });
         }
     }
 }

@@ -15,17 +15,19 @@ namespace pharmacyBackend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ProductsController : Controller
+    public class ProductsController : BaseController
     {
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
         private readonly ICloudService _cloud;
+        private readonly IImportService _import;
 
-        public ProductsController(AppDbContext context, IMapper mapper, ICloudService cloud)
+        public ProductsController(AppDbContext context, IMapper mapper, ICloudService cloud, IImportService importService)
         {
             _context = context;
             _mapper = mapper;
             _cloud = cloud;
+            _import = importService;
         }
 
         // [HttpGet]
@@ -317,6 +319,24 @@ namespace pharmacyBackend.Controllers
             await _context.SaveChangesAsync();
             return Ok(new { Message = "Продукт удален" });
 
+        }
+
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost("import")]
+        public async Task<IActionResult> Import(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest(new { Message = "Файл пуст или не выбран." });
+
+            var result = await _import.ImportProductsAsync(file);
+
+            if (result.AddedCount == 0 && result.Errors.Any())
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
         }
     }
 }

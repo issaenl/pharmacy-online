@@ -8,7 +8,28 @@
         placeholder="Поиск по названию..." 
         class="search-input" 
       />
+
+      <input 
+        type="file" 
+        ref="fileInput" 
+        @change="handleFileUpload" 
+        accept=".csv" 
+        style="display: none;"/>
+      <button class="btn-cancel" @click="$refs.fileInput.click()">
+        Импорт
+      </button>
+
       <button class="btn-primary" @click="openModal()">+ Добавить товар</button>
+    </div>
+
+    <div v-if="importErrors.length > 0" class="import-errors-alert">
+      <div class="error-header">
+        <h4>Внимание! Некоторые строки не были загружены:</h4>
+        <button class="btn-close-error" @click="importErrors = []">✕</button>
+      </div>
+      <ul class="error-list">
+        <li v-for="(error, index) in importErrors" :key="index">{{ error }}</li>
+      </ul>
     </div>
 
     <div class="table-container">
@@ -77,10 +98,10 @@
         <form @submit.prevent="saveProduct" class="product-form">
           <div class="form-grid">
             <div class="form-column">
-                <label>Название <input v-model="form.name" required /></label>
-                <label>Производитель <input v-model="form.manufacturer" required /></label>
-                <label>Страна <input v-model="form.country" required /></label>
-                <label>Форма выпуска <input v-model="form.dosageForm" required /></label>
+                <label>Название <input v-model="form.name" required placeholder="Магний"/></label>
+                <label>Производитель <input v-model="form.manufacturer" required placeholder="Байер"/></label>
+                <label>Страна <input v-model="form.country" required placeholder="Германия"/></label>
+                <label>Форма выпуска <input v-model="form.dosageForm" required placeholder="таблетки"/></label>
                 <label>Категория
                     <select v-model="form.categoryId" required class="form-select">
                         <option value="" disabled>Выберите категорию...</option>
@@ -168,12 +189,44 @@ const dragPhoto = ref(false);
 const dragPdf = ref(false);
 const photoFile = ref(null);
 const pdfFile = ref(null);
+const fileInput = ref(null);
+const importErrors = ref([]);
 
 const form = ref({
   name: '', manufacturer: '', country: '', dosageForm: '',
   categoryId: '', expirationDate: '', isPrescription: false, isActive: true,
   pictureUrl: null, pdfUrl: null
 });
+
+const handleFileUpload = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    toast.info("Загрузка файла...");
+    const response = await api.post('/Products/import', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    
+    toast.success(response.data.message);
+    if (response.data.errors && response.data.errors.length > 0) {
+      importErrors.value = response.data.errors;
+    } else {
+      importErrors.value = []; 
+    }
+
+    await fetchProducts();
+  } 
+  catch (error) {
+    toast.error("Ошибка при импорте файла");
+  } 
+  finally {
+    event.target.value = '';
+  }
+};
 
 const sortBy = (key) => {
   if (sortKey.value === key) {
@@ -428,6 +481,7 @@ th {
   width: 18px;
   height: 18px;
   cursor: default;
+  accent-color: var(--primary-color);
 }
 
 .sortable {
@@ -628,5 +682,72 @@ th {
   justify-content: flex-end;
   gap: 15px;
   margin-top: 30px;
+}
+
+.import-errors-alert {
+  background-color: #fee2e2;
+  border: 1px solid #fca5a5;
+  border-left: 5px solid #BB4E58;
+  border-radius: 8px;
+  padding: 15px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.error-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.error-header h4 {
+  margin: 0;
+  color: #BB4E58;
+  font-size: 16px;
+  font-family: inherit;
+}
+
+.btn-close-error {
+  background: transparent;
+  border: none;
+  color: #BB4E58;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0 5px;
+  transition: opacity 0.2s;
+  line-height: 1;
+}
+
+.btn-close-error:hover {
+  opacity: 0.6;
+}
+
+.error-list {
+  margin: 0;
+  padding-left: 20px;
+  color: #BB4E58;
+  font-size: 14px;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.error-list li {
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+
+.error-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.error-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.error-list::-webkit-scrollbar-thumb {
+  background-color: #fca5a5;
+  border-radius: 10px;
 }
 </style>

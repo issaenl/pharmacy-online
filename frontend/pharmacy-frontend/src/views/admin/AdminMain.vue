@@ -7,7 +7,7 @@
       <nav class="menu">
         <router-link to="/admin" exact-active-class="active">Главная</router-link>
         <router-link to="/admin/products" active-class="active">Продукты</router-link>
-        <router-link to="/admin/categories" active-class="active">Категории</router-link>
+        <router-link to="/admin/pharmacies" active-class="active">Аптеки</router-link>
         </nav>
       <button @click="handleLogout" class="logout-btn">Выйти</button>
     </aside>
