@@ -22,15 +22,7 @@
         </div>
       </div>
 
-    <div v-if="importErrors.length > 0" class="import-errors-alert">
-      <div class="error-header">
-        <h4>Внимание! Некоторые строки не были загружены:</h4>
-        <button class="btn-close-error" @click="importErrors = []">✕</button>
-      </div>
-      <ul class="error-list">
-        <li v-for="(error, index) in importErrors" :key="index">{{ error }}</li>
-      </ul>
-    </div>
+    <ErrorAlert :errors="importErrors" @clear="importErrors = []" />
 
     <div class="table-container">
       <table>
@@ -53,7 +45,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="product in sortedAndFilteredProducts" :key="product.id">
+          <tr v-for="product in paginatedProducts" :key="product.id">
             <td>
               <img :src="product.pictureUrl || '/placeholder.jpg'" class="product-thumb" alt="Фото" />
             </td>
@@ -72,29 +64,24 @@
                 {{ product.isActive ? 'Активен' : 'Отключен' }}
               </span>
             </td>
-            <td class="actions">
-              <button class="btn-action" @click="openModal(product)" title="Редактировать">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                </svg>
-              </button>
-              <button class="btn-action" @click="deleteProduct(product.id)" title="Удалить">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                </svg>
-              </button>
-            </td>
+            <TableActions 
+                @edit="openModal(product)" 
+                @delete="deleteProduct(product.id)" />
           </tr>
         </tbody>
       </table>
     </div>
 
-    <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
-      <div class="modal-content">
-        <h3>{{ isEditing ? 'Редактировать товар' : 'Добавить новый товар' }}</h3>
-        
+    <TablePagination 
+      :current-page="currentPage" 
+      :total-pages="totalPages" 
+      @prev="prevPage" 
+      @next="nextPage" />
+
+   <Modal 
+      :show="showModal" 
+      :title="isEditing ? 'Редактировать товар' : 'Новый товар'"
+      @close="closeModal">
         <form @submit.prevent="saveProduct" class="product-form">
           <div class="form-grid">
             <div class="form-column">
@@ -162,29 +149,31 @@
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   </div>
 </template>
 
 <script setup>
+import Modal from '@/components/admin/Modal.vue';
+import ErrorAlert from '@/components/admin/ErrorAlert.vue';
+import TableActions from '@/components/admin/TableActions.vue';
+import TablePagination from '@/components/admin/TablePagination.vue';
+import { usePagination } from '@/logic/pagination';
+import { useModal } from '@/logic/modal';
+import { useSorting } from '@/logic/sorting';
 import { ref, computed, onMounted } from 'vue';
 import { useToast } from 'vue-toast-notification';
 import api from '@/api/api';
 
 const toast = useToast({ position: 'bottom-right' });
 
+const { sortKey, sortOrder, sortBy } = useSorting();
+const { showModal, isEditing, currentId, openBaseModal, closeModal } = useModal();
+
 const products = ref([]);
 const categories = ref([]);
-const showModal = ref(false);
-const isEditing = ref(false);
 const isLoading = ref(false);
-const currentId = ref(null);
-
 const searchQuery = ref('');
-const sortKey = ref(null); 
-const sortOrder = ref(0);
-
 const dragPhoto = ref(false);
 const dragPdf = ref(false);
 const photoFile = ref(null);
@@ -221,6 +210,7 @@ const handleFileUpload = async (event) => {
     await fetchProducts();
   } 
   catch (error) {
+    importErrors.value = error.response.data.errors;
     toast.error("Ошибка при импорте файла");
   } 
   finally {
@@ -228,21 +218,6 @@ const handleFileUpload = async (event) => {
   }
 };
 
-const sortBy = (key) => {
-  if (sortKey.value === key) {
-    if (sortOrder.value === 1) {
-      sortOrder.value = -1;
-    } 
-    else if (sortOrder.value === -1) {
-      sortOrder.value = 0;
-      sortKey.value = null;
-    }
-  } 
-  else {
-    sortKey.value = key;
-    sortOrder.value = 1;
-  }
-};
 
 const sortedAndFilteredProducts = computed(() => {
   let result = products.value.filter(product => 
@@ -268,6 +243,14 @@ const sortedAndFilteredProducts = computed(() => {
 
   return result;
 });
+
+const { 
+  currentPage, 
+  totalPages, 
+  paginatedData: paginatedProducts,
+  nextPage, 
+  prevPage 
+} = usePagination(sortedAndFilteredProducts, 15);
 
 const fetchProducts = async () => {
   try {
@@ -295,26 +278,29 @@ onMounted(() => {
 });
 
 const openModal = (product = null) => {
-  showModal.value = true;
+  openBaseModal(product?.id);
   photoFile.value = null;
   pdfFile.value = null;
-
-  if (product) {
-    isEditing.value = true;
-    currentId.value = product.id;
-
+  if (product && product.id) {
     form.value = {
       ...product,
       expirationDate: product.expirationDate ? product.expirationDate.split('T')[0] : ''
     };
   } else {
-    isEditing.value = false;
-    currentId.value = null;
-    form.value = { name: '', manufacturer: '', country: '', dosageForm: '', categoryId: '', expirationDate: '', isPrescription: false, isActive: true, pictureUrl: null, pdfUrl: null };
+    form.value = { 
+      name: '', 
+      manufacturer: '', 
+      country: '', 
+      dosageForm: '', 
+      categoryId: '', 
+      expirationDate: '', 
+      isPrescription: false, 
+      isActive: true, 
+      pictureUrl: null, 
+      pdfUrl: null 
+    };
   }
 };
-
-const closeModal = () => { showModal.value = false; };
 
 const handleDrop = (e, type) => {
   const file = e.dataTransfer.files[0];

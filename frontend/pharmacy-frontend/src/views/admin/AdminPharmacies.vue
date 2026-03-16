@@ -28,7 +28,7 @@
             <th>Действия</th> </tr>
         </thead>
         <tbody>
-          <tr v-for="pharmacy in sortedAndFilteredPharmacies" :key="pharmacy.id">
+          <tr v-for="pharmacy in paginatedPharmacies" :key="pharmacy.id">
             <td>{{ pharmacy.name }}</td>
             <td>{{ pharmacy.district }}</td>
             <td>{{ pharmacy.address }}</td>
@@ -43,20 +43,9 @@
               </span>
               <span v-else class="text-muted">Нет данных</span>
             </td>
-            <td class="actions">
-              <button class="btn-action" @click="openModal(pharmacy)" title="Редактировать">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                </svg>
-              </button>
-              <button class="btn-action" @click="deletePharmacy(pharmacy.id)" title="Удалить">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                </svg>
-              </button>
-            </td>
+            <TableActions 
+                @edit="openModal(pharmacy)" 
+                @delete="deletePharmacy(pharmacy.id)" />
           </tr>
           <tr v-if="sortedAndFilteredPharmacies.length === 0">
             <td colspan="7" class="text-center text-muted" style="padding: 30px;">
@@ -67,10 +56,16 @@
       </table>
     </div>
 
-    <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
-      <div class="modal-content">
-        <h3>{{ isEditing ? 'Редактировать аптеку' : 'Добавить новую аптеку' }}</h3>
-        
+    <TablePagination 
+      :current-page="currentPage" 
+      :total-pages="totalPages" 
+      @prev="prevPage" 
+      @next="nextPage" />
+
+    <Modal 
+      :show="showModal" 
+      :title="isEditing ? 'Редактировать категорию' : 'Новая категория'"
+      @close="closeModal">
         <form @submit.prevent="savePharmacy" class="pharmacy-form">
           <div class="form-grid">
             <div class="form-column">
@@ -104,28 +99,29 @@
             </button>
           </div>
         </form>
-      </div>
-    </div>
+     </Modal>
   </div>
 </template>
 
 <script setup>
+import Modal from '@/components/admin/Modal.vue';
+import TableActions from '@/components/admin/TableActions.vue';
+import TablePagination from '@/components/admin/TablePagination.vue';
+import { usePagination } from '@/logic/pagination';
+import { useModal } from '@/logic/modal';
+import { useSorting } from '@/logic/sorting';
 import { ref, computed, onMounted } from 'vue';
 import { useToast } from 'vue-toast-notification';
 import api from '@/api/api';
 
 const toast = useToast({ position: 'bottom-right' });
 
+const { sortKey, sortOrder, sortBy } = useSorting();
+const { showModal, isEditing, currentId, openBaseModal, closeModal } = useModal();
+
 const pharmacies = ref([]);
-const showModal = ref(false);
 const isLoading = ref(false);
-
-const isEditing = ref(false);
-const currentId = ref(null);
-
 const searchQuery = ref('');
-const sortKey = ref(null); 
-const sortOrder = ref(0);
 
 const form = ref({
   name: '', district: '', address: '', phone: '', rating: null, latitude: null, longitude: null
@@ -146,22 +142,23 @@ onMounted(() => {
 });
 
 const openModal = (pharmacy = null) => {
-  showModal.value = true;
+  openBaseModal(pharmacy?.id);
   
   if (pharmacy && pharmacy.id) {
-    isEditing.value = true;
-    currentId.value = pharmacy.id;
     form.value = { ...pharmacy };
   } else {
-    isEditing.value = false;
-    currentId.value = null;
-    form.value = { name: '', district: '', address: '', phone: '', rating: null, latitude: null, longitude: null };
+    form.value = { 
+      name: '', 
+      district: '', 
+      address: '', 
+      phone: '', 
+      rating: null, 
+      latitude: null, 
+      longitude: null 
+    };
   }
 };
 
-const closeModal = () => { 
-  showModal.value = false; 
-};
 
 const savePharmacy = async () => {
   isLoading.value = true;
@@ -213,20 +210,6 @@ const deletePharmacy = async (id) => {
   }
 };
 
-const sortBy = (key) => {
-  if (sortKey.value === key) {
-    if (sortOrder.value === 1) {
-        sortOrder.value = -1;
-    }
-    else if (sortOrder.value === -1) { 
-        sortOrder.value = 0; sortKey.value = null; 
-    }
-  } 
-  else {
-    sortKey.value = key;
-    sortOrder.value = 1;
-  }
-};
 
 const sortedAndFilteredPharmacies = computed(() => {
   let result = pharmacies.value.filter(p => 
@@ -248,6 +231,14 @@ const sortedAndFilteredPharmacies = computed(() => {
   }
   return result;
 });
+
+const { 
+  currentPage, 
+  totalPages, 
+  paginatedData: paginatedPharmacies,
+  nextPage, 
+  prevPage 
+} = usePagination(sortedAndFilteredPharmacies, 15);
 </script>
 
 <style scoped>

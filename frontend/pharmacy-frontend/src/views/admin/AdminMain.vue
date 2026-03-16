@@ -42,6 +42,11 @@ const handleLogout = () => {
 
 .sidebar {
   width: 250px;
+  min-width: 250px; 
+  max-width: 250px; 
+  height: 100vh;  
+  position: sticky; 
+  top: 0;
   background-color: #FFFFFF;
   box-shadow: 2px 0 5px rgba(0,0,0,0.05);
   display: flex;
@@ -97,5 +102,7 @@ const handleLogout = () => {
   flex-grow: 1;
   padding: 30px;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 </style>

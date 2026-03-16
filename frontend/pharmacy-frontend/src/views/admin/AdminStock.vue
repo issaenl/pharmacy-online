@@ -31,15 +31,7 @@
       </div>
     </div>
 
-    <div v-if="importErrors.length > 0" class="import-errors-alert">
-      <div class="error-header">
-        <h4>Внимание! Некоторые строки не были загружены:</h4>
-        <button class="btn-close-error" @click="importErrors = []">✕</button>
-      </div>
-      <ul class="error-list">
-        <li v-for="(error, index) in importErrors" :key="index">{{ error }}</li>
-      </ul>
-    </div>
+    <ErrorAlert :errors="importErrors" @clear="importErrors = []" />
 
     <div class="table-container">
       <table>
@@ -62,7 +54,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="stock in sortedAndFilteredStocks" :key="stock.id">
+          <tr v-for="stock in paginatedStocks" :key="stock.id">
             <td v-if="!selectedPharmacyFilter" class="text-muted">{{ stock.pharmacyName }}</td>
             <td>{{ stock.productName }}</td>
             <td>
@@ -70,20 +62,9 @@
             </td>
             <td>{{ stock.price }} руб.</td>
             <td class="text-muted">{{ new Date(stock.lastUpdate).toLocaleString() }}</td>
-            <td class="actions">
-              <button class="btn-action" @click="openModal(stock)" title="Редактировать">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                </svg>
-              </button>
-              <button class="btn-action" @click="deleteStock(stock.id)" title="Удалить">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                </svg>
-              </button>
-            </td>
+            <TableActions 
+                @edit="openModal(stock)" 
+                @delete="deleteStock(stock.id)" />
           </tr>
           <tr v-if="sortedAndFilteredStocks.length === 0">
             <td :colspan="selectedPharmacyFilter ? 5 : 6" class="text-center text-muted" style="padding: 30px;">
@@ -94,10 +75,16 @@
       </table>
     </div>
 
-    <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
-      <div class="modal-content">
-        <h3>{{ isEditing ? 'Редактировать наличие' : 'Добавить наличие' }}</h3>
-        
+    <TablePagination 
+      :current-page="currentPage" 
+      :total-pages="totalPages" 
+      @prev="prevPage" 
+      @next="nextPage" />
+
+    <Modal 
+      :show="showModal" 
+      :title="isEditing ? 'Редактировать категорию' : 'Новая категория'"
+      @close="closeModal">
         <form @submit.prevent="saveStock" class="pharmacy-form">
           <div class="form-grid">
             <div class="form-column">
@@ -132,33 +119,37 @@
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   </div>
 </template>
 
 <script setup>
+import Modal from '@/components/admin/Modal.vue';
+import ErrorAlert from '@/components/admin/ErrorAlert.vue';
+import TableActions from '@/components/admin/TableActions.vue';
+import TablePagination from '@/components/admin/TablePagination.vue';
+import { usePagination } from '@/logic/pagination';
+import { useModal } from '@/logic/modal';
+import { useSorting } from '@/logic/sorting';
 import { ref, computed, onMounted } from 'vue';
 import { useToast } from 'vue-toast-notification';
 import api from '@/api/api';
 
 const toast = useToast({ position: 'bottom-right' });
 
+const { sortKey, sortOrder, sortBy } = useSorting();
+const { showModal, isEditing, currentId, openBaseModal, closeModal } = useModal();
+
 const stocks = ref([]);
 const pharmacies = ref([]);
 const products = ref([]);
 
-const showModal = ref(false);
 const isLoading = ref(false);
-const isEditing = ref(false);
-const currentId = ref(null);
 const fileInput = ref(null);
 const importErrors = ref([]);
 
 const searchQuery = ref('');
 const selectedPharmacyFilter = ref('');
-const sortKey = ref(null); 
-const sortOrder = ref(0);
 
 const form = ref({ pharmacyId: '', productId: '', quantity: 0, price: 0 });
 
@@ -200,6 +191,7 @@ const handleFileUpload = async (event) => {
     }
     await fetchData();
   } catch (error) {
+    importErrors.value = error.response.data.errors;
     toast.error(error.response?.data?.message || "Ошибка импорта");
   } finally {
     event.target.value = '';
@@ -207,15 +199,16 @@ const handleFileUpload = async (event) => {
 };
 
 const openModal = (stock = null) => {
-  showModal.value = true;
+  openBaseModal(stock?.id);
+
   if (stock && stock.id) {
-    isEditing.value = true;
-    currentId.value = stock.id;
-    form.value = { pharmacyId: stock.pharmacyId, productId: stock.productId, quantity: stock.quantity, price: stock.price };
+    form.value = { 
+      pharmacyId: stock.pharmacyId, 
+      productId: stock.productId, 
+      quantity: stock.quantity, 
+      price: stock.price 
+    };
   } else {
-    isEditing.value = false;
-    currentId.value = null;
-    
     form.value = { 
       pharmacyId: selectedPharmacyFilter.value || '', 
       productId: '', 
@@ -225,7 +218,6 @@ const openModal = (stock = null) => {
   }
 };
 
-const closeModal = () => { showModal.value = false; };
 
 const saveStock = async () => {
   isLoading.value = true;
@@ -257,14 +249,6 @@ const deleteStock = async (id) => {
   }
 };
 
-const sortBy = (key) => {
-  if (sortKey.value === key) {
-    if (sortOrder.value === 1) sortOrder.value = -1;
-    else if (sortOrder.value === -1) { sortOrder.value = 0; sortKey.value = null; }
-  } else { sortKey.value = key; sortOrder.value = 1; }
-};
-
-
 const sortedAndFilteredStocks = computed(() => {
   let result = stocks.value;
 
@@ -292,6 +276,14 @@ const sortedAndFilteredStocks = computed(() => {
   }
   return result;
 });
+
+const { 
+  currentPage, 
+  totalPages, 
+  paginatedData: paginatedStocks,
+  nextPage, 
+  prevPage 
+} = usePagination(sortedAndFilteredStocks, 15);
 </script>
 
 <style scoped>

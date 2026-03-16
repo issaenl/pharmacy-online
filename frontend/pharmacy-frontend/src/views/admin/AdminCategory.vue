@@ -19,15 +19,7 @@
       </div>
     </div>
 
-    <div v-if="importErrors.length > 0" class="import-errors-alert">
-      <div class="error-header">
-        <h4>Внимание! Некоторые строки не были загружены:</h4>
-        <button class="btn-close-error" @click="importErrors = []">✕</button>
-      </div>
-      <ul class="error-list">
-        <li v-for="(error, index) in importErrors" :key="index">{{ error }}</li>
-      </ul>
-    </div>
+    <ErrorAlert :errors="importErrors" @clear="importErrors = []" />
 
     <div class="table-container">
       <table>
@@ -42,7 +34,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="category in sortedAndFilteredCategories" :key="category.id">
+          <tr v-for="category in paginatedCategories" :key="category.id">
             <td><strong>{{ category.name }}</strong></td>
             <td class="text-muted">{{ category.description || '—' }}</td>
             <td>
@@ -61,14 +53,9 @@
                 <span v-if="!category.tags || category.tags.length === 0" class="text-muted">Нет тегов</span>
               </div>
             </td>
-            <td class="actions">
-              <button class="btn-action" @click="openModal(category)" title="Редактировать">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-              </button>
-              <button class="btn-action" @click="deleteCategory(category.id)" title="Удалить">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-              </button>
-            </td>
+              <TableActions 
+                @edit="openModal(category)" 
+                @delete="deleteCategory(category.id)" />
           </tr>
           <tr v-if="sortedAndFilteredCategories.length === 0">
             <td colspan="4" class="text-center text-muted" style="padding: 30px;">Категории не найдены</td>
@@ -77,74 +64,82 @@
       </table>
     </div>
 
-    <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
-      <div class="modal-content">
-        <h3>{{ isEditing ? 'Редактировать категорию' : 'Новая категория' }}</h3>
-        
-        <form @submit.prevent="saveCategory" class="pharmacy-form">
-          <div class="form-column">
-              <label>Название
-                <input type="text" v-model="form.name" required placeholder="Жаропонижающие" />
-              </label>
-              
-              <label>Описание
-                <textarea v-model="form.description" rows="3" placeholder="Краткое описание категории..."></textarea>
-              </label>
+    <TablePagination 
+      :current-page="currentPage" 
+      :total-pages="totalPages" 
+      @prev="prevPage" 
+      @next="nextPage" />
 
-              <div class="tags-editor-section">
-                <label>Теги для поиска (симптомы)</label>
-                <div class="info-box">
-                  По этим словам покупатели будут находить товары. Введите слово и нажмите <strong>Enter</strong> или кнопку <strong>Добавить</strong>.
-                </div>
-                
-                <div class="tag-input-wrapper">
-                  <input 
-                    type="text" 
-                    v-model="currentTag" 
-                    @keydown.enter.prevent="addTag" 
-                    placeholder="Например: мигрень, жар..." 
-                  />
-                  <button type="button" class="btn-add-tag" @click="addTag">Добавить</button>
-                </div>
+    <Modal 
+      :show="showModal" 
+      :title="isEditing ? 'Редактировать категорию' : 'Новая категория'"
+      @close="closeModal">
+      <form @submit.prevent="saveCategory" class="pharmacy-form">
+        <div class="form-column">
+          <label>Название
+            <input type="text" v-model="form.name" required placeholder="Жаропонижающие" />
+          </label>
+          
+          <label>Описание
+            <textarea v-model="form.description" rows="3" placeholder="Краткое описание категории..."></textarea>
+          </label>
 
-                <div class="tags-preview" v-if="form.tags.length > 0">
-                  <span class="tag-badge removable" v-for="(tag, index) in form.tags" :key="index">
-                    {{ tag }}
-                    <button type="button" class="remove-tag-btn" @click="removeTag(index)">✕</button>
-                  </span>
-                </div>
-              </div>
+          <div class="tags-editor-section">
+            <label>Теги для поиска (симптомы)</label>
+            <div class="info-box">
+              По этим словам покупатели будут находить товары. Введите слово и нажмите <strong>Enter</strong> или кнопку <strong>Добавить</strong>.
+            </div>
+            
+            <div class="tag-input-wrapper">
+              <input 
+                type="text" 
+                v-model="currentTag" 
+                @keydown.enter.prevent="addTag" 
+                placeholder="Например: мигрень, жар..." 
+              />
+              <button type="button" class="btn-add-tag" @click="addTag">Добавить</button>
+            </div>
+
+            <div class="tags-preview" v-if="form.tags.length > 0">
+              <span class="tag-badge removable" v-for="(tag, index) in form.tags" :key="index">
+                {{ tag }}
+                <button type="button" class="remove-tag-btn" @click="removeTag(index)">✕</button>
+              </span>
+            </div>
           </div>
+        </div>
 
-          <div class="modal-actions">
-            <button type="button" class="btn-cancel" @click="closeModal">Отмена</button>
-            <button type="submit" class="btn-primary" :disabled="isLoading">
-              {{ isLoading ? 'Сохранение...' : 'Сохранить' }}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" @click="closeModal">Отмена</button>
+          <button type="submit" class="btn-primary" :disabled="isLoading">
+            {{ isLoading ? 'Сохранение...' : 'Сохранить' }}
+          </button>
+        </div>
+      </form>
+    </Modal>
   </div>
 </template>
 
 <script setup>
+import Modal from '@/components/admin/Modal.vue';
+import ErrorAlert from '@/components/admin/ErrorAlert.vue';
+import TableActions from '@/components/admin/TableActions.vue';
+import TablePagination from '@/components/admin/TablePagination.vue';
+import { usePagination } from '@/logic/pagination';
+import { useModal } from '@/logic/modal';
+import { useSorting } from '@/logic/sorting';
 import { ref, computed, onMounted } from 'vue';
 import { useToast } from 'vue-toast-notification';
 import api from '@/api/api';
 
 const toast = useToast({ position: 'bottom-right' });
 
+const { sortKey, sortOrder, sortBy } = useSorting();
+const { showModal, isEditing, currentId, openBaseModal, closeModal } = useModal();
+
 const categories = ref([]);
-const showModal = ref(false);
 const isLoading = ref(false);
-const isEditing = ref(false);
-const currentId = ref(null);
-
 const searchQuery = ref('');
-const sortKey = ref(null); 
-const sortOrder = ref(0);
-
 const form = ref({ name: '', description: '', tags: [] });
 const currentTag = ref('');
 const expandedRows = ref([]);
@@ -173,6 +168,7 @@ const handleFileUpload = async (event) => {
     }
     await fetchCategories();
   } catch (error) {
+    importErrors.value = error.response.data.errors;
     toast.error(error.response?.data?.message || "Ошибка импорта");
   } finally {
     event.target.value = '';
@@ -221,25 +217,20 @@ const getVisibleTags = (category) => {
 };
 
 const openModal = (category = null) => {
-  showModal.value = true;
+  openBaseModal(category?.id); 
   currentTag.value = '';
   
   if (category && category.id) {
-    isEditing.value = true;
-    currentId.value = category.id;
     form.value = { 
       name: category.name, 
       description: category.description, 
       tags: [...(category.tags || [])] 
     };
   } else {
-    isEditing.value = false;
-    currentId.value = null;
     form.value = { name: '', description: '', tags: [] };
   }
 };
 
-const closeModal = () => { showModal.value = false; };
 
 const saveCategory = async () => {
   if (currentTag.value.trim() !== '') {
@@ -283,12 +274,6 @@ const deleteCategory = async (id) => {
   }
 };
 
-const sortBy = (key) => {
-  if (sortKey.value === key) {
-    if (sortOrder.value === 1) sortOrder.value = -1;
-    else if (sortOrder.value === -1) { sortOrder.value = 0; sortKey.value = null; }
-  } else { sortKey.value = key; sortOrder.value = 1; }
-};
 
 const sortedAndFilteredCategories = computed(() => {
   let result = categories.value;
@@ -314,6 +299,14 @@ const sortedAndFilteredCategories = computed(() => {
   }
   return result;
 });
+
+const { 
+  currentPage, 
+  totalPages, 
+  paginatedData: paginatedCategories,
+  nextPage, 
+  prevPage 
+} = usePagination(sortedAndFilteredCategories, 15);
 </script>
 
 <style scoped>
