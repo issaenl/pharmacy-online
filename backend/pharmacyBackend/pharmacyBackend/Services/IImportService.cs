@@ -6,5 +6,6 @@ namespace pharmacyBackend.Services
     {
         Task<ImportDTO> ImportProductsAsync(IFormFile file);
         Task<ImportDTO> ImportStocksAsync(IFormFile file);
+        Task<ImportDTO> ImportCategoriesAsync(IFormFile file);
     }
 }

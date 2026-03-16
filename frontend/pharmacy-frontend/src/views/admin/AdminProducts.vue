@@ -1,26 +1,26 @@
 <template>
   <div class="admin-products">
-    <div class="header-actions">
-      <h2>Управление товарами</h2>
-      <input 
-        type="text" 
-        v-model="searchQuery" 
-        placeholder="Поиск по названию..." 
-        class="search-input" 
-      />
+      <div class="header-actions">
+        <h2>Управление товарами</h2>
+        <input 
+          type="text" 
+          v-model="searchQuery" 
+          placeholder="Поиск по названию..." 
+          class="search-input" 
+        />
 
-      <input 
-        type="file" 
-        ref="fileInput" 
-        @change="handleFileUpload" 
-        accept=".csv" 
-        style="display: none;"/>
-      <button class="btn-cancel" @click="$refs.fileInput.click()">
-        Импорт
-      </button>
-
-      <button class="btn-primary" @click="openModal()">+ Добавить товар</button>
-    </div>
+        <div class="action-buttons">
+          <input 
+            type="file" 
+            ref="fileInput" 
+            @change="handleFileUpload" 
+            accept=".csv" 
+            style="display: none;"
+          />
+          <button class="btn-cancel" @click="$refs.fileInput.click()">Импорт</button>
+          <button class="btn-primary" @click="openModal()">+ Добавить товар</button>
+        </div>
+      </div>
 
     <div v-if="importErrors.length > 0" class="import-errors-alert">
       <div class="error-header">
@@ -409,95 +409,11 @@ const deleteProduct = async (id) => {
   padding: 20px;
 }
 
-.header-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  gap: 15px;
-  flex-wrap: wrap;
-}
-
-.search-input {
-  flex: 1;
-  max-width: 400px;
-  padding: 10px 15px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 16px;
-  font-family: inherit;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: var(--primary-color);
-}
-
-.form-select {
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-family: inherit;
-  font-size: 14px;
-  width: 100%;
-  background-color: white;
-  cursor: pointer;
-}
-
-.form-select:focus {
-  outline: none;
-  border-color: var(--primary-color);
-}
-
-.table-container {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  overflow: hidden;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-}
-
-th, td {
-  padding: 15px;
-  border-bottom: 1px solid #eee;
-}
-
-th {
-  background: var(--background-color);
-  color: #000;
-  font-weight: 600;
-}
-
-.text-center {
-  text-align: center;
-}
-
 .readonly-checkbox {
   width: 18px;
   height: 18px;
   cursor: default;
   accent-color: var(--primary-color);
-}
-
-.sortable {
-  cursor: pointer;
-  user-select: none;
-  transition: background-color 0.2s;
-}
-
-.sortable:hover {
-  background-color: #f5f5f5;
-}
-
-.sort-icon {
-  font-size: 10px;
-  margin-left: 5px;
-  color: var(--primary-color);
 }
 
 .product-thumb {
@@ -524,114 +440,6 @@ th {
   background: #FDE8E8;
   color: #BB4E58;
   font-size: 14px;
-}
-
-.btn-primary {
-  background: var(--primary-color);
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-  white-space: nowrap;
-  font-family: var(--main-font);
-  font-size: 16px;
-}
-
-.btn-primary:hover {
-  opacity: 0.9;
-}
-
-.btn-primary:disabled {
-  background: var(--primary-light);
-  cursor: not-allowed;
-}
-
-.btn-cancel {
-  background: #e0e0e0;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-family: var(--main-font);
-  font-size: 16px;
-}
-
-.actions {
-  white-space: nowrap;
-}
-
-.btn-action {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 5px;
-  border-radius: 6px;
-  transition: 0.2s;
-  margin-right: 5px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: #9e9e9e;
-}
-
-.btn-action:hover {
-  background: rgba(158, 158, 158, 0.1);
-  color: #616161;
-}
-
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background: white;
-  padding: 30px;
-  border-radius: 15px;
-  width: 90%;
-  max-width: 800px;
-  max-height: 90vh;
-  overflow-y: auto;
-}
-
-.form-grid {
-  display: flex;
-  gap: 30px;
-  margin-top: 20px;
-}
-
-.form-column {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.form-column label {
-  display: flex;
-  flex-direction: column;
-  font-size: 16px;
-  font-weight: bold;
-  color: #333;
-  gap: 5px;
-}
-
-.form-column input:not([type="checkbox"]) {
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-family: inherit;
-  font-size: 16px;
 }
 
 .checkboxes {
@@ -675,67 +483,6 @@ th {
 .file-selected {
   color: var(--primary-color);
   font-weight: bold;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 15px;
-  margin-top: 30px;
-}
-
-.import-errors-alert {
-  background-color: #fee2e2;
-  border: 1px solid #fca5a5;
-  border-left: 5px solid #BB4E58;
-  border-radius: 8px;
-  padding: 15px 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-}
-
-.error-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.error-header h4 {
-  margin: 0;
-  color: #BB4E58;
-  font-size: 16px;
-  font-family: inherit;
-}
-
-.btn-close-error {
-  background: transparent;
-  border: none;
-  color: #BB4E58;
-  font-size: 18px;
-  font-weight: bold;
-  cursor: pointer;
-  padding: 0 5px;
-  transition: opacity 0.2s;
-  line-height: 1;
-}
-
-.btn-close-error:hover {
-  opacity: 0.6;
-}
-
-.error-list {
-  margin: 0;
-  padding-left: 20px;
-  color: #BB4E58;
-  font-size: 14px;
-  max-height: 180px;
-  overflow-y: auto;
-}
-
-.error-list li {
-  margin-bottom: 6px;
-  line-height: 1.4;
 }
 
 .error-list::-webkit-scrollbar {

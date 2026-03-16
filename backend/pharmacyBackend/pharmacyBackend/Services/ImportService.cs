@@ -51,7 +51,7 @@ namespace pharmacyBackend.Services
                     lineNumber++;
                     var line = await reader.ReadLineAsync();
                     if (string.IsNullOrWhiteSpace(line)) continue;
-
+                    line = line.Trim().Trim('"');
                     var values = line.Split(new[] { ',', ';' });
                     ProcessProductRow(values, lineNumber, categoriesDict, existingProducts, productsToAdd, result.Errors);
                 }
@@ -120,7 +120,7 @@ namespace pharmacyBackend.Services
 
                 if (!categoriesDict.TryGetValue(categoryNameFromFile.ToLower(), out int categoryId))
                 {
-                    errors.Add($"Строка {lineNumber}: категория '{categoryNameFromFile}' не найдена.");
+                    errors.Add($"Строка {lineNumber}: категория {categoryNameFromFile} не найдена.");
                     return;
                 }
 
@@ -176,7 +176,7 @@ namespace pharmacyBackend.Services
                     lineNumber++;
                     var line = await reader.ReadLineAsync();
                     if (string.IsNullOrWhiteSpace(line)) continue;
-
+                    line = line.Trim().Trim('"');
                     var values = line.Split(new[] { ',', ';' });
                     ProcessStockRow(values, lineNumber, pharmaciesDict, productsDict, existingStocks, stocksToAdd, result.Errors);
                 }
@@ -230,20 +230,20 @@ namespace pharmacyBackend.Services
 
                 if (!pharmaciesDict.TryGetValue(pharmacyName, out int pharmacyId))
                 {
-                    errors.Add($"Строка {lineNumber}: Аптека '{values[0]}' не найдена.");
+                    errors.Add($"Строка {lineNumber}: Аптека {values[0]} не найдена.");
                     return;
                 }
 
                 if (!productsDict.TryGetValue(productName, out int productId))
                 {
-                    errors.Add($"Строка {lineNumber}: Товар '{values[1]}' не найден.");
+                    errors.Add($"Строка {lineNumber}: Товар {values[1]} не найден.");
                     return;
                 }
 
                 var uniqueKey = $"{pharmacyId}_{productId}";
                 if (existingStocks.Contains(uniqueKey))
                 {
-                    errors.Add($"Строка {lineNumber}: Запас для товара '{values[1]}' в аптеке '{values[0]}' уже существует.");
+                    errors.Add($"Строка {lineNumber}: Запас для товара {values[1]} в аптеке {values[0]} уже существует.");
                     return;
                 }
 
@@ -262,6 +262,126 @@ namespace pharmacyBackend.Services
             catch (Exception ex)
             {
                 errors.Add($"Строка {lineNumber}: ошибка форматов данных ({ex.Message}).");
+            }
+        }
+
+        public async Task<ImportDTO> ImportCategoriesAsync(IFormFile file)
+        {
+            var result = new ImportDTO();
+            var categoriesToAdd = new List<Category>();
+
+            var existingCategoriesList = await _context.Categories
+                .Select(c => c.Name.ToLower())
+                .ToListAsync();
+            var existingCategories = existingCategoriesList.ToHashSet();
+
+            var existingTagsDict = await _context.Tags
+                .ToDictionaryAsync(t => t.Name.ToLower(), t => t);
+
+            var extension = Path.GetExtension(file.FileName).ToLower();
+            using var stream = file.OpenReadStream();
+
+            if (extension == ".csv")
+            {
+                using var reader = new StreamReader(stream);
+                await reader.ReadLineAsync();
+                int lineNumber = 1;
+
+                while (!reader.EndOfStream)
+                {
+                    lineNumber++;
+                    var line = await reader.ReadLineAsync();
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+                    line = line.Trim().Trim('"');
+                    var values = line.Split(new[] { ';', '\t' });
+                    ProcessCategoryRow(values, lineNumber, existingCategories, existingTagsDict, categoriesToAdd, result.Errors);
+                }
+            }
+            else if (extension == ".xlsx" || extension == ".xls")
+            {
+                using var workbook = new XLWorkbook(stream);
+                var worksheet = workbook.Worksheet(1);
+                var rows = worksheet.RangeUsed().RowsUsed().Skip(1);
+
+                int lineNumber = 1;
+                foreach (var row in rows)
+                {
+                    lineNumber++;
+                    var values = new string[3];
+                    for (int i = 0; i < 3; i++) values[i] = row.Cell(i + 1).Value.ToString();
+
+                    ProcessCategoryRow(values, lineNumber, existingCategories, existingTagsDict, categoriesToAdd, result.Errors);
+                }
+            }
+            else
+            {
+                result.Errors.Add("Неподдерживаемый формат файла.");
+                return result;
+            }
+
+            if (categoriesToAdd.Any())
+            {
+                _context.Categories.AddRange(categoriesToAdd);
+                await _context.SaveChangesAsync();
+                result.AddedCount = categoriesToAdd.Count;
+            }
+
+            return result;
+        }
+
+        private void ProcessCategoryRow(string[] values, int lineNumber,
+            HashSet<string> existingCategories, Dictionary<string, Tag> existingTagsDict,
+            List<Category> categoriesToAdd, List<string> errors)
+        {
+            if (values.Length < 1 || string.IsNullOrWhiteSpace(values[0]))
+            {
+                errors.Add($"Строка {lineNumber}: пропущено название категории.");
+                return;
+            }
+
+            try
+            {
+                var name = values[0].Trim();
+                if (existingCategories.Contains(name.ToLower()))
+                {
+                    errors.Add($"Строка {lineNumber}: Категория {name} уже существует.");
+                    return;
+                }
+
+                var description = values.Length > 1 ? values[1].Trim() : null;
+                var tagsString = values.Length > 2 ? string.Join(",", values.Skip(2)) : "";
+
+                var category = new Category
+                {
+                    Name = name,
+                    Description = description,
+                    CategoryTags = new List<CategoryTag>()
+                };
+
+                if (!string.IsNullOrWhiteSpace(tagsString))
+                {
+                    var tagNames = tagsString.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                                             .Select(t => t.Trim().ToLower())
+                                             .Where(t => !string.IsNullOrEmpty(t))
+                                             .Distinct();
+
+                    foreach (var tagName in tagNames)
+                    {
+                        if (!existingTagsDict.TryGetValue(tagName, out var tag))
+                        {
+                            tag = new Tag { Name = tagName };
+                            existingTagsDict[tagName] = tag;
+                        }
+                        category.CategoryTags.Add(new CategoryTag { Tag = tag });
+                    }
+                }
+
+                categoriesToAdd.Add(category);
+                existingCategories.Add(name.ToLower());
+            }
+            catch (Exception ex)
+            {
+                errors.Add($"Строка {lineNumber}: ошибка обработки данных ({ex.Message}).");
             }
         }
     }

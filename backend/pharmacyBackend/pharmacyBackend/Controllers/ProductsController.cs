@@ -191,16 +191,37 @@ namespace pharmacyBackend.Controllers
             if (!products.Any())
             {
                 var allProducts = await _context.Products
-                    .Where( p => p.IsActive == true)
-                    .Select(p => new { p.Id, Name = p.Name.ToLower() })
-                    .ToListAsync();
-
-                var matches = allProducts
+                    .Where(p => p.IsActive == true)
                     .Select(p => new
                     {
                         p.Id,
-                        Distance = Math.Min(SearchHelper.LevensheteinAlgorithm(originalQuery, p.Name),
-                    SearchHelper.LevensheteinAlgorithm(otherLayoutQuery, p.Name))
+                        Name = p.Name.ToLower(),
+                        Tags = p.Category.CategoryTags.Select(ct => ct.Tag.Name.ToLower()).ToList()
+                    })
+                    .ToListAsync();
+
+                var matches = allProducts
+                    .Select(p =>
+                    {
+                        int nameDistance = Math.Min(
+                            SearchHelper.LevensheteinAlgorithm(originalQuery, p.Name),
+                            SearchHelper.LevensheteinAlgorithm(otherLayoutQuery, p.Name)
+                        );
+
+                        int tagDistance = int.MaxValue;
+                        if (p.Tags.Any())
+                        {
+                            tagDistance = p.Tags.Min(t => Math.Min(
+                                SearchHelper.LevensheteinAlgorithm(originalQuery, t),
+                                SearchHelper.LevensheteinAlgorithm(otherLayoutQuery, t)
+                            ));
+                        }
+
+                        return new
+                        {
+                            p.Id,
+                            Distance = Math.Min(nameDistance, tagDistance)
+                        };
                     })
                     .Where(x => x.Distance <= (originalQuery.Length > 4 ? 4 : 2))
                     .OrderBy(x => x.Distance)

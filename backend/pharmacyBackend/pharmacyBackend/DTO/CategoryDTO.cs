@@ -26,7 +26,7 @@ namespace pharmacyBackend.DTO
 
         [MaxLength(500, ErrorMessage = "Описание не должно превышать 500 символов.")]
         public string? Description { get; set; }
-        public List<int> TagIds { get; set; } = new();
+        public List<string> Tags { get; set; } = new();
     }
 
     public class TagCreateDTO
