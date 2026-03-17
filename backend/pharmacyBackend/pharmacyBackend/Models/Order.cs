@@ -10,6 +10,8 @@ namespace pharmacyBackend.Models
 
         [Required]
         public DateTime OrderDate { get; set; } = DateTime.UtcNow;
+
+        public DateTime? ReadyDate { get; set; }
         
         [Required]
         public OrderStatus Status { get; set; } = OrderStatus.Pending;

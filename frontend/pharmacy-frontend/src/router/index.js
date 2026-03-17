@@ -15,6 +15,7 @@ import AdminProducts from '@/views/admin/AdminProducts.vue';
 import AdminPharmacies from '@/views/admin/AdminPharmacies.vue';
 import AdminStock from '@/views/admin/AdminStock.vue';
 import AdminCategory from '@/views/admin/AdminCategory.vue';
+import AdminOrder from '@/views/admin/AdminOrder.vue';
 
 const routes = [
   {
@@ -98,6 +99,11 @@ const routes = [
         path: 'categories',
         name: 'admin-categories',
         component: AdminCategory
+      },
+      {
+        path: 'orders',
+        name: 'admin-orders',
+        component: AdminOrder
       }
     ]
   }

@@ -10,6 +10,7 @@
         <router-link to="/admin/categories" active-class="active">Категории</router-link>
         <router-link to="/admin/pharmacies" active-class="active">Аптеки</router-link>
         <router-link to="/admin/stocks" active-class="active">Наличие</router-link>
+        <router-link to="/admin/orders" active-class="active">Заказы</router-link>
         </nav>
       <button @click="handleLogout" class="logout-btn">Выйти</button>
     </aside>

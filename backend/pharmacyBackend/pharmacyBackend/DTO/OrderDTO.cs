@@ -9,6 +9,12 @@ namespace pharmacyBackend.DTO
     //    public int PharmacyId { get; set; }
     //}
 
+    public class UpdateOrderStatusDTO
+    {
+        [Required]
+        public OrderStatus Status { get; set; }
+    }
+
     public class QuickCheckoutDTO
     {
         [Required]

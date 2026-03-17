@@ -270,5 +270,76 @@ namespace pharmacyBackend.Controllers
 
             return Ok(new { message = "Бронь успешно отменена" });
         }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("admin-all")]
+        public async Task<ActionResult<IEnumerable<OrderFullDTO>>> GetAllOrders()
+        {
+            var orders = await _context.Orders
+                .Include(o => o.User)
+                .Include(o => o.Pharmacy)
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .OrderByDescending(o => o.OrderDate)
+                .ToListAsync();
+
+            var orderDtos = orders.Select(o => new OrderFullDTO
+            {
+                Id = o.Id,
+                OrderDate = o.OrderDate,
+                TotalPrice = o.TotalPrice,
+                PharmacyId = o.PharmacyId,
+                PharmacyName = o.Pharmacy?.Name ?? string.Empty,
+                PharmacyAddress = o.Pharmacy?.Address ?? string.Empty,
+                Status = o.Status,
+                UserFirstName = o.User?.FirstName ?? string.Empty,
+                UserPhone = o.User?.Phone ?? string.Empty,
+                Items = o.OrderItems.Select(oi => new OrderItemDTO
+                {
+                    ProductId = oi.ProductId,
+                    ProductName = oi.Product?.Name ?? string.Empty,
+                    Quantity = oi.Quantity,
+                    Price = oi.Price
+                }).ToList()
+            }).ToList();
+
+            return Ok(orderDtos);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPut("{id}/status")]
+        public async Task<ActionResult> UpdateOrderStatus(int id, [FromBody] UpdateOrderStatusDTO orderStatus)
+        {
+            var order = await _context.Orders
+                .Include(o => o.User)
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .FirstOrDefaultAsync(o => o.Id  == id);
+
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            if(orderStatus.Status == OrderStatus.Ready && order.Status != OrderStatus.Ready)
+            {
+                order.ReadyDate = DateTime.UtcNow;
+            }
+
+            order.Status = orderStatus.Status;
+            await _context.SaveChangesAsync();
+            if (order.User != null && !string.IsNullOrEmpty(order.User.Email))
+            {
+                var (subject, htmlBody) = _generator.GenerateStatusEmail(order.User, order, orderStatus.Status);
+
+                if (!string.IsNullOrEmpty(subject))
+                {
+                    //не ждем ответа
+                    _ = _email.SendEmailAsync(order.User.Email, subject, htmlBody);
+                }
+            }
+
+            return Ok();
+        }
     }
 }

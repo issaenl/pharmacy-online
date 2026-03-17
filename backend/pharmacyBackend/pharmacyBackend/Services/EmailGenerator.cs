@@ -36,13 +36,13 @@ namespace pharmacyBackend.Services
                 case OrderStatus.Ready:
                     subject = $"Ваш заказ №{order.Id} готов к выдаче!";
                     statusText = "ГОТОВ К ВЫДАЧЕ";
-                    messageBody = "Ура! Ваш заказ собран и ожидает вас в аптеке. Пожалуйста, заберите его в течение 48 часов.";
+                    messageBody = "Ваш заказ собран и ожидает вас в аптеке. Пожалуйста, заберите его в течение 48 часов.";
                     break;
 
                 case OrderStatus.Completed:
                     subject = $"Заказ №{order.Id} успешно получен";
                     statusText = "ВЫПОЛНЕН";
-                    messageBody = "Вы успешно забрали свой заказ. Спасибо, что выбираете УниМед! Будем рады видеть вас снова.";
+                    messageBody = "Вы успешно забрали свой заказ. Будем рады видеть вас снова.";
                     break;
 
                 case OrderStatus.Cancelled:
