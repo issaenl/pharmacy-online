@@ -38,14 +38,14 @@
         
         <div class="summary-row total-price-row">
           <span class="total-price">
-            <template v-if="!cartStore.selectedPharmacy">от </template>
+            <template v-if="!orderStore.selectedPharmacy">от </template>
             {{ cartStore.totalPrice.toFixed(2) }} р.
           </span>
         </div>
 
         <div class="pharmacy-selection">
           <button 
-            v-if="!cartStore.selectedPharmacy" 
+            v-if="!orderStore.selectedPharmacy" 
             class="checkout-btn select-map-btn" 
             @click="isMapOpen = true"
             :disabled="cartStore.items.length === 0">

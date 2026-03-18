@@ -32,6 +32,7 @@ namespace pharmacyBackend.DTO
     {
         public int Id { get; set; }
         public DateTime OrderDate { get; set; }
+        public DateTime? ReadyDate { get; set; }
         public decimal TotalPrice { get; set; }
         public int PharmacyId { get; set; }
         public string PharmacyName { get; set; } = string.Empty;

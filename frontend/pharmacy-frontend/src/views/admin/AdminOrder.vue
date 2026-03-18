@@ -97,7 +97,10 @@
           <div class="info-row"><strong>Аптека:</strong> {{ selectedOrder.pharmacyName }} ({{ selectedOrder.pharmacyAddress }})</div>
           <div class="info-row"><strong>Клиент:</strong> {{ selectedOrder.userFirstName }} ({{ selectedOrder.userPhone }})</div>
           <div class="info-row"><strong>Дата:</strong> {{ new Date(selectedOrder.orderDate).toLocaleString() }}</div>
-          
+          <div class="info-row" v-if="selectedOrder.readyDate">
+            <strong>Готов к выдаче:</strong> {{ new Date(selectedOrder.readyDate).toLocaleString() }}
+          </div>
+
           <h4 class="items-title">Товары:</h4>
           <table class="items-table">
             <thead>
@@ -196,8 +199,8 @@ const getStatusClass = (status) => {
     case 0: return 'status-pending';
     case 1: return 'status-ready';
     case 2: return 'status-completed';
-    case 3: 
-    case 4: return 'status-cancelled';
+    case 3: return 'status-cancelled'
+    case 4: return 'status-expired';
     default: return '';
   }
 };
@@ -323,6 +326,7 @@ const {
 
 .order-details {
   font-size: 15px;
+  margin-top: 20px;
 }
 
 .info-row {

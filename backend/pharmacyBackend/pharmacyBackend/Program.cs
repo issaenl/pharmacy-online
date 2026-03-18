@@ -75,6 +75,7 @@ builder.Services.AddScoped<IEmailGenerator, EmailGenerator>();
 builder.Services.AddScoped<ICloudService, CloudService>();
 builder.Services.AddHttpClient<GeocodeService>();
 builder.Services.AddScoped<IImportService, ImportService>();
+builder.Services.AddHostedService<pharmacyBackend.Background_Services.ExpirationService>();
 
 var app = builder.Build();
 

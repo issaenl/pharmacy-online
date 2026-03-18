@@ -287,6 +287,7 @@ namespace pharmacyBackend.Controllers
             {
                 Id = o.Id,
                 OrderDate = o.OrderDate,
+                ReadyDate = o.ReadyDate,
                 TotalPrice = o.TotalPrice,
                 PharmacyId = o.PharmacyId,
                 PharmacyName = o.Pharmacy?.Name ?? string.Empty,
