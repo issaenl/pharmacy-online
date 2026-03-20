@@ -24,7 +24,7 @@ namespace pharmacyBackend.DTO
     public class UserLoginDTO
     {
         [Required(ErrorMessage = "Телефон обязателен.")]
-        public string Phone { get; set; } = string.Empty;
+        public string Login { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Пароль обязателен.")]
         public string Password { get; set; } = string.Empty;
@@ -39,6 +39,8 @@ namespace pharmacyBackend.DTO
         public string? Email { get; set; }
         public UserRole Role { get; set; }
         public string RoleName => Role.ToString();
+
+        public int? PharmacyId { get; set; }
 
     }
 
@@ -65,5 +67,53 @@ namespace pharmacyBackend.DTO
         [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$",
             ErrorMessage = "Новый пароль должен содержать минимум 8 символов, одну заглавную, одну строчную букву и одну цифру.")]
         public string NewPassword { get; set; } = string.Empty;
+    }
+
+    public class CreateAdminDTO
+    {
+        [Required]
+        public string FirstName { get; set; } = string.Empty;
+
+        public string? LastName { get; set; }
+
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
+        public string Phone { get; set; } = string.Empty;
+
+        [Required]
+        public string Password { get; set; } = string.Empty;
+
+        [Required]
+        public UserRole Role { get; set; }
+
+        public int? PharmacyId { get; set; }
+    }
+
+    public class AdminDTO
+    {
+        public int Id { get; set; }
+        public string FirstName { get; set; } = string.Empty;
+        public string? LastName { get; set; }
+        public string Email { get; set; } = string.Empty;
+        public string Phone { get; set; } = string.Empty;
+        public UserRole Role { get; set; }
+        public string RoleName => Role.ToString();
+        public int? PharmacyId { get; set; }
+        public string? PharmacyName { get; set; }
+    }
+
+    public class UpdateAdminDTO
+    {
+        [Required]
+        public string FirstName { get; set; } = string.Empty;
+        public string? LastName { get; set; }
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
+        public string Phone { get; set; } = string.Empty;
+        [Required]
+        public UserRole Role { get; set; }
+        public int? PharmacyId { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using pharmacyBackend.Enums;
 namespace pharmacyBackend.Models
 {
@@ -22,5 +23,10 @@ namespace pharmacyBackend.Models
 
         [Required]
         public UserRole Role {  get; set; } = UserRole.User;
+
+        public int? PharmacyId { get; set; }
+
+        [ForeignKey("PharmacyId")]
+        public Pharmacy? Pharmacy { get; set; }
     }
 }

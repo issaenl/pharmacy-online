@@ -99,7 +99,8 @@ using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<AppDbContext>();
-    DbInitializer.Initialize(context);
+    var configuration = services.GetRequiredService<IConfiguration>();
+    DbInitializer.Initialize(context, configuration);
 }
 
 app.Run();

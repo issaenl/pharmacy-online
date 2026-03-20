@@ -16,6 +16,7 @@ import AdminPharmacies from '@/views/admin/AdminPharmacies.vue';
 import AdminStock from '@/views/admin/AdminStock.vue';
 import AdminCategory from '@/views/admin/AdminCategory.vue';
 import AdminOrder from '@/views/admin/AdminOrder.vue';
+import AdminUsers from '@/views/admin/AdminUsers.vue';
 
 const routes = [
   {
@@ -83,22 +84,31 @@ const routes = [
       {
         path: 'products',
         name: 'admin-products',
-        component: AdminProducts
+        component: AdminProducts,
+        meta: { superAdminOnly: true }
       },
       {
         path: 'pharmacies',
         name: 'admin-pharmacies',
-        component: AdminPharmacies
+        component: AdminPharmacies,
+        meta: { superAdminOnly: true }
+      },
+      {
+        path: 'categories',
+        name: 'admin-categories',
+        component: AdminCategory,
+        meta: { superAdminOnly: true }
+      },
+      {
+        path: 'users',
+        name: 'admin-users',
+        component: AdminUsers,
+        meta: { superAdminOnly: true }
       },
       {
         path: 'stocks',
         name: 'admin-stocks',
         component: AdminStock
-      },
-      {
-        path: 'categories',
-        name: 'admin-categories',
-        component: AdminCategory
       },
       {
         path: 'orders',
@@ -120,12 +130,16 @@ router.beforeEach((to, from, next) => {
 
   const userRole = authStore.user?.role; 
   const isSuperAdmin = userRole === 2 || userRole === 'Admin';
+  const isPharmacyAdmin = userRole === 1 || userRole === 'PharmacyAdmin';
+  const hasAdminAccess = isSuperAdmin || isPharmacyAdmin;
 
   if (to.meta.requiresAdmin) {
     if (!isAuthenticated) {
       next({ name: 'login', query: { redirect: to.fullPath } });
-    } else if (!isSuperAdmin) {
+    } else if (!hasAdminAccess) {
       next({ name: 'home' });
+    } else if (to.meta.superAdminOnly && !isSuperAdmin) {
+      next({ name: 'admin-orders' });
     } else {
       next();
     }

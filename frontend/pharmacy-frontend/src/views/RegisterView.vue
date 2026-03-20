@@ -16,7 +16,7 @@
             type="text" 
             :value="form.phone" 
             @input="handlePhoneInput" 
-            placeholder="+79991234567" 
+            placeholder="+375291234567" 
             required />
         </div>
 

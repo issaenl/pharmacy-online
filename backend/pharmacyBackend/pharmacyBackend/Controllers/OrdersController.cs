@@ -3,11 +3,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using pharmacyBackend.Data;
+using pharmacyBackend.DTO;
+using pharmacyBackend.Enums;
 using pharmacyBackend.Models;
 using pharmacyBackend.Services;
+using System.Linq;
 using System.Text;
-using pharmacyBackend.Enums;
-using pharmacyBackend.DTO;
 
 namespace pharmacyBackend.Controllers
 {
@@ -271,17 +272,24 @@ namespace pharmacyBackend.Controllers
             return Ok(new { message = "Бронь успешно отменена" });
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, PharmacyAdmin")]
         [HttpGet("admin-all")]
         public async Task<ActionResult<IEnumerable<OrderFullDTO>>> GetAllOrders()
         {
-            var orders = await _context.Orders
+            var query = _context.Orders
                 .Include(o => o.User)
                 .Include(o => o.Pharmacy)
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Product)
-                .OrderByDescending(o => o.OrderDate)
-                .ToListAsync();
+                .AsQueryable();
+
+            var claimId = User.FindFirst("PharmacyId")?.Value;
+            if (!string.IsNullOrEmpty(claimId) && int.TryParse(claimId, out int pharmacyId))
+            {
+                query = query.Where(o => o.PharmacyId == pharmacyId);
+            }
+
+            var orders = await query.OrderByDescending(o => o.OrderDate).ToListAsync();
 
             var orderDtos = orders.Select(o => new OrderFullDTO
             {
@@ -307,7 +315,7 @@ namespace pharmacyBackend.Controllers
             return Ok(orderDtos);
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, PharmacyAdmin")]
         [HttpPut("{id}/status")]
         public async Task<ActionResult> UpdateOrderStatus(int id, [FromBody] UpdateOrderStatusDTO orderStatus)
         {
@@ -322,7 +330,17 @@ namespace pharmacyBackend.Controllers
                 return NotFound();
             }
 
-            if(orderStatus.Status == OrderStatus.Ready && order.Status != OrderStatus.Ready)
+            var claimId = User.FindFirst("PharmacyId")?.Value;
+            if (!string.IsNullOrEmpty(claimId) && int.TryParse(claimId, out int pharmacyId))
+            {
+                if (order.PharmacyId != pharmacyId)
+                {
+                    return Forbid();
+                }
+
+            }
+
+            if (orderStatus.Status == OrderStatus.Ready && order.Status != OrderStatus.Ready)
             {
                 order.ReadyDate = DateTime.UtcNow;
             }

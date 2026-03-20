@@ -4,7 +4,7 @@
       <h2>Управление наличием</h2>
       
       <div class="filters-group">
-        <select v-model="selectedPharmacyFilter" class="form-select filter-select">
+        <select v-if="!isPharmacyAdmin" v-model="selectedPharmacyFilter" class="form-select filter-select">
           <option value="">Все аптеки</option>
           <option v-for="p in pharmacies" :key="p.id" :value="p.id">
             {{ p.name }} ({{ p.address }})
@@ -37,7 +37,7 @@
       <table>
         <thead>
           <tr>
-            <th v-if="!selectedPharmacyFilter" @click="sortBy('pharmacyName')" class="sortable">
+            <th v-if="!isPharmacyAdmin && !selectedPharmacyFilter" @click="sortBy('pharmacyName')" class="sortable">
               Аптека <span v-if="sortKey === 'pharmacyName'" class="sort-icon">{{ sortOrder === 1 ? '▲' : '▼' }}</span>
             </th>
             <th @click="sortBy('productName')" class="sortable">
@@ -55,7 +55,7 @@
         </thead>
         <tbody>
           <tr v-for="stock in paginatedStocks" :key="stock.id">
-            <td v-if="!selectedPharmacyFilter" class="text-muted">{{ stock.pharmacyName }}</td>
+            <td v-if="!isPharmacyAdmin && !selectedPharmacyFilter" class="text-muted">{{ stock.pharmacyName }}</td>
             <td>{{ stock.productName }}</td>
             <td>
               <span :class="{'out-of-stock': stock.quantity === 0}">{{ stock.quantity }} шт.</span>
@@ -67,7 +67,7 @@
                 @delete="deleteStock(stock.id)" />
           </tr>
           <tr v-if="sortedAndFilteredStocks.length === 0">
-            <td :colspan="selectedPharmacyFilter ? 5 : 6" class="text-center text-muted" style="padding: 30px;">
+            <td :colspan="isPharmacyAdmin || selectedPharmacyFilter ? 5 : 6" class="text-center text-muted" style="padding: 30px;">
               Запасы не найдены
             </td>
           </tr>
@@ -83,13 +83,13 @@
 
     <Modal 
       :show="showModal" 
-      :title="isEditing ? 'Редактировать категорию' : 'Новая категория'"
+      :title="isEditing ? 'Редактировать запас' : 'Новый запас'"
       @close="closeModal">
         <form @submit.prevent="saveStock" class="pharmacy-form">
           <div class="form-grid">
             <div class="form-column">
                 <label>Аптека
-                    <select v-model="form.pharmacyId" required class="form-select" :disabled="isEditing">
+                    <select v-model="form.pharmacyId" required class="form-select" :disabled="isEditing || isPharmacyAdmin">
                         <option value="" disabled>Выберите аптеку...</option>
                         <option v-for="p in pharmacies" :key="p.id" :value="p.id">{{ p.name }} ({{ p.address }})</option>
                     </select>
@@ -133,9 +133,14 @@ import { useModal } from '@/logic/modal';
 import { useSorting } from '@/logic/sorting';
 import { ref, computed, onMounted } from 'vue';
 import { useToast } from 'vue-toast-notification';
+import { useAuthStore } from '@/stores/authStore';
 import api from '@/api/api';
 
 const toast = useToast({ position: 'bottom-right' });
+const authStore = useAuthStore();
+
+const isPharmacyAdmin = computed(() => authStore.user?.role === 1 || authStore.user?.role === 'PharmacyAdmin' || authStore.user?.roleName === 'PharmacyAdmin');
+const myPharmacyId = authStore.user?.pharmacyId ? Number(authStore.user.pharmacyId) : '';
 
 const { sortKey, sortOrder, sortBy } = useSorting();
 const { showModal, isEditing, currentId, openBaseModal, closeModal } = useModal();
@@ -148,10 +153,15 @@ const isLoading = ref(false);
 const fileInput = ref(null);
 const importErrors = ref([]);
 
+const selectedPharmacyFilter = ref(isPharmacyAdmin.value ? myPharmacyId : '');
 const searchQuery = ref('');
-const selectedPharmacyFilter = ref('');
 
-const form = ref({ pharmacyId: '', productId: '', quantity: 0, price: 0 });
+const form = ref({
+  pharmacyId: isPharmacyAdmin.value ? myPharmacyId : '', 
+  productId: '', 
+  quantity: 0, 
+  price: 0
+});
 
 const fetchData = async () => {
   try {
@@ -191,7 +201,7 @@ const handleFileUpload = async (event) => {
     }
     await fetchData();
   } catch (error) {
-    importErrors.value = error.response.data.errors;
+    importErrors.value = error.response?.data?.errors || [];
     toast.error(error.response?.data?.message || "Ошибка импорта");
   } finally {
     event.target.value = '';
@@ -210,14 +220,13 @@ const openModal = (stock = null) => {
     };
   } else {
     form.value = { 
-      pharmacyId: selectedPharmacyFilter.value || '', 
+      pharmacyId: isPharmacyAdmin.value ? myPharmacyId : (selectedPharmacyFilter.value || ''), 
       productId: '', 
       quantity: 1, 
       price: 100 
     };
   }
 };
-
 
 const saveStock = async () => {
   isLoading.value = true;
@@ -252,14 +261,14 @@ const deleteStock = async (id) => {
 const sortedAndFilteredStocks = computed(() => {
   let result = stocks.value;
 
-  if (selectedPharmacyFilter.value) {
-    result = result.filter(s => s.pharmacyId === selectedPharmacyFilter.value);
+  if (selectedPharmacyFilter.value !== '') {
+    result = result.filter(s => s.pharmacyId === Number(selectedPharmacyFilter.value));
   }
 
   if (searchQuery.value) {
     result = result.filter(s => 
       s.productName.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      (!selectedPharmacyFilter.value && s.pharmacyName.toLowerCase().includes(searchQuery.value.toLowerCase()))
+      (!isPharmacyAdmin.value && selectedPharmacyFilter.value === '' && s.pharmacyName.toLowerCase().includes(searchQuery.value.toLowerCase()))
     );
   }
 

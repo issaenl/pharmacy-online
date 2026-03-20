@@ -4,7 +4,7 @@
       <h2>Управление заказами</h2>
       
       <div class="filters-group">
-        <select v-model="selectedPharmacyFilter" class="form-select filter-select">
+        <select v-if="!isPharmacyAdmin" v-model="selectedPharmacyFilter" class="form-select filter-select">
           <option value="">Все аптеки</option>
           <option v-for="p in pharmacies" :key="p.id" :value="p.id">
             {{ p.name }} ({{ p.address }})
@@ -37,7 +37,7 @@
             <th @click="sortBy('orderDate')" class="sortable">
               Дата <span v-if="sortKey === 'orderDate'" class="sort-icon">{{ sortOrder === 1 ? '▲' : '▼' }}</span>
             </th>
-            <th v-if="!selectedPharmacyFilter" @click="sortBy('pharmacyName')" class="sortable">
+            <th v-if="!isPharmacyAdmin && !selectedPharmacyFilter" @click="sortBy('pharmacyName')" class="sortable">
               Аптека <span v-if="sortKey === 'pharmacyName'" class="sort-icon">{{ sortOrder === 1 ? '▲' : '▼' }}</span>
             </th>
             <th @click="sortBy('totalPrice')" class="sortable">
@@ -51,7 +51,7 @@
           <tr v-for="order in paginatedOrders" :key="order.id">
             <td><strong>{{ order.id }}</strong></td>
             <td>{{ new Date(order.orderDate).toLocaleString() }}</td>
-            <td v-if="!selectedPharmacyFilter" class="text-muted">{{ order.pharmacyName }}</td>
+            <td v-if="!isPharmacyAdmin && !selectedPharmacyFilter" class="text-muted">{{ order.pharmacyName }}</td>
             <td><strong>{{ order.totalPrice.toFixed(2) }} руб.</strong></td>
             <td>
               <select 
@@ -75,7 +75,7 @@
             </td>
           </tr>
           <tr v-if="sortedAndFilteredOrders.length === 0">
-            <td :colspan="selectedPharmacyFilter ? 5 : 6" class="text-center text-muted" style="padding: 30px;">
+            <td :colspan="isPharmacyAdmin || selectedPharmacyFilter ? 5 : 6" class="text-center text-muted" style="padding: 30px;">
               Заказы не найдены
             </td>
           </tr>
@@ -94,7 +94,7 @@
       :title="`Состав заказа №${selectedOrder?.id || ''}`"
       @close="closeModal">
         <div v-if="selectedOrder" class="order-details">
-          <div class="info-row"><strong>Аптека:</strong> {{ selectedOrder.pharmacyName }} ({{ selectedOrder.pharmacyAddress }})</div>
+          <div class="info-row" v-if="!isPharmacyAdmin"><strong>Аптека:</strong> {{ selectedOrder.pharmacyName }} ({{ selectedOrder.pharmacyAddress }})</div>
           <div class="info-row"><strong>Клиент:</strong> {{ selectedOrder.userFirstName }} ({{ selectedOrder.userPhone }})</div>
           <div class="info-row"><strong>Дата:</strong> {{ new Date(selectedOrder.orderDate).toLocaleString() }}</div>
           <div class="info-row" v-if="selectedOrder.readyDate">
@@ -141,9 +141,14 @@ import { useModal } from '@/logic/modal';
 import { useSorting } from '@/logic/sorting';
 import { ref, computed, onMounted } from 'vue';
 import { useToast } from 'vue-toast-notification';
+import { useAuthStore } from '@/stores/authStore';
 import api from '@/api/api';
 
 const toast = useToast({ position: 'bottom-right' });
+const authStore = useAuthStore();
+
+const isPharmacyAdmin = computed(() => authStore.user?.role === 1 || authStore.user?.role === 'PharmacyAdmin' || authStore.user?.roleName === 'PharmacyAdmin');
+const myPharmacyId = authStore.user?.pharmacyId ? Number(authStore.user.pharmacyId) : '';
 
 const { sortKey, sortOrder, sortBy } = useSorting();
 const { showModal, openBaseModal, closeModal } = useModal();
@@ -152,9 +157,9 @@ const orders = ref([]);
 const pharmacies = ref([]);
 const selectedOrder = ref(null);
 
-const searchQuery = ref('');
-const selectedPharmacyFilter = ref('');
+const selectedPharmacyFilter = ref(isPharmacyAdmin.value ? myPharmacyId : '');
 const selectedStatusFilter = ref('');
+const searchQuery = ref('');
 
 const statusNames = {
   0: 'Ожидает сборки',
@@ -199,7 +204,7 @@ const getStatusClass = (status) => {
     case 0: return 'status-pending';
     case 1: return 'status-ready';
     case 2: return 'status-completed';
-    case 3: return 'status-cancelled'
+    case 3: return 'status-cancelled';
     case 4: return 'status-expired';
     default: return '';
   }
@@ -208,8 +213,8 @@ const getStatusClass = (status) => {
 const sortedAndFilteredOrders = computed(() => {
   let result = orders.value;
 
-  if (selectedPharmacyFilter.value) {
-    result = result.filter(o => o.pharmacyId === selectedPharmacyFilter.value);
+  if (selectedPharmacyFilter.value !== '') {
+    result = result.filter(o => o.pharmacyId === Number(selectedPharmacyFilter.value));
   }
 
   if (selectedStatusFilter.value !== '') {

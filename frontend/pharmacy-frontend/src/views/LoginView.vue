@@ -6,12 +6,12 @@
       <form @submit.prevent="handleLogin" class="auth-form">
         
         <div class="form-group">
-          <label>Телефон</label>
+          <label>Телефон или Email</label>
           <input 
             type="text" 
-            :value="phone" 
-            @input="handlePhoneInput" 
-            placeholder="+79991234567" 
+            :value="loginCredential" 
+            @input="handleLoginInput" 
+            placeholder="+375291234567 или email@example.com" 
             required />
         </div>
 
@@ -36,12 +36,11 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { useRoute } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore';
 import TheHeader from '@/components/Header.vue';
 
-const phone = ref('');
+const loginCredential = ref('');
 const password = ref('');
 const errorMessage = ref('');
 const isLoading = ref(false);
@@ -50,13 +49,14 @@ const authStore = useAuthStore();
 const router = useRouter();
 const route = useRoute();
 
-const handlePhoneInput = (event) => {
-  let inputDigits = event.target.value.replace(/[^\d]/g, '');
+const handleLoginInput = (event) => {
+  let val = event.target.value;
   
-  if (inputDigits) {
-    phone.value = '+' + inputDigits;
+  if (/^[\+\d]/.test(val) && !val.includes('@') && !/[a-zA-Z]/.test(val)) {
+    let inputDigits = val.replace(/[^\d]/g, '');
+    loginCredential.value = inputDigits ? '+' + inputDigits : '';
   } else {
-    phone.value = '';
+    loginCredential.value = val;
   }
 };
 
@@ -65,21 +65,21 @@ const handleLogin = async () => {
   errorMessage.value = '';
   
   try {
-    await authStore.login(phone.value, password.value);
+    await authStore.login(loginCredential.value, password.value);
     const redirectPath = route.query.redirect;
 
     if (redirectPath) {
       router.push(redirectPath); 
     } else {
       const userRole = authStore.user?.role;
-      if (userRole === 2 || userRole === 'Admin') {
+      if (userRole === 1 || userRole === 'Admin' || userRole === 2 || userRole === 'PharmacyAdmin') {
          router.push('/admin');
       } else {
          router.push('/'); 
       }
     }
   } catch (error) {
-    errorMessage.value = error
+    errorMessage.value = error;
   } finally {
     isLoading.value = false;
   }

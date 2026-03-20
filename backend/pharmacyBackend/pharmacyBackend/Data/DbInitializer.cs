@@ -7,7 +7,7 @@ namespace pharmacyBackend.Data
     public class DbInitializer
     {
 
-        public static void Initialize(AppDbContext context)
+        public static void Initialize(AppDbContext context, IConfiguration configuration)
         {
             context.Database.EnsureCreated();
 
@@ -232,7 +232,7 @@ namespace pharmacyBackend.Data
             if (!context.Users.Any(u => u.Role == UserRole.Admin))
             {
                 var adminPhone = "+375298707424"; 
-                var adminPassword = "Aa1111!!"; 
+                var adminPassword = configuration["DefaultPassword:Password"];
 
                 var superAdmin = new User
                 {

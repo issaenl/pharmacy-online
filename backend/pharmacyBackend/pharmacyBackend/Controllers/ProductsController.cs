@@ -241,7 +241,7 @@ namespace pharmacyBackend.Controllers
             return Ok(products);
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, PharmacyAdmin")]
         [HttpGet("admin-all-products")]
         public async Task<ActionResult<IEnumerable<ProductFullDTO>>> GetAllForAdmins()
         {

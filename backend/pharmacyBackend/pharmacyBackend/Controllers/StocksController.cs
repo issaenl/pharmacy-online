@@ -25,23 +25,41 @@ namespace pharmacyBackend.Controllers
             _import = import;
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, PharmacyAdmin")]
         [HttpGet("admin-all")]
         public async Task<ActionResult<IEnumerable<PharmacyStockFullDTO>>> GetAllStocks()
         {
-            var stocks = await _context.Stocks
+            var query = _context.Stocks
                 .Include(s => s.Pharmacy)
                 .Include(s => s.Product)
+                .AsQueryable();
+
+            var claimId = User.FindFirst("PharmacyId")?.Value;
+            if (!string.IsNullOrEmpty(claimId) && int.TryParse(claimId, out int pharmacyId))
+            {
+                query = query.Where(s => s.PharmacyId == pharmacyId);
+            }
+
+            var stocks = await query
                 .ProjectTo<PharmacyStockFullDTO>(_mapper.ConfigurationProvider)
                 .OrderByDescending(s => s.LastUpdate)
                 .ToListAsync();
             return Ok(stocks);
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, PharmacyAdmin")]
         [HttpPost]
         public async Task<ActionResult> CreateStock([FromBody] StockCreateDTO dto)
         {
+            var claimId = User.FindFirst("PharmacyId")?.Value;
+            if (!string.IsNullOrEmpty(claimId) && int.TryParse(claimId, out int pharmacyId))
+            {
+                if (dto.PharmacyId != pharmacyId)
+                {
+                    return Forbid();
+                }
+            }
+
             var existing = await _context.Stocks.FirstOrDefaultAsync(s => s.PharmacyId == dto.PharmacyId && s.ProductId == dto.ProductId);
             if(existing != null)
             {
@@ -61,7 +79,7 @@ namespace pharmacyBackend.Controllers
             return Ok(new {Message = "Товар добавлен в наличие в аптеку" });
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, PharmacyAdmin")]
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateStock(int id, [FromBody] StockCreateDTO dto)
         {
@@ -69,6 +87,15 @@ namespace pharmacyBackend.Controllers
             if(stock == null)
             {
                 return NotFound();
+            }
+
+            var claimId = User.FindFirst("PharmacyId")?.Value;
+            if (!string.IsNullOrEmpty(claimId) && int.TryParse(claimId, out int pharmacyId))
+            {
+                if (stock.PharmacyId != pharmacyId || dto.PharmacyId != pharmacyId)
+                {
+                    return Forbid();
+                }
             }
 
             stock.PharmacyId = dto.PharmacyId;
@@ -81,7 +108,7 @@ namespace pharmacyBackend.Controllers
             return Ok(new { Message = "Наличие успешно обновлено" });
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, PharmacyAdmin")]
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteStock(int id)
         {
@@ -89,6 +116,15 @@ namespace pharmacyBackend.Controllers
             if (stock == null)
             {
                 return NotFound();
+            }
+
+            var claimId = User.FindFirst("PharmacyId")?.Value;
+            if (!string.IsNullOrEmpty(claimId) && int.TryParse(claimId, out int pharmacyId))
+            {
+                if (stock.PharmacyId != pharmacyId)
+                {
+                    return Forbid();
+                }
             }
 
             try
@@ -106,7 +142,7 @@ namespace pharmacyBackend.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, PharmacyAdmin")]
         [HttpPost("import")]
         public async Task<ActionResult> Import(IFormFile file)
         {

@@ -6,12 +6,13 @@
       </div>
       <nav class="menu">
         <router-link to="/admin" exact-active-class="active">Главная</router-link>
-        <router-link to="/admin/products" active-class="active">Продукты</router-link>
-        <router-link to="/admin/categories" active-class="active">Категории</router-link>
-        <router-link to="/admin/pharmacies" active-class="active">Аптеки</router-link>
-        <router-link to="/admin/stocks" active-class="active">Наличие</router-link>
-        <router-link to="/admin/orders" active-class="active">Заказы</router-link>
-        </nav>
+        <router-link v-if="isAdmin" to="/admin/users" active-class="active">Сотрудники</router-link>
+        <router-link v-if="isAdmin" to="/admin/products" active-class="active">Продукты</router-link>
+        <router-link v-if="isAdmin" to="/admin/categories" active-class="active">Категории</router-link>
+        <router-link v-if="isAdmin" to="/admin/pharmacies" active-class="active">Аптеки</router-link>
+        <router-link v-if="isAdmin || isPharmacyAdmin" to="/admin/stocks" active-class="active">Наличие</router-link>
+        <router-link v-if="isAdmin || isPharmacyAdmin" to="/admin/orders" active-class="active">Заказы</router-link>
+      </nav>
       <button @click="handleLogout" class="logout-btn">Выйти</button>
     </aside>
 
@@ -22,11 +23,15 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useRouter } from 'vue-router';
 
 const authStore = useAuthStore();
 const router = useRouter();
+
+const isAdmin = computed(() => authStore.user?.role === 2 || authStore.user?.role === 'Admin');
+const isPharmacyAdmin = computed(() => authStore.user?.role === 1 || authStore.user?.role === 'PharmacyAdmin');
 
 const handleLogout = () => {
   authStore.logout();

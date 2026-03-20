@@ -34,32 +34,32 @@ export const useAuthStore = defineStore('auth', () => {
     api.defaults.headers.common['Authorization'] = `Bearer ${token.value}`;
   }
 
-  const login = async (phone, password) => {
+  const login = async (loginCredential, password) => {
+  try {
+    const response = await api.post('/Auth/login', { login: loginCredential, password });
+    
+    token.value = response.data.token;
+    user.value = response.data.user;
+    
+    localStorage.setItem('token', token.value);
+    localStorage.setItem('user', JSON.stringify(user.value));
+    
+    api.defaults.headers.common['Authorization'] = `Bearer ${token.value}`;
+
     try {
-      const response = await api.post('/Auth/login', { phone, password });
-      
-      token.value = response.data.token;
-      user.value = response.data.user;
-      
-      localStorage.setItem('token', token.value);
-      localStorage.setItem('user', JSON.stringify(user.value));
-      
-      api.defaults.headers.common['Authorization'] = `Bearer ${token.value}`;
-
-      try {
-        const cartStore = useCartStore();
-        const favoriteStore = useFavoriteStore();
-        await cartStore.syncCart();
-        await favoriteStore.syncFavorites();
-      } catch (error) {
-        console.error('Ошибка при синхронизации корзины:', error);
-      }
+      const cartStore = useCartStore();
+      const favoriteStore = useFavoriteStore();
+      await cartStore.syncCart();
+      await favoriteStore.syncFavorites();
     } catch (error) {
-      throw extractErrorMessage(error); 
+      console.error(error);
     }
-  };
+  } catch (error) {
+    throw extractErrorMessage(error); 
+  }
+};
 
-  const register = async (userData) => {
+const register = async (userData) => {
     try {
       await api.post('/Auth/register', userData);
       await login(userData.phone, userData.password);

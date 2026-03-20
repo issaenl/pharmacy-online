@@ -75,7 +75,7 @@ namespace pharmacyBackend.Controllers
         [HttpPost("login")]
         public async Task<ActionResult> Login(UserLoginDTO loginUser)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Phone == loginUser.Phone);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Phone == loginUser.Login || u.Email == loginUser.Login);
 
             if(user == null || !BCrypt.Net.BCrypt.Verify(loginUser.Password, user.Password))
             {
@@ -96,6 +96,11 @@ namespace pharmacyBackend.Controllers
                 new Claim(ClaimTypes.MobilePhone, user.Phone),
                 new Claim(ClaimTypes.Role, user.Role.ToString())
             };
+
+            if(user.PharmacyId.HasValue)
+            {
+                claimsList.Add(new Claim("PharmacyId", user.PharmacyId.Value.ToString()));
+            }
 
             var tokenKey = _configuration.GetValue<string>("AppSettings:Token");
             if (string.IsNullOrEmpty(tokenKey))

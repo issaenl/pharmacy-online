@@ -144,7 +144,7 @@ namespace pharmacyBackend.Services
             }
         }
 
-        public async Task<ImportDTO> ImportStocksAsync(IFormFile file)
+        public async Task<ImportDTO> ImportStocksAsync(IFormFile file, int? allowedPharmacyId = null)
         {
             var result = new ImportDTO();
             var stocksToAdd = new List<Stock>();
@@ -178,7 +178,7 @@ namespace pharmacyBackend.Services
                     if (string.IsNullOrWhiteSpace(line)) continue;
                     line = line.Trim().Trim('"');
                     var values = line.Split(new[] { ',', ';' });
-                    ProcessStockRow(values, lineNumber, pharmaciesDict, productsDict, existingStocks, stocksToAdd, result.Errors);
+                    ProcessStockRow(values, lineNumber, pharmaciesDict, productsDict, existingStocks, stocksToAdd, result.Errors, allowedPharmacyId);
                 }
             }
             else if (extension == ".xlsx" || extension == ".xls")
@@ -194,7 +194,7 @@ namespace pharmacyBackend.Services
                     var values = new string[4];
                     for (int i = 0; i < 4; i++) values[i] = row.Cell(i + 1).Value.ToString();
 
-                    ProcessStockRow(values, lineNumber, pharmaciesDict, productsDict, existingStocks, stocksToAdd, result.Errors);
+                    ProcessStockRow(values, lineNumber, pharmaciesDict, productsDict, existingStocks, stocksToAdd, result.Errors, allowedPharmacyId);
                 }
             }
             else
@@ -215,7 +215,7 @@ namespace pharmacyBackend.Services
 
         private void ProcessStockRow(string[] values, int lineNumber,
             Dictionary<string, int> pharmaciesDict, Dictionary<string, int> productsDict,
-            HashSet<string> existingStocks, List<Stock> stocksToAdd, List<string> errors)
+            HashSet<string> existingStocks, List<Stock> stocksToAdd, List<string> errors, int? allowedPharmacyId = null)
         {
             if (values.Length < 4)
             {
@@ -231,6 +231,12 @@ namespace pharmacyBackend.Services
                 if (!pharmaciesDict.TryGetValue(pharmacyName, out int pharmacyId))
                 {
                     errors.Add($"Строка {lineNumber}: Аптека {values[0]} не найдена.");
+                    return;
+                }
+
+                if (allowedPharmacyId.HasValue && allowedPharmacyId.Value != pharmacyId)
+                {
+                    errors.Add($"Строка {lineNumber}: У вас нет прав для изменения остатков в аптеке {values[0]}.");
                     return;
                 }
 
