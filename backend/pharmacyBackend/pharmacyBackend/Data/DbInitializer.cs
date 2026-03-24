@@ -120,7 +120,6 @@ namespace pharmacyBackend.Data
                         Country = "Германия",
                         IsPrescription = false,
                         DosageForm = "таблетки",
-                        ExpirationDate = new DateOnly(2027, 12, 1),
                         IsActive = true,
                         CategoryId = urologyCat.Id,
                         PdfUrl = "https://res.cloudinary.com/dvsftlg7d/image/upload/v1772550649/2373_97_01_02_06_11_13_16_24_p_nhs8xo.pdf",
@@ -133,7 +132,6 @@ namespace pharmacyBackend.Data
                         Country = "Германия",
                         IsPrescription = false,
                         DosageForm = "раствор 100 мл",
-                        ExpirationDate = new DateOnly(2026, 6, 1),
                         IsActive = true,
                         CategoryId = coughCat.Id
                     },
@@ -144,7 +142,6 @@ namespace pharmacyBackend.Data
                         Country = "Франция",
                         IsPrescription = false,
                         DosageForm = "таблетки",
-                        ExpirationDate = new DateOnly(2027, 3, 1),
                         IsActive = true,
                         CategoryId = vitaminsCat.Id
                     },
@@ -155,7 +152,6 @@ namespace pharmacyBackend.Data
                         Country = "Россия",
                         IsPrescription = false,
                         DosageForm = "таблетки",
-                        ExpirationDate = new DateOnly(2026, 10, 10),
                         IsActive = true,
                         CategoryId = hemorrhoidCat.Id
                     },
@@ -166,7 +162,6 @@ namespace pharmacyBackend.Data
                         Country = "Великобритания",
                         IsPrescription = true,
                         DosageForm = "аэрозоль 125 мкг",
-                        ExpirationDate = new DateOnly(2026, 11, 11),
                         IsActive = true,
                         CategoryId = bronchialasthmaCat.Id
                     },
@@ -177,7 +172,6 @@ namespace pharmacyBackend.Data
                         Country = "Австрия",
                         IsPrescription = true,
                         DosageForm = "концентрат 100 мкг",
-                        ExpirationDate = new DateOnly(2028, 10 , 22),
                         IsActive = true,
                         CategoryId = sedativesCat.Id
                     },
@@ -188,7 +182,6 @@ namespace pharmacyBackend.Data
                         Country = "Франция",
                         IsPrescription = false,
                         DosageForm = "капсулы 250 мг",
-                        ExpirationDate = new DateOnly(2026, 9, 1),
                         IsActive = true,
                         CategoryId = probioticCat.Id,
                         PictureUrl = "https://res.cloudinary.com/dvsftlg7d/image/upload/v1772548850/enterol_qkfkhz.jpg"
@@ -209,20 +202,20 @@ namespace pharmacyBackend.Data
 
                 var stocks = new Stock[]
                 {
-                    new Stock { ProductId = canephron.Id, PharmacyId = pharmacy1.Id, Price = 27.34m, Quantity = 10 },
-                    new Stock { ProductId = canephron.Id, PharmacyId = pharmacy2.Id, Price = 32.01m, Quantity = 5 },
-                    new Stock { ProductId = bronchipret.Id, PharmacyId = pharmacy1.Id, Price = 22.50m, Quantity = 8 },
-                    new Stock { ProductId = bronchipret.Id, PharmacyId = pharmacy2.Id, Price = 24.90m, Quantity = 3 },
-                    new Stock { ProductId = magneB6.Id, PharmacyId = pharmacy1.Id, Price = 27.90m, Quantity = 6 },
-                    new Stock { ProductId = magneB6.Id, PharmacyId = pharmacy2.Id, Price = 29.50m, Quantity = 4 },
-                    new Stock { ProductId = enterol.Id, PharmacyId = pharmacy1.Id, Price = 26.22m, Quantity = 12 },
-                    new Stock { ProductId = enterol.Id, PharmacyId = pharmacy2.Id, Price = 28.00m, Quantity = 7 },
-                    new Stock { ProductId = detraleks.Id, PharmacyId = pharmacy1.Id, Price = 70.89m, Quantity = 4 },
-                    new Stock { ProductId = detraleks.Id, PharmacyId = pharmacy2.Id, Price = 75.89m, Quantity = 5 },
-                    new Stock { ProductId = flixotide.Id, PharmacyId = pharmacy1.Id, Price = 54.64m, Quantity = 10 },
-                    new Stock { ProductId = flixotide.Id, PharmacyId = pharmacy2.Id, Price = 65.75m, Quantity = 4 },
-                    new Stock { ProductId = dexmedetomidine.Id, PharmacyId = pharmacy1.Id, Price = 77.03m, Quantity = 13 },
-                    new Stock { ProductId = dexmedetomidine.Id, PharmacyId = pharmacy2.Id, Price = 84.30m, Quantity = 9 },
+                    new Stock { ProductId = canephron.Id, PharmacyId = pharmacy1.Id, Price = 27.34m, Quantity = 10, ExpirationDate = new DateOnly(2028, 10 , 22)},
+                    new Stock { ProductId = canephron.Id, PharmacyId = pharmacy2.Id, Price = 32.01m, Quantity = 5, ExpirationDate = new DateOnly(2028, 10 , 22) },
+                    new Stock { ProductId = bronchipret.Id, PharmacyId = pharmacy1.Id, Price = 22.50m, Quantity = 8 , ExpirationDate = new DateOnly(2028, 10 , 22)},
+                    new Stock { ProductId = bronchipret.Id, PharmacyId = pharmacy2.Id, Price = 24.90m, Quantity = 3, ExpirationDate = new DateOnly(2028, 10 , 22) },
+                    new Stock { ProductId = magneB6.Id, PharmacyId = pharmacy1.Id, Price = 27.90m, Quantity = 6, ExpirationDate = new DateOnly(2028, 10 , 22) },
+                    new Stock { ProductId = magneB6.Id, PharmacyId = pharmacy2.Id, Price = 29.50m, Quantity = 4, ExpirationDate = new DateOnly(2028, 10 , 22) },
+                    new Stock { ProductId = enterol.Id, PharmacyId = pharmacy1.Id, Price = 26.22m, Quantity = 12, ExpirationDate = new DateOnly(2028, 10 , 22) },
+                    new Stock { ProductId = enterol.Id, PharmacyId = pharmacy2.Id, Price = 28.00m, Quantity = 7, ExpirationDate = new DateOnly(2028, 10 , 22) },
+                    new Stock { ProductId = detraleks.Id, PharmacyId = pharmacy1.Id, Price = 70.89m, Quantity = 4, ExpirationDate = new DateOnly(2028, 10 , 22) },
+                    new Stock { ProductId = detraleks.Id, PharmacyId = pharmacy2.Id, Price = 75.89m, Quantity = 5, ExpirationDate = new DateOnly(2028, 10 , 22) },
+                    new Stock { ProductId = flixotide.Id, PharmacyId = pharmacy1.Id, Price = 54.64m, Quantity = 10, ExpirationDate = new DateOnly(2028, 10 , 22) },
+                    new Stock { ProductId = flixotide.Id, PharmacyId = pharmacy2.Id, Price = 65.75m, Quantity = 4, ExpirationDate = new DateOnly(2028, 10 , 22) },
+                    new Stock { ProductId = dexmedetomidine.Id, PharmacyId = pharmacy1.Id, Price = 77.03m, Quantity = 13, ExpirationDate = new DateOnly(2028, 10 , 22) },
+                    new Stock { ProductId = dexmedetomidine.Id, PharmacyId = pharmacy2.Id, Price = 84.30m, Quantity = 9, ExpirationDate = new DateOnly(2028, 10 , 22) },
                 };
 
                 context.Stocks.AddRange(stocks);

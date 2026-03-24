@@ -56,6 +56,7 @@ namespace pharmacyBackend.DTO
         public decimal Price { get; set; }
         public int Quantity { get; set; }
         public DateTime LastUpdate { get; set; }
+        public DateOnly ExpirationDate { get; set; }
     }
 
     public class PharmacyStockFullDTO : PharmacyStockDTO
@@ -72,6 +73,9 @@ namespace pharmacyBackend.DTO
 
         [Required(ErrorMessage = "Укажите ID товара.")]
         public int ProductId { get; set; }
+
+        [Required(ErrorMessage = "Срок годности обязателен")]
+        public string ExpirationDate { get; set; } = string.Empty;
 
         [Required]
         [Range(0, 10000, ErrorMessage = "Количество должно быть от 0 до 10000.")]

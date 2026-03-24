@@ -1,6 +1,6 @@
 <template>
   <div class="cart-item">
-    <img :src="item.imageUrl || '/assets/no-image.jpg'" class="item-img" />
+    <img :src="item.pictureUrl || '/assets/no-image.jpg'" class="item-img" />
     
     <div class="item-info">
         <router-link :to="`/product/${item.productId}`" class="item-name">

@@ -120,8 +120,10 @@ namespace pharmacyBackend.Controllers
         [HttpGet("{id}/availibility")]
         public async Task<ActionResult<IEnumerable<PharmacyStockDTO>>> GetProductAvalibility(int id)
         {
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
             var avalibility = await _context.Stocks
-                .Where(s => s.ProductId == id && s.Quantity > 0)
+                .Where(s => s.ProductId == id && s.Quantity > 0 && s.ExpirationDate > today)
                 .Include(s => s.Pharmacy)
                 .ProjectTo<PharmacyStockDTO>(_mapper.ConfigurationProvider)
                 .ToListAsync();
@@ -268,11 +270,6 @@ namespace pharmacyBackend.Controllers
                 IsActive = upload.IsActive,
             };
 
-            if (DateOnly.TryParse(upload.ExpirationDate, out var expDate))
-            {
-                product.ExpirationDate = expDate;
-            }
-
             if (upload.PictureFile != null)
             {
                 product.PictureUrl = await _cloud.UploadFileAsync(upload.PictureFile);
@@ -306,11 +303,6 @@ namespace pharmacyBackend.Controllers
             product.DosageForm = upload.DosageForm;
             product.CategoryId = upload.CategoryId;
             product.IsActive = upload.IsActive;
-
-            if (DateOnly.TryParse(upload.ExpirationDate, out var expDate))
-            {
-                product.ExpirationDate = expDate;
-            }
 
             if (upload.PictureFile != null)
             {

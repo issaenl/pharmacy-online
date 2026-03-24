@@ -66,12 +66,18 @@ namespace pharmacyBackend.Controllers
                 return BadRequest(new { Message = "Этот товар уже есть в аптеке" });
             }
 
+            if (!DateOnly.TryParse(dto.ExpirationDate, out var expDate))
+            {
+                return BadRequest(new { Message = "Неверный формат срока годности." });
+            }
+
             var stock = new Stock
             {
                 PharmacyId = dto.PharmacyId,
                 ProductId = dto.ProductId,
                 Quantity = dto.Quantity,
                 Price = dto.Price,
+                ExpirationDate = expDate,
                 LastUpdate = DateTime.UtcNow
             };
             _context.Stocks.Add(stock);
@@ -98,10 +104,16 @@ namespace pharmacyBackend.Controllers
                 }
             }
 
+            if (!DateOnly.TryParse(dto.ExpirationDate, out var expDate))
+            {
+                return BadRequest(new { Message = "Неверный формат срока годности." });
+            }
+
             stock.PharmacyId = dto.PharmacyId;
             stock.ProductId = dto.ProductId;
             stock.Quantity = dto.Quantity;
             stock.Price = dto.Price;
+            stock.ExpirationDate = expDate;
             stock.LastUpdate = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();

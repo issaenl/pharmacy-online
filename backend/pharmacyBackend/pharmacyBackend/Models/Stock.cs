@@ -20,6 +20,9 @@ namespace pharmacyBackend.Models
         public decimal Price { get; set; }
 
         [Required]
+        public DateOnly ExpirationDate { get; set; }
+
+        [Required]
         [Range(0, int.MaxValue)]
         public int Quantity { get; set; }
 

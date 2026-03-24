@@ -167,8 +167,8 @@ namespace pharmacyBackend.Services
 
             if (extension == ".csv")
             {
-                using var reader = new StreamReader(stream);
-                await reader.ReadLineAsync(); 
+                using var reader = new StreamReader(stream, System.Text.Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
+                await reader.ReadLineAsync();
                 int lineNumber = 1;
 
                 while (!reader.EndOfStream)
@@ -176,8 +176,10 @@ namespace pharmacyBackend.Services
                     lineNumber++;
                     var line = await reader.ReadLineAsync();
                     if (string.IsNullOrWhiteSpace(line)) continue;
+
                     line = line.Trim().Trim('"');
-                    var values = line.Split(new[] { ',', ';' });
+                    var values = line.Split(new[] { ';', '\t', ',' });
+
                     ProcessStockRow(values, lineNumber, pharmaciesDict, productsDict, existingStocks, stocksToAdd, result.Errors, allowedPharmacyId);
                 }
             }
@@ -191,8 +193,11 @@ namespace pharmacyBackend.Services
                 foreach (var row in rows)
                 {
                     lineNumber++;
-                    var values = new string[4];
-                    for (int i = 0; i < 4; i++) values[i] = row.Cell(i + 1).Value.ToString();
+                    var values = new string[5];
+                    for (int i = 0; i < 5; i++)
+                    {
+                        values[i] = row.Cell(i + 1).Value.ToString();
+                    }
 
                     ProcessStockRow(values, lineNumber, pharmaciesDict, productsDict, existingStocks, stocksToAdd, result.Errors, allowedPharmacyId);
                 }
@@ -217,39 +222,46 @@ namespace pharmacyBackend.Services
             Dictionary<string, int> pharmaciesDict, Dictionary<string, int> productsDict,
             HashSet<string> existingStocks, List<Stock> stocksToAdd, List<string> errors, int? allowedPharmacyId = null)
         {
-            if (values.Length < 4)
+            if (values.Length < 5)
             {
-                errors.Add($"Строка {lineNumber}: недостаточно колонок (ожидается 4).");
+                errors.Add($"Строка {lineNumber}: недостаточно колонок (ожидается 5, включая срок годности).");
                 return;
             }
 
             try
             {
-                var pharmacyName = values[0].Trim().ToLower();
-                var productName = values[1].Trim().ToLower();
+                var pharmacyName = values[0].Trim().Trim('"').ToLower();
+                var productName = values[1].Trim().Trim('"').ToLower();
 
                 if (!pharmaciesDict.TryGetValue(pharmacyName, out int pharmacyId))
                 {
-                    errors.Add($"Строка {lineNumber}: Аптека {values[0]} не найдена.");
+                    errors.Add($"Строка {lineNumber}: Аптека '{values[0]}' не найдена.");
                     return;
                 }
 
                 if (allowedPharmacyId.HasValue && allowedPharmacyId.Value != pharmacyId)
                 {
-                    errors.Add($"Строка {lineNumber}: У вас нет прав для изменения остатков в аптеке {values[0]}.");
+                    errors.Add($"Строка {lineNumber}: У вас нет прав для изменения остатков в аптеке '{values[0]}'.");
                     return;
                 }
 
                 if (!productsDict.TryGetValue(productName, out int productId))
                 {
-                    errors.Add($"Строка {lineNumber}: Товар {values[1]} не найден.");
+                    errors.Add($"Строка {lineNumber}: Товар '{values[1]}' не найден.");
                     return;
                 }
 
                 var uniqueKey = $"{pharmacyId}_{productId}";
                 if (existingStocks.Contains(uniqueKey))
                 {
-                    errors.Add($"Строка {lineNumber}: Запас для товара {values[1]} в аптеке {values[0]} уже существует.");
+                    errors.Add($"Строка {lineNumber}: Запас для товара '{values[1]}' в аптеке '{values[0]}' уже существует. Обновите его вручную.");
+                    return;
+                }
+
+                var dateString = values[4].Trim().Trim('"');
+                if (!DateOnly.TryParse(dateString, out var expirationDate))
+                {
+                    errors.Add($"Строка {lineNumber}: неверный формат срока годности '{values[4]}'. Ожидается дата (например, 31.12.2025).");
                     return;
                 }
 
@@ -257,8 +269,9 @@ namespace pharmacyBackend.Services
                 {
                     PharmacyId = pharmacyId,
                     ProductId = productId,
-                    Quantity = int.Parse(values[2].Trim()),
-                    Price = decimal.Parse(values[3].Trim().Replace(".", ",")),
+                    Quantity = int.Parse(values[2].Trim().Trim('"')),
+                    Price = decimal.Parse(values[3].Trim().Trim('"').Replace(".", ",")),
+                    ExpirationDate = expirationDate,
                     LastUpdate = DateTime.UtcNow
                 };
 

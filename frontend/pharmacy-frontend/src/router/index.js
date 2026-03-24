@@ -17,6 +17,7 @@ import AdminStock from '@/views/admin/AdminStock.vue';
 import AdminCategory from '@/views/admin/AdminCategory.vue';
 import AdminOrder from '@/views/admin/AdminOrder.vue';
 import AdminUsers from '@/views/admin/AdminUsers.vue';
+import AdminStats from '@/views/admin/AdminStats.vue';
 
 const routes = [
   {
@@ -81,6 +82,11 @@ const routes = [
     component: AdminMain,
     meta: { requiresAuth: true, requiresAdmin: true }, 
     children: [
+      {
+        path: '',
+        name: 'admin-stats',
+        component: AdminStats
+      },
       {
         path: 'products',
         name: 'admin-products',

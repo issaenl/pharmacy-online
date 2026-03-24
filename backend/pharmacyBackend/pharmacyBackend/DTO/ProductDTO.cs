@@ -77,7 +77,6 @@ namespace pharmacyBackend.DTO
         [Required] public string Country { get; set; } = string.Empty;
         public bool IsPrescription { get; set; }
         [Required] public string DosageForm { get; set; } = string.Empty;
-        public string? ExpirationDate { get; set; } 
         public int CategoryId { get; set; }
         public bool IsActive { get; set; } = true;
 

@@ -97,9 +97,6 @@
                         </option>
                     </select>
                 </label>
-                <label>Срок годности 
-                    <input type="date" v-model="form.expirationDate" required />
-                </label>
               
                 <div class="checkboxes">
                     <label><input type="checkbox" v-model="form.isPrescription" /> Рецептурный</label>
@@ -183,7 +180,7 @@ const importErrors = ref([]);
 
 const form = ref({
   name: '', manufacturer: '', country: '', dosageForm: '',
-  categoryId: '', expirationDate: '', isPrescription: false, isActive: true,
+  categoryId: '', isPrescription: false, isActive: true,
   pictureUrl: null, pdfUrl: null
 });
 
@@ -283,8 +280,7 @@ const openModal = (product = null) => {
   pdfFile.value = null;
   if (product && product.id) {
     form.value = {
-      ...product,
-      expirationDate: product.expirationDate ? product.expirationDate.split('T')[0] : ''
+      ...product
     };
   } else {
     form.value = { 
@@ -293,7 +289,6 @@ const openModal = (product = null) => {
       country: '', 
       dosageForm: '', 
       categoryId: '', 
-      expirationDate: '', 
       isPrescription: false, 
       isActive: true, 
       pictureUrl: null, 
@@ -331,10 +326,6 @@ const saveProduct = async () => {
     formData.append('CategoryId', form.value.categoryId);
     formData.append('IsPrescription', form.value.isPrescription);
     formData.append('IsActive', form.value.isActive);
-
-    if (form.value.expirationDate) {
-      formData.append('ExpirationDate', form.value.expirationDate);
-    }
     
     if (photoFile.value) 
     {

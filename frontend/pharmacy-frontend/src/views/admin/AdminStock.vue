@@ -49,7 +49,10 @@
             <th @click="sortBy('price')" class="sortable">
               Цена <span v-if="sortKey === 'price'" class="sort-icon">{{ sortOrder === 1 ? '▲' : '▼' }}</span>
             </th>
-            <th>Последнее обновление</th>
+            <th @click="sortBy('expirationDate')" class="sortable">
+              Годен до <span v-if="sortKey === 'expirationDate'" class="sort-icon">{{ sortOrder === 1 ? '▲' : '▼' }}</span>
+            </th>
+            <th>Обновлено</th>
             <th>Действия</th>
           </tr>
         </thead>
@@ -61,7 +64,14 @@
               <span :class="{'out-of-stock': stock.quantity === 0}">{{ stock.quantity }} шт.</span>
             </td>
             <td>{{ stock.price }} руб.</td>
-            <td class="text-muted">{{ new Date(stock.lastUpdate).toLocaleString() }}</td>
+            
+            <td>
+              <span :class="{'out-of-stock': new Date(stock.expirationDate) < new Date()}">
+                {{ new Date(stock.expirationDate).toLocaleDateString('ru-RU') }}
+              </span>
+            </td>
+            
+            <td class="text-muted">{{ new Date(stock.lastUpdate).toLocaleDateString('ru-RU') }}</td>
             <TableActions 
                 @edit="openModal(stock)" 
                 @delete="deleteStock(stock.id)" />
@@ -109,8 +119,13 @@
                 <label>Цена (руб)
                   <input type="number" min="0.01" v-model="form.price" step="0.01" required />
                 </label>
+                <label>Срок годности партии
+                  <input type="date" v-model="form.expirationDate" required />
+                </label>
             </div>
           </div>
+
+          
 
           <div class="modal-actions">
             <button type="button" class="btn-cancel" @click="closeModal">Отмена</button>
@@ -160,7 +175,8 @@ const form = ref({
   pharmacyId: isPharmacyAdmin.value ? myPharmacyId : '', 
   productId: '', 
   quantity: 0, 
-  price: 0
+  price: 0,
+  expirationDate: ''
 });
 
 const fetchData = async () => {
@@ -216,14 +232,16 @@ const openModal = (stock = null) => {
       pharmacyId: stock.pharmacyId, 
       productId: stock.productId, 
       quantity: stock.quantity, 
-      price: stock.price 
+      price: stock.price,
+      expirationDate: stock.expirationDate ? stock.expirationDate.split('T')[0] : '' 
     };
   } else {
     form.value = { 
       pharmacyId: isPharmacyAdmin.value ? myPharmacyId : (selectedPharmacyFilter.value || ''), 
       productId: '', 
       quantity: 1, 
-      price: 100 
+      price: 100,
+      expirationDate: '' 
     };
   }
 };
@@ -330,7 +348,7 @@ const {
 }
 
 .out-of-stock {
-  color: #e74c3c;
+  color: var(--accent-color);
   font-weight: bold;
 }
 
