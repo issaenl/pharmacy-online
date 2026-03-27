@@ -44,12 +44,14 @@ namespace pharmacyBackend.Controllers
             }
 
             var query = _context.Pharmacies.AsQueryable();
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
             foreach (var item in cartItems)
             {
                 query = query.Where(p => p.Stocks.Any(s =>
                     s.ProductId == item.ProductId &&
-                    s.Quantity >= item.Quantity));
+                    s.Quantity >= item.Quantity &&
+                    s.ExpirationDate > today));
             }
 
             var availablePharmacies = await query

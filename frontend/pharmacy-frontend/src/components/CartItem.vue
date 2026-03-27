@@ -7,7 +7,10 @@
             {{ item.productName }}
         </router-link>
         
-        <div class="item-price">от {{ item.unitPrice.toFixed(2) }} р.</div>
+        <div class="item-price">
+          <template v-if="!orderStore.selectedPharmacy">от </template>
+          {{ item.unitPrice.toFixed(2) }} р.
+        </div>
     </div>
 
 
@@ -44,6 +47,7 @@
 import { defineProps } from 'vue';
 import { useCartStore } from '@/stores/cartStore';
 import { useFavoriteStore } from '@/stores/favoriteStore';
+import { useOrderStore } from '@/stores/orderStore';
 
 const props = defineProps({
   item: {
@@ -54,6 +58,7 @@ const props = defineProps({
 
 const cartStore = useCartStore();
 const favoriteStore = useFavoriteStore();
+const orderStore = useOrderStore();
 </script>
 
 <style scoped>

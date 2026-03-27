@@ -10,13 +10,15 @@ namespace pharmacyBackend.Mappers
             //лекарства
             CreateMap<Product, ProductShortDTO>()
                 .ForMember(dest => dest.MinPrice, opt => opt.MapFrom(src =>
-                    src.Stocks.Any() ? src.Stocks.Min(s => s.Price) : 0));
+                    src.Stocks.Where(s => s.Quantity > 0 && s.ExpirationDate > DateOnly.FromDateTime(DateTime.UtcNow)).Any()
+                    ? src.Stocks.Where(s => s.Quantity > 0 && s.ExpirationDate > DateOnly.FromDateTime(DateTime.UtcNow)).Min(s => s.Price): 0));
 
             CreateMap<Product, ProductMediumDTO>()
                 .IncludeBase<Product, ProductShortDTO>() 
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
                 .ForMember(dest => dest.MaxPrice, opt => opt.MapFrom(src =>
-                    src.Stocks.Any() ? src.Stocks.Max(s => s.Price) : 0));
+                    src.Stocks.Where(s => s.Quantity > 0 && s.ExpirationDate > DateOnly.FromDateTime(DateTime.UtcNow)).Any()
+                    ? src.Stocks.Where(s => s.Quantity > 0 && s.ExpirationDate > DateOnly.FromDateTime(DateTime.UtcNow)).Max(s => s.Price): 0));
 
             CreateMap<Product, ProductLongDTO>()
                 .IncludeBase<Product, ProductMediumDTO>()

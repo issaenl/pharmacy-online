@@ -1,11 +1,22 @@
 <template>
   <div class="admin-dashboard">
     <div class="header-actions">
-      <h2>Обзорная панель</h2>
-      <button class="btn-primary refresh-btn" @click="fetchStats" :disabled="isLoading">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :class="{ 'spin': isLoading }"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-        Обновить
-      </button>
+      <h2>Статистика</h2>
+      
+      <div class="actions-right">
+        <select v-model="selectedPeriod" @change="fetchStats" class="period-select">
+          <option value="today">За сегодня</option>
+          <option value="week">За неделю</option>
+          <option value="month">За месяц</option>
+          <option value="year">За год</option>
+          <option value="all">За все время</option>
+        </select>
+
+        <button class="btn-primary refresh-btn" @click="fetchStats" :disabled="isLoading">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :class="{ 'spin': isLoading }"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+          Обновить
+        </button>
+      </div>
     </div>
 
     <div v-if="isLoading && !stats" class="loading-state">
@@ -20,7 +31,7 @@
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>
           </div>
           <div class="metric-info">
-            <div class="metric-label">Выручка за текущий день</div>
+            <div class="metric-label">Выручка ({{ periodLabel }})</div>
             <div class="metric-value">{{ formatPrice(revenue) }} р.</div>
           </div>
         </div>
@@ -30,7 +41,7 @@
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
           </div>
           <div class="metric-info">
-            <div class="metric-label">{{ isSuperAdmin ? 'Всего заказов' : 'Выдано заказов' }}</div>
+            <div class="metric-label">{{ isSuperAdmin ? 'Заказов' : 'Выдано' }} ({{ periodLabel }})</div>
             <div class="metric-value">{{ ordersCount }}</div>
           </div>
         </div>
@@ -46,28 +57,14 @@
           </div>
         </div>
 
-       <div class="metric-card alert">
-        <div class="metric-icon warning">
-            <svg 
-            width="24" 
-            height="24" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            stroke-width="2" 
-            stroke-linecap="round" 
-            stroke-linejoin="round" 
-            style="overflow: visible;"
-            >
-            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-            <line x1="12" y1="9" x2="12" y2="13"></line>
-            <line x1="12" y1="17" x2="12.01" y2="17"></line>
-            </svg>
-        </div>
-        <div class="metric-info">
+        <div class="metric-card alert">
+          <div class="metric-icon warning">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          </div>
+          <div class="metric-info">
             <div class="metric-label">Заканчивается (менее 5 шт)</div>
             <div class="metric-value danger">{{ lowStock }} поз.</div>
-        </div>
+          </div>
         </div>
       </div>
 
@@ -93,7 +90,7 @@
           </div>
         </div>
 
-        <div class="dashboard-panel panel-danger">
+        <div class="dashboard-panel panel-warning">
           <h3 class="panel-title">Срок годности истекает в ближайший месяц</h3>
           <div class="list-container">
             <div v-for="(prod, index) in stats.expiringProducts" :key="'exp-'+index" class="list-item">
@@ -114,7 +111,7 @@
         </div>
         
         <div class="dashboard-panel">
-          <h3 class="panel-title">Топ-5 продаваемых товаров в этом месяце</h3>
+          <h3 class="panel-title">Топ-5 продаваемых товаров ({{ periodLabel }})</h3>
           <div class="list-container">
             <div v-for="(prod, index) in stats.topProducts" :key="'top-'+index" class="list-item">
               <div class="item-left">
@@ -145,6 +142,18 @@ const toast = useToast({ position: 'bottom-right' });
 
 const stats = ref(null);
 const isLoading = ref(false);
+const selectedPeriod = ref('today');
+
+const periodLabel = computed(() => {
+  const labels = {
+    'today': 'за сегодня',
+    'week': 'за неделю',
+    'month': 'за месяц',
+    'year': 'за год',
+    'all': 'за всё время'
+  };
+  return labels[selectedPeriod.value];
+});
 
 const isSuperAdmin = computed(() => authStore.user?.role === 2 || authStore.user?.role === 'Admin');
 
@@ -156,11 +165,11 @@ const fetchStats = async () => {
   isLoading.value = true;
   try {
     if (isSuperAdmin.value) {
-      const response = await api.get('/Admin/admin');
+      const response = await api.get(`/Admin/admin?period=${selectedPeriod.value}`);
       stats.value = response.data;
     } else {
       const pharmacyId = authStore.user?.pharmacyId || 1;
-      const response = await api.get(`/Admin/pharmacy/${pharmacyId}`); 
+      const response = await api.get(`/Admin/pharmacy/${pharmacyId}?period=${selectedPeriod.value}`); 
       stats.value = response.data;
     }
   } catch (error) {
@@ -205,6 +214,27 @@ const formatDate = (dateString) => {
   margin: 0;
   color: #000;
   font-size: 28px;
+}
+
+.actions-right { 
+  display: flex; 
+  gap: 15px; 
+  align-items: center; 
+}
+
+.period-select { 
+  padding: 10px 15px; 
+  border-radius: 12px; 
+  border: 1px solid #ddd; 
+  font-family: inherit; 
+  font-size: 15px; 
+  outline: none; 
+  background: #fff; 
+  cursor: pointer;
+}
+
+.period-select:focus { 
+  border-color: var(--primary-color); 
 }
 
 .refresh-btn {
@@ -278,11 +308,30 @@ const formatDate = (dateString) => {
   flex-shrink: 0;
 }
 
-.metric-icon.money { background: #E8F4EA; color: #689D6D; }
-.metric-icon.orders { background: #Eef2ff; color: #3b82f6; }
-.metric-icon.pharmacy { background: #f3faf1; color: #B3CCAE; }
-.metric-icon.pending { background: #fef3c7; color: #f0d159; }
-.metric-icon.warning { background: #FDE8E8; color: #BB4E58; }
+.metric-icon.money { 
+  background: #E8F4EA; 
+  color: #689D6D; 
+}
+
+.metric-icon.orders { 
+  background: #Eef2ff; 
+  color: #3b82f6; 
+}
+
+.metric-icon.pharmacy { 
+  background: #f3faf1; 
+  color: #B3CCAE; 
+}
+
+.metric-icon.pending { 
+  background: #fef3c7; 
+  color: #f0d159; 
+}
+
+.metric-icon.warning { 
+  background: #FDE8E8; 
+  color: #BB4E58; 
+}
 
 .metric-info {
   display: flex;

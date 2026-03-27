@@ -28,5 +28,6 @@ namespace pharmacyBackend.Models
 
         [ForeignKey("PharmacyId")]
         public Pharmacy? Pharmacy { get; set; }
+        public bool IsBanned { get; set; } = false;
     }
 }

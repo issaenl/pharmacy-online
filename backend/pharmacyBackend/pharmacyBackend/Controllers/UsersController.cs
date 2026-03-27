@@ -22,6 +22,97 @@ namespace pharmacyBackend.Controllers
             _configuration = configuration;
         }
 
+        [HttpGet("customers")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<IEnumerable<object>>> GetCustomers()
+        {
+            var customers = await _context.Users
+                .Where(u => u.Role == UserRole.User)
+                .Select(u => new
+                {
+                    u.Id,
+                    u.FirstName,
+                    u.LastName,
+                    u.Email,
+                    u.Phone,
+                    u.IsBanned,
+                    OrdersCount = _context.Orders.Count(o => o.UserId == u.Id)
+                })
+                .ToListAsync();
+
+            return Ok(customers);
+        }
+
+        [HttpPut("ban/{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult> ToggleBanStatus(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound("Пользователь не найден");
+            }
+
+            if (user.Role != UserRole.User)
+            {
+                return BadRequest("Банить можно только обычных покупателей");
+            }
+
+            user.IsBanned = !user.IsBanned;
+            await _context.SaveChangesAsync();
+
+            var statusStr = user.IsBanned ? "заблокирован" : "разблокирован";
+            return Ok(new { message = $"Пользователь успешно {statusStr}" });
+        }
+
+        [HttpDelete("delete-customer/{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult> DeleteCustomer(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+
+            if (user == null)
+            {
+                return NotFound("Пользователь не найден");
+            }
+
+            if (user.Role != UserRole.User)
+            {
+                return BadRequest("Этот метод предназначен только для удаления обычных покупателей");
+            }
+
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Аккаунт покупателя успешно удален" });
+        }
+
+
+        [HttpPut("reset-customer-password/{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult> ResetCustomerPassword(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+
+            if (user == null)
+            {
+                return NotFound(new { message = "Пользователь не найден" });
+            }
+
+            if (user.Role != UserRole.User)
+            {
+                return BadRequest(new { message = "Этот метод предназначен только для покупателей" });
+            }
+
+            var defaultPassword = _configuration["DefaultPassword:Password"];
+
+            user.Password = BCrypt.Net.BCrypt.HashPassword(defaultPassword);
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = $"Пароль успешно сброшен на: {defaultPassword}" });
+        }
+
 
         [HttpGet("admins")]
         public async Task<ActionResult<IEnumerable<AdminDTO>>> GetEmployees()

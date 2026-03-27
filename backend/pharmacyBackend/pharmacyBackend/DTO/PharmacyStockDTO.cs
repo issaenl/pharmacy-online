@@ -52,7 +52,8 @@ namespace pharmacyBackend.DTO
         public string PharmacyName { get; set; } = string.Empty;
         public string PharmacyAddress { get; set; } = string.Empty;
         public string? PharmacyPhone { get; set; }
-
+        public double? PharmacyLatitude { get; set; }
+        public double? PharmacyLongitude { get; set; }
         public decimal Price { get; set; }
         public int Quantity { get; set; }
         public DateTime LastUpdate { get; set; }

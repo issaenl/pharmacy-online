@@ -7,6 +7,9 @@
     
     <div class="pharmacy-address-col">
       <div class="pharmacy-address">{{ pharmacy.pharmacyAddress }}</div>
+      <div v-if="pharmacy.expirationDate" class="expiration-date">
+        Годен до: {{ formatExpDate(pharmacy.expirationDate) }}
+      </div>
     </div>
     
     <div class="pharmacy-pricing">
@@ -58,6 +61,12 @@ const formatDate = (dateString) => {
 
     return `${time}, ${dayMonthYear}`;
 };
+
+const formatExpDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
+};
 </script>
 
 <style scoped>
@@ -90,6 +99,19 @@ const formatDate = (dateString) => {
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;  
         overflow: hidden;
+    }
+
+    .expiration-date { 
+        display: inline-flex; 
+        align-items: center; 
+        gap: 5px; 
+        font-size: 13px; 
+        font-weight: 600; 
+        color: var(--primary-color); 
+        background-color: #E8F4EA; 
+        padding: 4px 10px; 
+        border-radius: 8px; 
+        width: fit-content; 
     }
 
     .pharmacy-name { 

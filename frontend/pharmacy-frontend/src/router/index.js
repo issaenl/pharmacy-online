@@ -18,6 +18,7 @@ import AdminCategory from '@/views/admin/AdminCategory.vue';
 import AdminOrder from '@/views/admin/AdminOrder.vue';
 import AdminUsers from '@/views/admin/AdminUsers.vue';
 import AdminStats from '@/views/admin/AdminStats.vue';
+import AdminCustomers from '@/views/admin/AdminCustomers.vue';
 
 const routes = [
   {
@@ -109,6 +110,12 @@ const routes = [
         path: 'users',
         name: 'admin-users',
         component: AdminUsers,
+        meta: { superAdminOnly: true }
+      },
+       {
+        path: 'customers',
+        name: 'admin-customers',
+        component: AdminCustomers,
         meta: { superAdminOnly: true }
       },
       {

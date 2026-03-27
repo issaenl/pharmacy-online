@@ -20,18 +20,30 @@ namespace pharmacyBackend.Controllers
         }
 
 
-        [Authorize(Roles = "Admin")]
-        [HttpGet("admin")]
-        public async Task<ActionResult<GeneralAdminDTO>> GetGeneralAdminStatistics()
+        private DateTime GetStartDate(string period)
         {
             var today = DateTime.UtcNow.Date;
-            var monthAgo = today.AddMonths(-1);
-            var expirationThreshold = today.AddMonths(1);
+            return period?.ToLower() switch
+            {
+                "week" => today.AddDays(-7),
+                "month" => today.AddMonths(-1),
+                "year" => today.AddYears(-1),
+                "all" => DateTime.MinValue,
+                _ => today
+            };
+        }
 
+        [Authorize(Roles = "Admin")]
+        [HttpGet("admin")]
+        public async Task<ActionResult<GeneralAdminDTO>> GetGeneralAdminStatistics([FromQuery] string period = "today")
+        {
+            var startDate = GetStartDate(period);
+            var expirationThreshold = DateTime.UtcNow.Date.AddMonths(1);
             var totalRevenue = await _context.Orders
-                .Where(o => o.Status == Enums.OrderStatus.Completed)
+                .Where(o => o.Status == OrderStatus.Completed && o.OrderDate >= startDate)
                 .SumAsync(o => o.TotalPrice);
-            var ordersToday = await _context.Orders.CountAsync(o => o.OrderDate.Date == today);
+
+            var ordersPeriod = await _context.Orders.CountAsync(o => o.OrderDate >= startDate);
             var activePharmacies = await _context.Pharmacies.CountAsync();
             var totalProducts = await _context.Products.CountAsync();
             var lowStockCount = await _context.Stocks.CountAsync(s => s.Quantity < 5);
@@ -50,7 +62,7 @@ namespace pharmacyBackend.Controllers
                 })
                 .ToListAsync();
             var topProducts = await _context.OrderItems
-                .Where(oi => oi.Order.Status == Enums.OrderStatus.Completed && oi.Order.OrderDate >= monthAgo)
+                .Where(oi => oi.Order.Status == OrderStatus.Completed && oi.Order.OrderDate >= startDate)
                 .GroupBy(oi => new { oi.ProductId, oi.Product.Name })
                 .Select(g => new TopProductDTO
                 {
@@ -78,7 +90,7 @@ namespace pharmacyBackend.Controllers
             var stats = new GeneralAdminDTO
             {
                 TotalRevenue = totalRevenue,
-                OrdersToday = ordersToday,
+                OrdersToday = ordersPeriod,
                 ActivePharmacies = activePharmacies,
                 TotalProducts = totalProducts,
                 GlobalLowStockCount = lowStockCount,
@@ -91,17 +103,15 @@ namespace pharmacyBackend.Controllers
 
         [Authorize(Roles = "PharmacyAdmin")]
         [HttpGet("pharmacy/{pharmacyId}")]
-        public async Task<ActionResult<PharmacyAdminDTO>> GetPharmacyAdminStatistics(int pharmacyId)
+        public async Task<ActionResult<PharmacyAdminDTO>> GetPharmacyAdminStatistics(int pharmacyId, [FromQuery] string period = "today")
         {
-            var today = DateTime.UtcNow.Date;
-            var monthAgo = today.AddMonths(-1);
-            var expirationThreshold = today.AddMonths(1);
-
-            var revenueToday = await _context.Orders
-                .Where(o => o.Status == Enums.OrderStatus.Completed && o.PharmacyId == pharmacyId)
+            var startDate = GetStartDate(period);
+            var expirationThreshold = DateTime.UtcNow.Date.AddMonths(1);
+            var revenuePeriod = await _context.Orders
+                .Where(o => o.Status == OrderStatus.Completed && o.PharmacyId == pharmacyId && o.OrderDate >= startDate)
                 .SumAsync(o => o.TotalPrice);
             var pendingOrders = await _context.Orders.CountAsync(o => o.PharmacyId == pharmacyId && o.Status == OrderStatus.Pending);
-            var completedToday = await _context.Orders.CountAsync(o => o.PharmacyId == pharmacyId && o.Status == OrderStatus.Completed && o.OrderDate.Date == today);
+            var completedPeriod = await _context.Orders.CountAsync(o => o.PharmacyId == pharmacyId && o.Status == OrderStatus.Completed && o.OrderDate >= startDate);
             var lowStockCount = await _context.Stocks.CountAsync(s => s.PharmacyId == pharmacyId && s.Quantity < 5);
             var lowStockProducts = await _context.Stocks
                 .Include(s => s.Product)
@@ -116,7 +126,7 @@ namespace pharmacyBackend.Controllers
                 })
                 .ToListAsync();
             var topProducts = await _context.OrderItems
-                .Where(oi => oi.Order.PharmacyId == pharmacyId && oi.Order.Status == OrderStatus.Completed && oi.Order.OrderDate >= monthAgo)
+                .Where(oi => oi.Order.PharmacyId == pharmacyId && oi.Order.Status == OrderStatus.Completed && oi.Order.OrderDate >= startDate)
                 .GroupBy(oi => new { oi.ProductId, oi.Product.Name })
                 .Select(g => new TopProductDTO
                 {
@@ -141,9 +151,9 @@ namespace pharmacyBackend.Controllers
                  .ToListAsync();
             var stats = new PharmacyAdminDTO
             {
-                RevenueToday = revenueToday,
+                RevenueToday = revenuePeriod,
                 PendingOrders = pendingOrders,
-                CompletedTodayOrders = completedToday,
+                CompletedTodayOrders = completedPeriod,
                 LowStockCount = lowStockCount,
                 LowStockProducts = lowStockProducts,
                 TopProducts = topProducts,

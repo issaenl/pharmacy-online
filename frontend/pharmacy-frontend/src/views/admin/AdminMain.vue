@@ -10,6 +10,7 @@
         <router-link v-if="isAdmin" to="/admin/products" active-class="active">Продукты</router-link>
         <router-link v-if="isAdmin" to="/admin/categories" active-class="active">Категории</router-link>
         <router-link v-if="isAdmin" to="/admin/pharmacies" active-class="active">Аптеки</router-link>
+        <router-link v-if="isAdmin" to="/admin/customers" active-class="active">Покупатели</router-link>
         <router-link v-if="isAdmin || isPharmacyAdmin" to="/admin/stocks" active-class="active">Наличие</router-link>
         <router-link v-if="isAdmin || isPharmacyAdmin" to="/admin/orders" active-class="active">Заказы</router-link>
       </nav>
