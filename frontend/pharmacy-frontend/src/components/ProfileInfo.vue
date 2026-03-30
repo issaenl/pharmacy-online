@@ -1,7 +1,7 @@
 <template>
   <div class="profile-info-component">
     <div class="section-header">
-      <h2>Данные пользователя</h2>
+      <h2>Профиль</h2>
       <button v-if="!isEditingProfile" @click="startEditingProfile" class="edit-text-btn">Изменить данные</button>
     </div>
     

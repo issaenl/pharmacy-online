@@ -1,26 +1,46 @@
 <template>
   <div class="order-card" :class="{ expanded: isExpanded }">
     <div class="order-header" @click="toggleExpand">
-      <div class="header-left">
-        <div class="order-id">Заказ №{{ order.id }}</div>
-        <div class="order-date">{{ formatDate(order.orderDate) }}</div>
-      </div>
       
-      <div class="header-center">
-        <div class="order-pharmacy">{{ order.pharmacyName }}</div>
-        <div class="order-status" :class="statusClass">{{ statusText }}</div>
+      <div class="header-top">
+        <div class="header-left">
+          <div class="order-id">Заказ №{{ order.id }}</div>
+          <div class="order-date">{{ formatDate(order.orderDate) }}</div>
+        </div>
+        
+        <div class="header-center">
+          <div class="order-pharmacy">{{ order.pharmacyName }}</div>
+          <div class="order-status" :class="statusClass">{{ statusText }}</div>
+        </div>
+
+        <div class="header-right">
+          <div class="order-price">{{ order.totalPrice.toFixed(2) }} р.</div>
+          <button class="expand-btn">
+            <svg v-if="!isExpanded" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            <svg v-else width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+          </button>
+        </div>
       </div>
 
-      <div class="header-right">
-        <div class="order-price">{{ order.totalPrice.toFixed(2) }} р.</div>
-        <button class="expand-btn">
-          <svg v-if="!isExpanded" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-          <svg v-else width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+      <div class="order-actions" @click.stop>
+        <button 
+          v-if="order.status === 2 && !order.hasReview" 
+          class="action-btn review-btn" 
+          @click.stop="$emit('review', order.id)">
+          Оценить аптеку
         </button>
+
+        <span v-if="order.status === 2 && order.hasReview" class="reviewed-badge">
+          ✓ Отзыв оставлен
+        </span>
+
+        <button class="action-btn repeat-btn" @click.stop="repeatOrder">Повторить заказ</button>
+        <button v-if="order.status === 0" class="action-btn cancel-btn" @click.stop="cancelOrder">Отменить заказ</button>
       </div>
+
     </div>
 
-    <div class="order-details" v-if="isExpanded">
+    <div class="order-details" v-if="isExpanded" @click.stop>
       <div class="details-info">
         <p><strong>Адрес самовывоза:</strong> {{ order.pharmacyAddress }}</p>
       </div>
@@ -31,11 +51,6 @@
           <span class="item-qty-price">{{ item.quantity }} шт. x {{ item.price.toFixed(2) }} р.</span>
           <span class="item-total">{{ item.totalPrice.toFixed(2) }} р.</span>
         </div>
-      </div>
-
-      <div class="order-actions">
-        <button class="action-btn repeat-btn" @click="repeatOrder">Повторить заказ</button>
-        <button v-if="order.status === 0" class="action-btn cancel-btn" @click="cancelOrder">Отменить заказ</button>
       </div>
     </div>
   </div>
@@ -52,7 +67,7 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['cancel']);
+const emit = defineEmits(['cancel', 'review']);
 const cartStore = useCartStore();
 const isExpanded = ref(false);
 
@@ -122,20 +137,25 @@ const cancelOrder = () => {
 
     .order-header {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
+        flex-direction: column;
         padding: 20px;
         cursor: pointer;
         background: #fff;
+        gap: 15px;
     }
 
     .order-header:hover {
         background: #FAFAFA;
     }
 
-    .header-left {
-        flex: 1;
+    .header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
     }
+
+    .header-left { flex: 1; }
 
     .order-id {
         font-weight: 700;
@@ -144,10 +164,7 @@ const cancelOrder = () => {
         margin-bottom: 5px;
     }
 
-    .order-date {
-        font-size: 14px;
-        color: #888;
-    }
+    .order-date { font-size: 14px; color: #888; }
 
     .header-center {
         flex: 1;
@@ -168,30 +185,11 @@ const cancelOrder = () => {
         font-weight: 600;
     }
 
-    .status-pending {
-        background: #fcf1d6;
-        color: #F3C301;
-    }
-
-    .status-ready {
-        background: #E8F4EA;
-        color: #689D6D;
-    }
-
-    .status-completed {
-        background: #F0F0F0;
-        color: #333;
-    }
-
-    .status-cancelled {
-        background: #FDE8E8;
-        color: #BB4E58;
-    }
-
-    .status-expired {
-        background: #F5F5F5;
-        color: #888;
-    }
+    .status-pending { background: #fcf1d6; color: #F3C301; }
+    .status-ready { background: #E8F4EA; color: #689D6D; }
+    .status-completed { background: #F0F0F0; color: #333; }
+    .status-cancelled { background: #FDE8E8; color: #BB4E58; }
+    .status-expired { background: #F5F5F5; color: #888; }
 
     .header-right {
         flex: 1;
@@ -217,62 +215,14 @@ const cancelOrder = () => {
         justify-content: center;
     }
 
-    .order-details {
-        padding: 0 20px 20px 20px;
-        border-top: 1px solid #F0F0F0;
-        background: #FAFAFA;
-    }
-
-    .details-info {
-        margin: 15px 0;
-        font-size: 16px;
-        color: #000;
-    }
-
-    .items-list {
-        background: white;
-        border-radius: 10px;
-        padding: 15px;
-        margin-bottom: 20px;
-        border: 1px solid #eee;
-    }
-
-    .order-item-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 8px 0;
-        border-bottom: 1px dashed #eee;
-        font-size: 16px;
-    }
-
-    .order-item-row:last-child {
-        border-bottom: none;
-        padding-bottom: 0;
-    }
-
-    .item-name {
-        flex: 2;
-        color: #000;
-        font-weight: 500;
-    }
-
-    .item-qty-price {
-        flex: 1;
-        color: #888;
-        text-align: center;
-    }
-
-    .item-total {
-        flex: 1;
-        color: #000;
-        font-weight: 600;
-        text-align: right;
-    }
-
     .order-actions {
         display: flex;
         gap: 15px;
         justify-content: flex-end;
+        align-items: center;
+        width: 100%;
+        padding-top: 15px;
+        border-top: 1px dashed #eee;
     }
 
     .action-btn {
@@ -281,7 +231,6 @@ const cancelOrder = () => {
         font-size: 16px;
         font-weight: 600;
         cursor: pointer;
-        border: none;
         font-family: var(--main-font);
         transition: 0.2s;
     }
@@ -289,48 +238,71 @@ const cancelOrder = () => {
     .repeat-btn {
         background: var(--primary-color);
         color: white;
+        border: none;
     }
-
-    .repeat-btn:hover {
-        filter: brightness(0.9);
-    }
+    .repeat-btn:hover { filter: brightness(0.9); }
 
     .cancel-btn {
         background: transparent;
-        border: 1px solid #BB4E58;
+        border: 1px solid #BB4E58 !important;
         color: #BB4E58;
     }
+    .cancel-btn:hover { background: #BB4E58; color: white; }
 
-    .cancel-btn:hover {
-        background: #BB4E58;
+    .review-btn {
+        background-color: white;
+        color: var(--primary-color);
+        border: 1px solid var(--primary-color) !important; 
+    }
+    .review-btn:hover {
+        background: var(--primary-color);
         color: white;
     }
 
+    .reviewed-badge {
+        color: #888;
+        font-size: 16px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .order-details {
+        padding: 0 20px 20px 20px;
+        background: #fff;
+    }
+
+    .details-info { margin: 0 0 15px 0; font-size: 16px; color: #000; }
+
+    .items-list {
+        background: #FAFAFA;
+        border-radius: 10px;
+        padding: 15px;
+        border: 1px solid #eee;
+    }
+
+    .order-item-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px dashed #e0e0e0;
+        font-size: 16px;
+    }
+
+    .order-item-row:last-child { border-bottom: none; padding-bottom: 0; }
+
+    .item-name { flex: 2; color: #000; font-weight: 500; }
+    .item-qty-price { flex: 1; color: #888; text-align: center; }
+    .item-total { flex: 1; color: #000; font-weight: 600; text-align: right; }
+
     @media (max-width: 768px) {
-        .order-header {
-            flex-direction: column;
-            align-items: stretch;
-            gap: 10px;
-        }
-        
-        .header-left, 
-        .header-center {
-            width: 100%;
-            text-align: left;
-        }
-        
-        .header-right {
-            width: 100%;
-            justify-content: space-between;
-        }
-        
-        .order-item-row {
-            flex-direction: column;
-            gap: 5px;
-        }
-        
-        .item-qty-price, .item-total {
-            text-align: left;
-        }
+        .header-top { flex-direction: column; align-items: stretch; gap: 10px; }
+        .header-left, .header-center { width: 100%; text-align: left; }
+        .header-right { width: 100%; justify-content: space-between; }
+        .order-actions { flex-direction: column; align-items: stretch; gap: 10px; }
+        .action-btn { width: 100%; text-align: center; }
+        .order-item-row { flex-direction: column; gap: 5px; }
+        .item-qty-price, .item-total { text-align: left; }
     }
 </style>

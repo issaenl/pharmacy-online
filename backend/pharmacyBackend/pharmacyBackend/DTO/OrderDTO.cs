@@ -44,6 +44,7 @@ namespace pharmacyBackend.DTO
     public class OrderWithItemsDTO : OrderDTO
     {
         public string PharmacyAddress { get; set; } = string.Empty;
+        public bool HasReview { get; set; }
         public List<OrderItemDTO> Items { get; set; } = new();
     }
 

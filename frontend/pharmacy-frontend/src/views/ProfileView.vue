@@ -13,13 +13,19 @@
           <button 
             :class="['menu-item', { active: currentTab === 'info' }]" 
             @click="currentTab = 'info'">
-            Личные данные
+            Профиль
           </button>
           
           <button 
             :class="['menu-item', { active: currentTab === 'orders' }]" 
             @click="currentTab = 'orders'">
             История заказов
+          </button>
+
+          <button 
+            :class="['menu-item', { active: currentTab === 'reviews' }]" 
+            @click="currentTab = 'reviews'">
+            Мои отзывы
           </button>
         </nav>
 
@@ -29,6 +35,7 @@
       <main class="profile-content">
         <ProfileInfo v-if="currentTab === 'info'" />
         <ProfileOrders v-if="currentTab === 'orders'" />
+        <ProfileReviews v-if="currentTab === 'reviews'" />
       </main>
       
     </div>
@@ -42,6 +49,7 @@ import { useAuthStore } from '@/stores/authStore';
 import TheHeader from '@/components/Header.vue';
 import ProfileInfo from '@/components/ProfileInfo.vue';
 import ProfileOrders from '@/components/ProfileOrders.vue';
+import ProfileReviews from '@/components/ProfileReviews.vue';
 
 const authStore = useAuthStore();
 const router = useRouter();
