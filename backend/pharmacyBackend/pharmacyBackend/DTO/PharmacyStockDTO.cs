@@ -11,6 +11,7 @@ namespace pharmacyBackend.DTO
         public string Address { get; set; } = string.Empty;
         public string Phone { get; set; } = string.Empty;
         public double? Rating { get; set; }
+        public string? PhotoUrl { get; set; }
     }
 
     public class PharmacyFullDTO : PharmacyDTO
@@ -44,6 +45,7 @@ namespace pharmacyBackend.DTO
 
         [Range(-180.0, 180.0, ErrorMessage = "Долгота должна быть от -180 до 180.")]
         public double? Longitude { get; set; }
+        public string? PhotoUrl { get; set; }
     }
 
     public class PharmacyStockDTO
@@ -85,5 +87,19 @@ namespace pharmacyBackend.DTO
         [Required]
         [Range(0.01, 100000, ErrorMessage = "Цена должна быть больше нуля.")]
         public decimal Price { get; set; }
+    }
+
+    public class PharmacyAssortmentDTO
+    {
+        public int ProductId { get; set; }
+        public string ProductName { get; set; } = string.Empty;
+        public string DosageForm { get; set; } = string.Empty;
+        public string Manufacturer { get; set; } = string.Empty;
+        public string Country { get; set; } = string.Empty;
+        public int Quantity { get; set; }
+        public decimal Price { get; set; }
+        public string? PictureUrl { get; set; }
+        public DateOnly ExpirationDate { get; set; }
+        public DateTime LastUpdate { get; set; }
     }
 }

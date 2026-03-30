@@ -1,5 +1,5 @@
 <template>
-  <div class="pharmacy-item">
+  <div class="pharmacy-item" @click="goToPharmacy">
     <div class="pharmacy-main-info">
       <div class="pharmacy-name">{{ pharmacy.pharmacyName }}</div>
       <div class="update-time">Последнее обновление: {{ formatDate(pharmacy.lastUpdate) }}</div>
@@ -20,8 +20,8 @@
     </div>
 
     <div class="pharmacy-actions">
-      <button class="book-btn" @click="$emit('book', pharmacy)">Забронировать</button>
-      <button class="call-btn" :title="pharmacy.pharmacyPhone">
+      <button class="book-btn" @click.stop="$emit('book', pharmacy)">Забронировать</button>
+      <button class="call-btn" :title="pharmacy.pharmacyPhone" @click.stop>
         <img src="/assets/Phone.svg" alt="Позвонить" class="phone-icon">
       </button>
     </div>
@@ -29,6 +29,8 @@
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router';
+
 const props = defineProps({
   pharmacy: {
     type: Object,
@@ -37,6 +39,15 @@ const props = defineProps({
 });
 
 defineEmits(['book']);
+
+const router = useRouter();
+
+const goToPharmacy = () => {
+  const id = props.pharmacy.pharmacyId || props.pharmacy.id;
+  if (id) {
+    router.push(`/pharmacy/${id}`);
+  }
+};
 
 const formatPrice = (price) => {
   if (price == null) return '0.00';
@@ -72,12 +83,14 @@ const formatExpDate = (dateString) => {
 <style scoped>
     .pharmacy-item {
         display: grid;
-        grid-template-columns: 2fr 1.5fr 1fr 240px;
+        grid-template-columns: 2fr 1.5fr 1fr minmax(260px, auto);
         align-items: center;
         padding: 15px 25px;
         background: #fff;
         border-radius: 30px;
         margin-bottom: 10px;
+        cursor: pointer;
+        transition: 0.2s;
     }
 
     .pharmacy-item:hover {
@@ -89,6 +102,13 @@ const formatExpDate = (dateString) => {
         display: flex;
         flex-direction: column;
         gap: 4px;
+    }
+
+    .pharmacy-address-col { 
+        display: flex; 
+        flex-direction: column; 
+        gap: 6px; 
+        align-items: flex-start;
     }
 
     .pharmacy-address { 
@@ -107,8 +127,8 @@ const formatExpDate = (dateString) => {
         gap: 5px; 
         font-size: 13px; 
         font-weight: 600; 
-        color: var(--primary-color); 
-        background-color: #E8F4EA; 
+        background: #E8F4EA;
+        color: #689D6D;
         padding: 4px 10px; 
         border-radius: 8px; 
         width: fit-content; 
@@ -146,7 +166,6 @@ const formatExpDate = (dateString) => {
         gap: 10px; 
         justify-content: flex-end; 
         align-items: center;
-    
     }
 
     .book-btn {
@@ -187,7 +206,7 @@ const formatExpDate = (dateString) => {
 
     @media (max-width: 1024px) {
         .pharmacy-item {
-            grid-template-columns: 1.5fr 1fr 0.8fr 200px;
+            grid-template-columns: 1.5fr 1fr 0.8fr minmax(200px, auto);
             padding: 15px;
             border-radius: 20px;
         }
@@ -212,32 +231,12 @@ const formatExpDate = (dateString) => {
             padding: 20px;
         }
 
-        .pharmacy-main-info { 
-            grid-area: info; 
-        }
-
-        .pharmacy-pricing {
-            grid-area: pricing; 
-            align-items: flex-end; 
-        }
-
-        .pharmacy-address-col { 
-            grid-area: address; 
-        }
-
-        .pharmacy-actions { 
-            grid-area: actions; 
-            margin-top: 5px; 
-        }
-
-        .pharmacy-price { 
-            font-size: 18px; 
-        }
-
-        .pharmacy-address { 
-            -webkit-line-clamp: 1; 
-            min-height: auto; 
-        }
+        .pharmacy-main-info { grid-area: info; }
+        .pharmacy-pricing { grid-area: pricing; align-items: flex-end; }
+        .pharmacy-address-col { grid-area: address; }
+        .pharmacy-actions { grid-area: actions; margin-top: 5px; }
+        .pharmacy-price { font-size: 18px; }
+        .pharmacy-address { -webkit-line-clamp: 1; min-height: auto; }
     }
 
     @media (max-width: 480px) {

@@ -702,8 +702,7 @@ onMounted(async () => {
 
   .filter-group label {
     font-weight: 600;
-    color: #555;
-    font-size: 14px;
+    font-size: 16px;
   }
 
   .filter-select {
@@ -712,7 +711,7 @@ onMounted(async () => {
     border: 1px solid #ddd;
     outline: none;
     font-family: inherit;
-    font-size: 14px;
+    font-size: 16px;
     min-width: 150px;
   }
 

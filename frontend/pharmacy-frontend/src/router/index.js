@@ -19,6 +19,7 @@ import AdminOrder from '@/views/admin/AdminOrder.vue';
 import AdminUsers from '@/views/admin/AdminUsers.vue';
 import AdminStats from '@/views/admin/AdminStats.vue';
 import AdminCustomers from '@/views/admin/AdminCustomers.vue';
+import PharmacyView from '@/views/PharmacyView.vue';
 
 const routes = [
   {
@@ -76,7 +77,11 @@ const routes = [
     name: 'favorites',
     component: FavoriteView
   },
-
+  {
+    path: '/pharmacy/:id',
+    name: 'pahrmacy-detail',
+    component: PharmacyView
+  },
 
   {
     path: '/admin',

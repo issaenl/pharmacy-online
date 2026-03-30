@@ -23,7 +23,6 @@ namespace pharmacyBackend.DTO
 
     public class ProductLongDTO : ProductMediumDTO
     {
-        public DateOnly ExpirationDate { get; set; }
         public string? PdfUrl { get; set; }
         public int CategoryId { get; set; }
         public List<PharmacyStockDTO> AvailableIn { get; set; } = new();

@@ -150,5 +150,43 @@ namespace pharmacyBackend.Controllers
             await _context.SaveChangesAsync();
             return Ok(new { Message = "Аптека удалена" });
         }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<PharmacyFullDTO>> GetPharmacyById(int id)
+        {
+            var pharmacy = await _context.Pharmacies
+                .ProjectTo<PharmacyFullDTO>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync(p => p.Id == id);
+            if (pharmacy == null)
+            {
+                return NotFound();
+            }
+            return Ok(pharmacy);
+        }
+
+        [HttpGet("{id}/assortiment")]
+        public async Task<ActionResult<IEnumerable<PharmacyAssortmentDTO>>> GetPharmacyAssortiment(int id)
+        {
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            var assortiment = await _context.Stocks
+                .Include(s => s.Product)
+                .Where(s => s.PharmacyId == id && s.Quantity > 0 && s.ExpirationDate > today)
+                .Select(s => new PharmacyAssortmentDTO
+                {
+                    ProductId = s.ProductId,
+                    ProductName = s.Product.Name,
+                    Quantity = s.Quantity,
+                    DosageForm = s.Product.DosageForm,
+                    Manufacturer = s.Product.Manufacturer,
+                    Country = s.Product.Country,
+                    Price = s.Price,
+                    PictureUrl = s.Product.PictureUrl,
+                    ExpirationDate = s.ExpirationDate,
+                    LastUpdate = s.LastUpdate
+                })
+                .OrderBy(s => s.ProductName)
+                .ToListAsync();
+            return Ok(assortiment);
+        }
     }
 }

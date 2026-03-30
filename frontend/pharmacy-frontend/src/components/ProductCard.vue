@@ -26,7 +26,14 @@
         <h4 class="title">{{ product.name }}</h4>
         <div class="dosage">{{ product.dosageForm }}</div>
       </div>
-      <div class="price">от {{ formatPrice(product.minPrice) }} р.</div>
+
+      <div v-if="product.expirationDate" class="expiration-date">
+        Годен до: {{ formatExpDate(product.expirationDate) }}
+      </div>
+
+      <div class="price">
+        <span v-if="!exactPrice">от </span>{{ formatPrice(product.minPrice) }} р.
+      </div>
     </div>
 
     <button class="cart-btn" @click.stop="addToCart">
@@ -54,6 +61,10 @@ const props = defineProps({
     type: Object,
     required: true,
     default: () => ({})
+  },
+  exactPrice: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -81,6 +92,12 @@ const addToCart = () => {
 const formatPrice = (price) => {
   if (price == null) return '0.00';
   return Number(price).toFixed(2);
+};
+
+const formatExpDate = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
 };
 </script>
 
@@ -179,6 +196,19 @@ const formatPrice = (price) => {
     font-size: 12px; 
     color: #999; 
     margin-bottom: 10px; 
+  }
+
+  .expiration-date { 
+    display: inline-flex; 
+    align-items: center; 
+    font-size: 14px; 
+    font-weight: 600; 
+    background: #E8F4EA;
+    color: #689D6D;
+    padding: 4px 8px; 
+    border-radius: 6px; 
+    margin-bottom: 10px;
+    width: fit-content; 
   }
 
   .price { 

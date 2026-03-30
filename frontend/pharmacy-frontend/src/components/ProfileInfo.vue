@@ -1,7 +1,7 @@
 <template>
   <div class="profile-info-component">
     <div class="section-header">
-      <h2>Личные данные</h2>
+      <h2>Данные пользователя</h2>
       <button v-if="!isEditingProfile" @click="startEditingProfile" class="edit-text-btn">Изменить данные</button>
     </div>
     
@@ -48,7 +48,7 @@
     </form>
 
     <div class="section-header security-header">
-      <h2>Безопасность</h2>
+      <h2>Смена пароля</h2>
       <button v-if="!isChangingPassword" @click="isChangingPassword = true" class="edit-text-btn">Изменить пароль</button>
     </div>
 
@@ -244,15 +244,19 @@ const handlePhoneInput = (event) => {
         padding: 30px; 
         border-radius: 20px; 
         box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
-        display: grid; 
-        grid-template-columns: 1fr 1fr; 
-        gap: 20px; 
+        display: block; 
     }
 
     .info-group { 
         display: flex; 
         flex-direction: column; 
         gap: 8px; 
+        max-width: 400px; 
+        margin-bottom: 20px; 
+    }
+    
+    .info-group:last-child {
+        margin-bottom: 0;
     }
 
     .info-group label { 
@@ -267,10 +271,25 @@ const handlePhoneInput = (event) => {
         padding: 12px; 
         background: #F9F9F9; 
         border-radius: 10px; 
+        width: 100%; 
+        box-sizing: border-box;
+    }
+
+    .edit-form .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        max-width: 400px; 
+        margin-bottom: 20px; 
+    }
+
+    .edit-form .form-group label {
+        font-size: 14px; 
+        color: #888; 
     }
 
     .edit-form .form-group input { 
-        width: 100%; 
+        width: 100%;
         padding: 12px; 
         border: 1px solid #ddd; 
         border-radius: 10px; 
@@ -287,15 +306,14 @@ const handlePhoneInput = (event) => {
         background: #fff; 
     }
 
-    .full-width { 
-        grid-column: 1 / -1; 
-    }
-
     .form-actions { 
         display: flex; 
         gap: 15px; 
-        grid-column: 1 / -1; 
-        margin-top: 10px; 
+        margin-top: 20px; 
+    }
+    
+    .danger-card .form-actions {
+        margin-top: 20px;
     }
 
     .save-btn { 
@@ -334,6 +352,7 @@ const handlePhoneInput = (event) => {
         color: #BB4E58; 
         font-size: 14px; 
         margin: 0; 
+        margin-bottom: 10px;
     }
 
     .success-msg { 
@@ -341,6 +360,7 @@ const handlePhoneInput = (event) => {
         font-size: 14px; 
         margin: 0; 
         font-weight: 600; 
+        margin-bottom: 10px;
     }
 
     .danger-zone { 
@@ -357,6 +377,7 @@ const handlePhoneInput = (event) => {
         font-size: 14px; 
         color: #BB4E58; 
         margin: 0; 
+        max-width: 600px; 
     }
 
     .delete-btn { 
@@ -381,9 +402,4 @@ const handlePhoneInput = (event) => {
         cursor: not-allowed; 
     }
 
-    @media (max-width: 768px) {
-        .info-card { 
-            grid-template-columns: 1fr;
-        }
-    }
 </style>

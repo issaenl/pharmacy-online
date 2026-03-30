@@ -23,6 +23,8 @@ namespace pharmacyBackend.Models
         [Required]
         public double Longitude { get; set; }
         
+        public string? PhotoUrl { get; set; }
+
         public double? Rating { get; set; }
 
         public ICollection<Stock> Stocks { get; set; }
