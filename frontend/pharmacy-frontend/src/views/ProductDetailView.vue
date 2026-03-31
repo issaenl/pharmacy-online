@@ -97,11 +97,11 @@
           @book="handleBookClick"
         />
         
-        <div v-if="filteredPharmacies.length > itemsPerPage" class="pagination">
-          <button class="page-arrow" @click="setPage(currentPage - 1)" :disabled="currentPage === 1">‹</button>
-          <button v-for="page in totalPages" :key="page" :class="['page-num', { active: currentPage === page }]" @click="setPage(page)">{{ page }}</button>
-          <button class="page-arrow" @click="setPage(currentPage + 1)" :disabled="currentPage === totalPages">›</button>
-        </div>
+        <AppPagination 
+          :current-page="currentPage" 
+          :total-pages="totalPages" 
+          @update:currentPage="setPage" 
+        />
       </div>
 
       <div v-show="viewMode === 'map'" class="map-view-container">
@@ -144,6 +144,7 @@ import PharmacyItem from '@/components/PharmacyItem.vue';
 import TheHeader from '@/components/Header.vue';
 import QuickOrderModal from '@/components/QuickOrderModal.vue';
 import api from '@/api/api';
+import AppPagination from '@/components/admin/AppPagination.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -589,54 +590,6 @@ onMounted(async () => {
     background: white;
   }
 
-  .page-num, .page-arrow { 
-    width: 44px; 
-    height: 44px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    border-radius: 50%; 
-    border: none; 
-    cursor: pointer; 
-    font-size: 16px; 
-    font-weight: 600; 
-    transition: all 0.2s ease; 
-    background: #f0f0f0; 
-    color: #333; 
-  }
-
-  .page-arrow { 
-    color: #888; 
-    background: #f0f0f0; 
-  }
-
-  .page-arrow:not(:disabled):hover { 
-    background: #e0e0e0; 
-    color: #000; 
-  }
-
-  .page-arrow:disabled { 
-    cursor: not-allowed; 
-    opacity: 0.5; 
-  }
-
-  .page-num.active { 
-    background: #689D6D; 
-    color: #fff; 
-  }
-
-  .page-num:not(.active):hover { 
-    background: #e5e5e5; 
-  }
-
-  .pagination { 
-    display: flex; 
-    justify-content: center; 
-    align-items: center; 
-    gap: 12px; 
-    margin: 40px 0; 
-  }
-
   .pharmacies-section {
     background: white;
     border-radius: 30px;
@@ -802,17 +755,6 @@ onMounted(async () => {
       width: 100%; 
       font-size: 16px; 
       padding: 12px; 
-    }
-    
-    .pagination { 
-      gap: 6px; 
-      flex-wrap: wrap; 
-    }
-    
-    .page-num, .page-arrow { 
-      width: 38px; 
-      height: 38px; 
-      font-size: 14px; 
     }
     
     .pdf-title { 

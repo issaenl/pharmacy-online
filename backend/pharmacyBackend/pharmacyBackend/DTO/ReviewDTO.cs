@@ -24,6 +24,7 @@ namespace pharmacyBackend.DTO
         public int Rating { get; set; }
         public string? Comment { get; set; }
         public ReviewStatus Status { get; set; }
+        public string? RejectReason { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }

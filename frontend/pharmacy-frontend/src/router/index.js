@@ -20,6 +20,7 @@ import AdminUsers from '@/views/admin/AdminUsers.vue';
 import AdminStats from '@/views/admin/AdminStats.vue';
 import AdminCustomers from '@/views/admin/AdminCustomers.vue';
 import PharmacyView from '@/views/PharmacyView.vue';
+import AdminReviews from '@/views/admin/AdminReviews.vue';
 
 const routes = [
   {
@@ -121,6 +122,12 @@ const routes = [
         path: 'customers',
         name: 'admin-customers',
         component: AdminCustomers,
+        meta: { superAdminOnly: true }
+      },
+      {
+        path: 'reviews',
+        name: 'admin-reviews',
+        component: AdminReviews,
         meta: { superAdminOnly: true }
       },
       {

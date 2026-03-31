@@ -14,6 +14,7 @@ namespace pharmacyBackend.Models
         public string? Comment { get; set; }
 
         public ReviewStatus Status { get; set; } = ReviewStatus.Pending;
+        public string? RejectReason { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

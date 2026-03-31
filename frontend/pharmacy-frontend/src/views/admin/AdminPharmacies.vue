@@ -23,9 +23,9 @@
             </th>
             <th>Адрес</th>
             <th>Телефон</th>
-            <th>Рейтинг</th>
             <th>Координаты</th>
-            <th>Действия</th> </tr>
+            <th>Действия</th> 
+          </tr>
         </thead>
         <tbody>
           <tr v-for="pharmacy in paginatedPharmacies" :key="pharmacy.id">
@@ -33,10 +33,6 @@
             <td>{{ pharmacy.district }}</td>
             <td>{{ pharmacy.address }}</td>
             <td>{{ pharmacy.phone }}</td>
-            <td>
-              <span class="rating-badge" v-if="pharmacy.rating">{{ pharmacy.rating }}</span>
-              <span v-else class="text-muted">—</span>
-            </td>
             <td class="coords">
               <span v-if="pharmacy.latitude && pharmacy.longitude">
                 {{ pharmacy.latitude.toFixed(4) }}, {{ pharmacy.longitude.toFixed(4) }}
@@ -48,7 +44,7 @@
                 @delete="deletePharmacy(pharmacy.id)" />
           </tr>
           <tr v-if="sortedAndFilteredPharmacies.length === 0">
-            <td colspan="7" class="text-center text-muted" style="padding: 30px;">
+            <td colspan="6" class="text-center text-muted" style="padding: 30px;">
               Аптеки не найдены
             </td>
           </tr>
@@ -64,7 +60,7 @@
 
     <Modal 
       :show="showModal" 
-      :title="isEditing ? 'Редактировать категорию' : 'Новая категория'"
+      :title="isEditing ? 'Редактировать аптеку' : 'Новая аптека'"
       @close="closeModal">
         <form @submit.prevent="savePharmacy" class="pharmacy-form">
           <div class="form-grid">
@@ -73,9 +69,6 @@
                 <label>Область <input v-model="form.district" required placeholder="Гомельская" /></label>
                 <label>Адрес <input v-model="form.address" required placeholder="ул. Ленина, д. 10" /></label>
                 <label>Телефон <input v-model="form.phone" required placeholder="+375 (00) 000-00-00" /></label>
-                <label>Рейтинг (0-5) 
-                  <input type="number" step="0.1" min="0" max="5" v-model="form.rating" />
-                </label>
             </div>
 
             <div class="form-column">
@@ -124,7 +117,7 @@ const isLoading = ref(false);
 const searchQuery = ref('');
 
 const form = ref({
-  name: '', district: '', address: '', phone: '', rating: null, latitude: null, longitude: null
+  name: '', district: '', address: '', phone: '', latitude: null, longitude: null
 });
 
 const fetchPharmacies = async () => {
@@ -152,7 +145,6 @@ const openModal = (pharmacy = null) => {
       district: '', 
       address: '', 
       phone: '', 
-      rating: null, 
       latitude: null, 
       longitude: null 
     };
@@ -168,7 +160,6 @@ const savePharmacy = async () => {
       address: form.value.address,
       district: form.value.district,
       phone: form.value.phone,
-      rating: form.value.rating ? parseFloat(form.value.rating) : null,
       latitude: form.value.latitude ? parseFloat(form.value.latitude) : null,
       longitude: form.value.longitude ? parseFloat(form.value.longitude) : null
     };
@@ -210,7 +201,6 @@ const deletePharmacy = async (id) => {
   }
 };
 
-
 const sortedAndFilteredPharmacies = computed(() => {
   let result = pharmacies.value.filter(p => 
     p.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
@@ -244,14 +234,5 @@ const {
 <style scoped>
 .admin-pharmacies {
   padding: 20px;
-}
-
-.rating-badge {
-  background: #fff8e1;
-  color: #d97706;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-weight: bold;
-  font-size: 13px;
 }
 </style>

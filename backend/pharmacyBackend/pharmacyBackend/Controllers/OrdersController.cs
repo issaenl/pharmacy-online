@@ -213,7 +213,7 @@ namespace pharmacyBackend.Controllers
                 PharmacyName = o.Pharmacy.Name,
                 PharmacyAddress = o.Pharmacy.Address,
                 Status = o.Status,
-                HasReview = _context.Reviews.Any(r => r.OrderId == o.Id),
+                HasReview = _context.Reviews.Any(r => r.OrderId == o.Id && r.Status != ReviewStatus.Rejected),
                 Items = o.OrderItems.Select(oi => new OrderItemDTO
                 {
                     ProductId = oi.ProductId,

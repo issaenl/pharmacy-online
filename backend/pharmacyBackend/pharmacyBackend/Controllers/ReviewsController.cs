@@ -35,14 +35,28 @@ namespace pharmacyBackend.Controllers
             if (order.Status != OrderStatus.Completed)
                 return BadRequest("Отзыв можно оставить только после того, как заказ будет выполнен.");
 
-            bool alreadyReviewed = await _context.Reviews.AnyAsync(r => r.OrderId == dto.OrderId);
-            if (alreadyReviewed)
-                return BadRequest("Вы уже оставили отзыв к этому заказу.");
+            var existingReview = await _context.Reviews.FirstOrDefaultAsync(r => r.OrderId == dto.OrderId);
 
+            if (existingReview != null)
+            {
+                if (existingReview.Status != ReviewStatus.Rejected)
+                {
+                    return BadRequest("Вы уже оставили отзыв к этому заказу.");
+                }
+
+                existingReview.Rating = dto.Rating;
+                existingReview.Comment = dto.Comment;
+                existingReview.Status = ReviewStatus.Pending;
+                existingReview.RejectReason = null;
+                existingReview.CreatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+                return Ok(new { message = "Ваш исправленный отзыв отправлен на модерацию." });
+            }
             var review = new Review
             {
                 UserId = userId,
-                PharmacyId = order.PharmacyId, 
+                PharmacyId = order.PharmacyId,
                 OrderId = dto.OrderId,
                 Rating = dto.Rating,
                 Comment = dto.Comment,
@@ -82,7 +96,7 @@ namespace pharmacyBackend.Controllers
 
         [HttpPut("{id}/moderate")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult> ModerateReview(int id, [FromQuery] ReviewStatus newStatus)
+        public async Task<ActionResult> ModerateReview(int id, [FromQuery] ReviewStatus newStatus, [FromQuery] string? rejectReason = null)
         {
             var review = await _context.Reviews.Include(r => r.Pharmacy).FirstOrDefaultAsync(r => r.Id == id);
 
@@ -91,6 +105,15 @@ namespace pharmacyBackend.Controllers
                 return NotFound("Отзыв не найден");
             }
             review.Status = newStatus;
+            if (newStatus == ReviewStatus.Rejected)
+            {
+                review.RejectReason = rejectReason;
+            }
+            else
+            {
+                review.RejectReason = null;
+            }
+
             await _context.SaveChangesAsync();
 
             var avgRating = await _context.Reviews
@@ -98,7 +121,6 @@ namespace pharmacyBackend.Controllers
                 .AverageAsync(r => (double?)r.Rating);
 
             review.Pharmacy.Rating = avgRating.HasValue ? Math.Round(avgRating.Value, 1) : null;
-
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "Статус отзыва обновлен, рейтинг аптеки пересчитан." });
@@ -121,6 +143,27 @@ namespace pharmacyBackend.Controllers
                     Rating = r.Rating,
                     Comment = r.Comment,
                     Status = r.Status,
+                    RejectReason = r.RejectReason,
+                    CreatedAt = r.CreatedAt
+                })
+                .ToListAsync();
+
+            return Ok(reviews);
+        }
+
+        [HttpGet("pharmacy/{pharmacyId}")]
+        public async Task<ActionResult<IEnumerable<ReviewAdminDTO>>> GetPharmacyReviews(int pharmacyId)
+        {
+            var reviews = await _context.Reviews
+                .Include(r => r.User)
+                .Where(r => r.PharmacyId == pharmacyId && r.Status == ReviewStatus.Approved)
+                .OrderByDescending(r => r.CreatedAt)
+                .Select(r => new ReviewAdminDTO
+                {
+                    Id = r.Id,
+                    UserName = r.User.FirstName,
+                    Rating = r.Rating,
+                    Comment = r.Comment,
                     CreatedAt = r.CreatedAt
                 })
                 .ToListAsync();
