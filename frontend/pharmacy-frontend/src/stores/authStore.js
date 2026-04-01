@@ -8,21 +8,13 @@ import { useFavoriteStore } from './favoriteStore';
 const extractErrorMessage = (error) => {
   if (error.response && error.response.data) {
     const data = error.response.data;
-    
     if (data.errors && typeof data.errors === 'object') {
       const firstField = Object.keys(data.errors)[0];
       return data.errors[firstField][0];
     }
-    
-    if (typeof data === 'string') {
-      return data;
-    }
-
-    if (data.title) {
-      return data.title;
-    }
+    if (typeof data === 'string') return data;
+    if (data.title) return data.title;
   }
-  
   return error.message || 'Произошла непредвиденная ошибка';
 };
 
@@ -34,32 +26,46 @@ export const useAuthStore = defineStore('auth', () => {
     api.defaults.headers.common['Authorization'] = `Bearer ${token.value}`;
   }
 
-  const login = async (loginCredential, password) => {
-  try {
-    const response = await api.post('/Auth/login', { login: loginCredential, password });
-    
-    token.value = response.data.token;
-    user.value = response.data.user;
-    
-    localStorage.setItem('token', token.value);
-    localStorage.setItem('user', JSON.stringify(user.value));
-    
-    api.defaults.headers.common['Authorization'] = `Bearer ${token.value}`;
-
+  const fetchUser = async () => {
+    if (!token.value) return;
     try {
-      const cartStore = useCartStore();
-      const favoriteStore = useFavoriteStore();
-      await cartStore.syncCart();
-      await favoriteStore.syncFavorites();
+      const response = await api.get('/Auth/me');
+      user.value = response.data;
+      localStorage.setItem('user', JSON.stringify(user.value));
     } catch (error) {
-      console.error(error);
+      console.error("Ошибка обновления профиля", error);
+      if (error.response?.status === 401 || error.response?.status === 404) {
+        logout();
+      }
     }
-  } catch (error) {
-    throw extractErrorMessage(error); 
-  }
-};
+  };
 
-const register = async (userData) => {
+  const login = async (loginCredential, password) => {
+    try {
+      const response = await api.post('/Auth/login', { login: loginCredential, password });
+      
+      token.value = response.data.token;
+      user.value = response.data.user;
+      
+      localStorage.setItem('token', token.value);
+      localStorage.setItem('user', JSON.stringify(user.value));
+      
+      api.defaults.headers.common['Authorization'] = `Bearer ${token.value}`;
+
+      try {
+        const cartStore = useCartStore();
+        const favoriteStore = useFavoriteStore();
+        await cartStore.syncCart();
+        await favoriteStore.syncFavorites();
+      } catch (error) {
+        console.error(error);
+      }
+    } catch (error) {
+      throw extractErrorMessage(error); 
+    }
+  };
+
+  const register = async (userData) => {
     try {
       await api.post('/Auth/register', userData);
       await login(userData.phone, userData.password);
@@ -110,5 +116,8 @@ const register = async (userData) => {
     logout();
   };
 
-  return { token, user, login, register, logout, updateProfile, changePassword, deleteAccount };
+  return { 
+    token, user, 
+    login, register, logout, updateProfile, changePassword, deleteAccount, fetchUser
+  };
 });

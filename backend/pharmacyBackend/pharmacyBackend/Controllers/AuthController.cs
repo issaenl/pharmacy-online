@@ -174,5 +174,18 @@ namespace pharmacyBackend.Controllers
 
             return Ok(new {Message = "Аккаунт удален"});
         }
+
+        [Authorize]
+        [HttpGet("me")]
+        public async Task<ActionResult<UserDataDTO>> GetMe()
+        {
+            var userId = GetUserId();
+            var user = await _context.Users.FindAsync(userId);
+
+            if (user == null)
+                return NotFound("Пользователь не найден");
+
+            return Ok(_mapper.Map<UserDataDTO>(user));
+        }
     }
 }

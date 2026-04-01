@@ -56,8 +56,12 @@ const router = useRouter();
 
 const currentTab = ref('info'); 
 
-onMounted(() => {
-  if (!authStore.token) router.push('/login');
+onMounted(async () => {
+  if (!authStore.token) {
+    router.push('/login');
+  } else {
+    await authStore.fetchUser();
+  }
 });
 
 const userInitials = computed(() => {

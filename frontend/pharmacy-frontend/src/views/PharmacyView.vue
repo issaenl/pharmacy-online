@@ -76,21 +76,11 @@
 
       <div class="reviews-list-container" v-if="pharmacyReviews.length > 0">
         <div class="reviews-grid">
-          <div v-for="rev in pharmacyReviews.slice(0, 3)" :key="rev.id" class="review-bubble">
-            <div class="bubble-header">
-              <div class="bubble-user">
-                <div class="avatar">{{ rev.userName.charAt(0) }}</div>
-                <div class="user-meta">
-                  <div class="author-name">{{ rev.userName }}</div>
-                  <div class="bubble-stars">
-                    <span v-for="n in 5" :key="n" :class="{'filled': n <= rev.rating}">★</span>
-                  </div>
-                </div>
-              </div>
-              <div class="review-date">{{ formatDate(rev.createdAt) }}</div>
-            </div>
-            <p class="bubble-text" v-if="rev.comment">{{ rev.comment }}</p>
-          </div>
+          <ReviewCard 
+            v-for="rev in pharmacyReviews.slice(0, 3)" 
+            :key="rev.id" 
+            :review="rev" 
+          />
         </div>
 
         <div class="reviews-footer">
@@ -148,7 +138,8 @@ import { useRoute } from 'vue-router';
 import { useToast } from 'vue-toast-notification';
 import ProductCard from '@/components/ProductCard.vue'; 
 import TheHeader from '@/components/Header.vue';
-import AppPagination from '@/components/admin/AppPagination.vue';
+import AppPagination from '@/components/AppPagination.vue';
+import ReviewCard from '@/components/ReviewCard.vue';
 import api from '@/api/api';
 
 const route = useRoute();

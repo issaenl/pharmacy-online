@@ -21,6 +21,7 @@ import AdminStats from '@/views/admin/AdminStats.vue';
 import AdminCustomers from '@/views/admin/AdminCustomers.vue';
 import PharmacyView from '@/views/PharmacyView.vue';
 import AdminReviews from '@/views/admin/AdminReviews.vue';
+import PharmacyAllReviews from '@/views/PharmacyAllReviews.vue';
 
 const routes = [
   {
@@ -82,6 +83,11 @@ const routes = [
     path: '/pharmacy/:id',
     name: 'pahrmacy-detail',
     component: PharmacyView
+  },
+  {
+    path: '/pharmacy/:id/reviews',
+    name: 'pahrmacy-reviews',
+    component: PharmacyAllReviews
   },
 
   {

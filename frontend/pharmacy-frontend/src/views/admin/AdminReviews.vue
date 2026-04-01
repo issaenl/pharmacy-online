@@ -41,9 +41,7 @@
             <td>{{ review.pharmacyName }}</td>
             <td><span class="order-badge">№{{ review.orderId }}</span></td>
             <td class="text-center">
-              <span class="rating-badge" :class="getRatingColor(review.rating)">
-                ★ {{ review.rating }}
-              </span>
+              <RatingBadge :rating="review.rating" />
             </td>
             <td class="comment-cell">
               <div class="comment-text" :title="review.comment">{{ review.comment || '—' }}</div>
@@ -64,6 +62,14 @@
                 title="Отклонить (скрыть)"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+
+              <button 
+                class="icon-action-btn hover-ban" 
+                @click="banUser(review.userId, review.userName, review.id)"
+                title="Заблокировать пользователя"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
               </button>
             </td>
           </tr>
@@ -124,6 +130,7 @@
 <script setup>
 import TablePagination from '@/components/admin/TablePagination.vue';
 import Modal from '@/components/admin/Modal.vue';
+import RatingBadge from '@/components/RatingBadge.vue';
 import { usePagination } from '@/logic/pagination';
 import { useSorting } from '@/logic/sorting';
 import { ref, computed, onMounted } from 'vue';
@@ -155,6 +162,32 @@ const fetchPendingReviews = async () => {
 };
 
 onMounted(() => { fetchPendingReviews(); });
+
+const banUser = async (userId, userName, reviewId) => {
+  if (!userId) {
+    toast.error("Ошибка: ID пользователя неизвестен.");
+    return;
+  }
+
+  if (!confirm(`Вы уверены, что хотите заблокировать покупателя ${userName}? Его аккаунт будет заблокирован, а текущий отзыв автоматически отклонен.`)) {
+    return;
+  }
+
+  try {
+    const banResponse = await api.put(`/Users/ban/${userId}`);
+    toast.success(banResponse.data.message || `Пользователь ${userName} заблокирован`);
+    if (reviewId) {
+      const reason = encodeURIComponent("Aккаунт заблокирован за нарушение правил сервиса.");
+      await api.put(`/Reviews/${reviewId}/moderate?newStatus=2&rejectReason=${reason}`);
+      toast.success("Отзыв автоматически отклонен");
+    }
+    await fetchPendingReviews();
+    
+  } catch (error) {
+    console.error(error);
+    toast.error("Ошибка при блокировке пользователя или отклонении отзыва");
+  }
+};
 
 const openRejectModal = (id) => {
   currentRejectReviewId.value = id;
@@ -205,13 +238,6 @@ const moderateReview = async (id, status) => {
 const formatDate = (dateString) => {
   const date = new Date(dateString);
   return date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-};
-
-const getRatingColor = (rating) => {
-  if (rating === 5) return 'rating-5';
-  if (rating === 4) return 'rating-4';
-  if (rating === 3) return 'rating-3';
-  return 'rating-bad';
 };
 
 const sortedAndFilteredReviews = computed(() => {
@@ -265,22 +291,8 @@ const {
 .filters-group { flex: 1; max-width: 400px; }
 .search-input { width: 100%; }
 
-.rating-badge {
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-weight: bold;
-  font-size: 14px;
-  white-space: nowrap;
-}
-
-.rating-5 { color: #689D6D; background: #E8F4EA; } 
-.rating-4 { color: #84A950; background: #F1F7E8; }
-.rating-3 { color: #D97706; background: #FFF8E1; } 
-.rating-bad { color: #BB4E58; background: #FDE8E8; } 
-
 .order-badge {
-  background: #f3f4f6;
-  color: #4b5563;
+  color: #333;
   padding: 4px 8px;
   border-radius: 6px;
   font-size: 13px;
@@ -302,7 +314,7 @@ const {
 
 .actions-cell {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   justify-content: flex-start;
   align-items: center;
 }
@@ -327,6 +339,7 @@ const {
 
 .icon-action-btn.hover-approve:hover { color: #689D6D; background: #E8F4EA;} 
 .icon-action-btn.hover-reject:hover { color: #BB4E58; background: #FDE8E8;} 
+.icon-action-btn.hover-ban:hover { color: #333; background: #E5E7EB;} 
 
 .empty-state {
   padding: 60px !important;

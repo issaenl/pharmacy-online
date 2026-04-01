@@ -2,7 +2,17 @@
   <div class="profile-info-component">
     <div class="section-header">
       <h2>Профиль</h2>
-      <button v-if="!isEditingProfile" @click="startEditingProfile" class="edit-text-btn">Изменить данные</button>
+      <button v-if="!isEditingProfile && !authStore.user?.isBanned" @click="startEditingProfile" class="edit-text-btn">Изменить данные</button>
+    </div>
+
+    <div v-if="authStore.user?.isBanned" class="info-card danger-card banned-banner">
+      <div class="banned-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+      </div>
+      <div class="banned-content">
+        <h3>Аккаунт заблокирован</h3>
+        <p>Администратор ограничил ваш доступ к платформе за нарушение правил сервиса. Оформление новых заказов и публикация отзывов недоступны.</p>
+      </div>
     </div>
     
     <div v-if="!isEditingProfile && authStore.user" class="info-card">
@@ -220,6 +230,32 @@ const handlePhoneInput = (event) => {
         color: #000; 
     }
 
+    .banned-banner {
+        display: flex;
+        align-items: flex-start;
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+
+    .banned-icon {
+        color: #BB4E58;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .banned-content h3 {
+        margin: 0 0 5px 0;
+        color: #BB4E58;
+        font-size: 18px;
+    }
+
+    .banned-content p {
+        margin: 0;
+        color: #BB4E58;
+        font-size: 15px;
+        line-height: 1.4;
+    }
+
     .security-header { 
         margin-top: 40px; 
     }
@@ -369,8 +405,7 @@ const handlePhoneInput = (event) => {
     }
 
     .danger-card { 
-        border: 1px solid #ffcccc; 
-        background: #fffafb; 
+      background: #FDE8E8; 
     }
 
     .danger-text { 
@@ -401,5 +436,4 @@ const handlePhoneInput = (event) => {
         background: #dca7ab; 
         cursor: not-allowed; 
     }
-
 </style>

@@ -21,10 +21,17 @@ namespace pharmacyBackend.DTO
         public string UserName { get; set; } = string.Empty;
         public string PharmacyName { get; set; } = string.Empty;
         public int OrderId { get; set; }
+        public int UserId { get; set; }
         public int Rating { get; set; }
         public string? Comment { get; set; }
         public ReviewStatus Status { get; set; }
         public string? RejectReason { get; set; }
         public DateTime CreatedAt { get; set; }
+    }
+
+    public class EditReviewDTO
+    {
+        public int Rating { get; set; }
+        public string? Comment { get; set; }
     }
 }

@@ -33,7 +33,12 @@ namespace pharmacyBackend.Controllers
         {
             var userId = GetUserId();
             var user = await _context.Users.FindAsync(userId);
-            
+
+            if (user != null && user.IsBanned)
+            {
+                return BadRequest("Ваш аккаунт заблокирован за нарушение правил сервиса. Оформление заказов недоступно.");
+            }
+
             var cart = await _context.Carts
                 .Include(c => c.CartItems)
                 .ThenInclude(ci => ci.Product)
@@ -115,6 +120,11 @@ namespace pharmacyBackend.Controllers
         {
             var userId = GetUserId();
             var user = await _context.Users.FindAsync(userId);
+
+            if (user != null && user.IsBanned)
+            {
+                return BadRequest("Ваш аккаунт заблокирован за нарушение правил сервиса. Оформление заказов недоступно.");
+            }
 
             var product = await _context.Products
                 .Include(p => p.Stocks)

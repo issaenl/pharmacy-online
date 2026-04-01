@@ -85,6 +85,7 @@ namespace pharmacyBackend.Controllers
                     UserName = r.User.FirstName,
                     PharmacyName = r.Pharmacy.Name,
                     OrderId = r.OrderId,
+                    UserId = r.UserId,
                     Rating = r.Rating,
                     Comment = r.Comment,
                     Status = r.Status,
@@ -169,6 +170,76 @@ namespace pharmacyBackend.Controllers
                 .ToListAsync();
 
             return Ok(reviews);
+        }
+
+        [HttpPut("{id}")]
+        [Authorize]
+        public async Task<ActionResult> EditReview(int id, [FromBody] EditReviewDTO dto)
+        {
+            var userId = GetUserId();
+            var review = await _context.Reviews
+                .Include(r => r.Pharmacy)
+                .FirstOrDefaultAsync(r => r.Id == id && r.UserId == userId);
+
+            if (review == null)
+                return NotFound("Отзыв не найден.");
+
+            bool wasApproved = review.Status == ReviewStatus.Approved;
+
+            review.Rating = dto.Rating;
+            review.Comment = dto.Comment;
+            review.Status = ReviewStatus.Pending;
+            review.RejectReason = null;
+            review.CreatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            if (wasApproved)
+            {
+                var avgRating = await _context.Reviews
+                    .Where(r => r.PharmacyId == review.PharmacyId && r.Status == ReviewStatus.Approved)
+                    .AverageAsync(r => (double?)r.Rating);
+
+                review.Pharmacy.Rating = avgRating.HasValue ? Math.Round(avgRating.Value, 1) : null;
+                await _context.SaveChangesAsync();
+            }
+
+            return Ok(new { message = "Отзыв изменен и отправлен на модерацию." });
+        }
+
+        [HttpDelete("{id}")]
+        [Authorize]
+        public async Task<ActionResult> DeleteReview(int id)
+        {
+            var userId = GetUserId();
+            var review = await _context.Reviews
+                .Include(r => r.Pharmacy)
+                .FirstOrDefaultAsync(r => r.Id == id && r.UserId == userId);
+
+            if (review == null)
+                return NotFound("Отзыв не найден.");
+
+            var pharmacyId = review.PharmacyId;
+            bool wasApproved = review.Status == ReviewStatus.Approved;
+
+            _context.Reviews.Remove(review);
+            await _context.SaveChangesAsync();
+
+            if (wasApproved)
+            {
+                var avgRating = await _context.Reviews
+                    .Where(r => r.PharmacyId == pharmacyId && r.Status == ReviewStatus.Approved)
+                    .AverageAsync(r => (double?)r.Rating);
+
+                var pharmacy = await _context.Pharmacies.FindAsync(pharmacyId);
+                if (pharmacy != null)
+                {
+                    pharmacy.Rating = avgRating.HasValue ? Math.Round(avgRating.Value, 1) : null;
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+            return Ok(new { message = "Отзыв успешно удален." });
         }
     }
 }

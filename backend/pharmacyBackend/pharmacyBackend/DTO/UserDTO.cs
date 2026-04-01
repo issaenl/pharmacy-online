@@ -39,7 +39,7 @@ namespace pharmacyBackend.DTO
         public string? Email { get; set; }
         public UserRole Role { get; set; }
         public string RoleName => Role.ToString();
-
+        public bool IsBanned { get; set; }
         public int? PharmacyId { get; set; }
 
     }

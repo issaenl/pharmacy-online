@@ -144,7 +144,7 @@ import PharmacyItem from '@/components/PharmacyItem.vue';
 import TheHeader from '@/components/Header.vue';
 import QuickOrderModal from '@/components/QuickOrderModal.vue';
 import api from '@/api/api';
-import AppPagination from '@/components/admin/AppPagination.vue';
+import AppPagination from '@/components/AppPagination.vue';
 
 const route = useRoute();
 const router = useRouter();

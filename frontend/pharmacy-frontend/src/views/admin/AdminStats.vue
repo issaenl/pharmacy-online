@@ -12,13 +12,30 @@
           <option value="all">За все время</option>
         </select>
 
-        <button class="btn-primary refresh-btn" @click="fetchStats" :disabled="isLoading">
+        <button class="btn-primary refresh-btn" @click="refreshAll" :disabled="isLoading">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :class="{ 'spin': isLoading }"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
           Обновить
         </button>
       </div>
     </div>
 
+    <div v-if="!isSuperAdmin && pharmacyName" class="pharmacy-info-badge">
+      <div class="pharmacy-badge-left">
+        <div class="pharmacy-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        </div>
+        <div class="pharmacy-title">
+          <span class="label">Ваша аптека:</span>
+          <span class="name">{{ pharmacyName }}</span>
+        </div>
+      </div>
+      <div class="pharmacy-badge-right">
+        <RatingBadge v-if="pharmacyRating !== null" :rating="pharmacyRating" class="dashboard-rating-badge" />
+        <div class="rating-box empty" v-else>
+          Нет оценок
+        </div>
+      </div>
+    </div>
     <div v-if="isLoading && !stats" class="loading-state">
       Загрузка данных...
     </div>
@@ -135,6 +152,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useToast } from 'vue-toast-notification';
+import RatingBadge from '@/components/RatingBadge.vue';
 import api from '@/api/api';
 
 const authStore = useAuthStore();
@@ -143,6 +161,9 @@ const toast = useToast({ position: 'bottom-right' });
 const stats = ref(null);
 const isLoading = ref(false);
 const selectedPeriod = ref('today');
+
+const pharmacyName = ref('');
+const pharmacyRating = ref(null);
 
 const periodLabel = computed(() => {
   const labels = {
@@ -180,8 +201,26 @@ const fetchStats = async () => {
   }
 };
 
+const fetchPharmacyInfo = async () => {
+  if (!isSuperAdmin.value && authStore.user?.pharmacyId) {
+    try {
+      const res = await api.get(`/Pharmacies/${authStore.user.pharmacyId}`);
+      pharmacyName.value = res.data.name;
+      pharmacyRating.value = res.data.rating ? res.data.rating.toFixed(1) : null;
+    } catch (e) {
+      console.error("Ошибка при загрузке рейтинга", e);
+    }
+  }
+};
+
+const refreshAll = () => {
+  fetchStats();
+  fetchPharmacyInfo();
+};
+
 onMounted(() => {
   fetchStats();
+  fetchPharmacyInfo();
 });
 
 const formatPrice = (price) => {
@@ -207,7 +246,7 @@ const formatDate = (dateString) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: 25px;
 }
 
 .header-actions h2 {
@@ -261,6 +300,70 @@ const formatDate = (dateString) => {
 
 @keyframes spin {
   100% { transform: rotate(360deg); }
+}
+
+.pharmacy-info-badge {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  border-radius: 16px;
+  padding: 15px 25px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+}
+
+.pharmacy-badge-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.pharmacy-icon {
+  background: #E8F4EA;
+  color: var(--primary-color, #689D6D);
+  padding: 12px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pharmacy-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pharmacy-title .label {
+  font-size: 13px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pharmacy-title .name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+}
+
+.dashboard-rating-badge {
+  font-size: 20px !important;
+  padding: 8px 16px !important;
+  border-radius: 12px !important;
+}
+
+.rating-box.empty {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 15px;
+  color: #888;
+  font-weight: normal;
+  background: #f9f9f9;
+  border: 1px solid #eee;
 }
 
 .loading-state {
@@ -477,6 +580,16 @@ const formatDate = (dateString) => {
 }
 
 @media (max-width: 600px) {
+  .header-actions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  .pharmacy-info-badge {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
   .list-item {
     flex-direction: column;
     align-items: flex-start;

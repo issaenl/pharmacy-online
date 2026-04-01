@@ -23,6 +23,9 @@
             </th>
             <th>Адрес</th>
             <th>Телефон</th>
+            <th @click="sortBy('rating')" class="sortable text-center">
+              Рейтинг <span v-if="sortKey === 'rating'" class="sort-icon">{{ sortOrder === 1 ? '▲' : '▼' }}</span>
+            </th>
             <th>Координаты</th>
             <th>Действия</th> 
           </tr>
@@ -33,6 +36,12 @@
             <td>{{ pharmacy.district }}</td>
             <td>{{ pharmacy.address }}</td>
             <td>{{ pharmacy.phone }}</td>
+            
+            <td class="text-center">
+              <RatingBadge v-if="pharmacy.rating" :rating="pharmacy.rating" />
+              <span v-else class="text-muted">—</span>
+            </td>
+            
             <td class="coords">
               <span v-if="pharmacy.latitude && pharmacy.longitude">
                 {{ pharmacy.latitude.toFixed(4) }}, {{ pharmacy.longitude.toFixed(4) }}
@@ -44,7 +53,7 @@
                 @delete="deletePharmacy(pharmacy.id)" />
           </tr>
           <tr v-if="sortedAndFilteredPharmacies.length === 0">
-            <td colspan="6" class="text-center text-muted" style="padding: 30px;">
+            <td colspan="7" class="text-center text-muted" style="padding: 30px;">
               Аптеки не найдены
             </td>
           </tr>
@@ -100,6 +109,7 @@
 import Modal from '@/components/admin/Modal.vue';
 import TableActions from '@/components/admin/TableActions.vue';
 import TablePagination from '@/components/admin/TablePagination.vue';
+import RatingBadge from '@/components/RatingBadge.vue';
 import { usePagination } from '@/logic/pagination';
 import { useModal } from '@/logic/modal';
 import { useSorting } from '@/logic/sorting';
@@ -150,7 +160,6 @@ const openModal = (pharmacy = null) => {
     };
   }
 };
-
 
 const savePharmacy = async () => {
   isLoading.value = true;
@@ -234,5 +243,8 @@ const {
 <style scoped>
 .admin-pharmacies {
   padding: 20px;
+}
+.text-center {
+  text-align: center;
 }
 </style>

@@ -81,9 +81,15 @@
 
       <main class="catalog-content">
         <ProductList 
-          :products="products" 
+          :products="paginatedProducts" 
           :isLoading="isLoading" 
           :title="pageTitle" 
+        />
+        
+        <AppPagination 
+          v-if="!isLoading && totalPages > 1"
+          v-model:currentPage="currentPage"
+          :totalPages="totalPages"
         />
       </main>
 
@@ -96,6 +102,7 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, onBeforeRouteLeave } from 'vue-router';
 import ProductList from '@/components/ProductList.vue';
 import TheHeader from '@/components/Header.vue';
+import AppPagination from '@/components/AppPagination.vue'; 
 import api from '@/api/api';
 
 const route = useRoute();
@@ -122,6 +129,18 @@ const availableDistricts = ref([]);
 
 const pageTitle = 'Каталог товаров';
 
+const currentPage = ref(1);
+const itemsPerPage = 2 ;
+
+const totalPages = computed(() => {
+  return Math.ceil(products.value.length / itemsPerPage);
+});
+
+const paginatedProducts = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return products.value.slice(start, end);
+});
 
 const fetchProducts = async () => {
   isLoading.value = true;
@@ -142,6 +161,8 @@ const fetchProducts = async () => {
       response = await api.get(`/Products?${params.toString()}`);
     }
     products.value = response.data;
+
+    currentPage.value = 1;
   } catch (error) {
     products.value = [];
   } finally {
@@ -168,7 +189,6 @@ const fetchFilterOptions = async () => {
   }
 };
 
-
 const resetFilters = () => {
   filters.value = {
     priceMin: null,
@@ -181,6 +201,9 @@ const resetFilters = () => {
   };
 };
 
+watch(currentPage, () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
 
 watch(filters, (newFilters) => {
   sessionStorage.setItem('catalogFilters', JSON.stringify(newFilters));
