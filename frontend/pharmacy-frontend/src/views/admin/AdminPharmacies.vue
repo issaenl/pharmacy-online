@@ -78,6 +78,7 @@
                 <label>Область <input v-model="form.district" required placeholder="Гомельская" /></label>
                 <label>Адрес <input v-model="form.address" required placeholder="ул. Ленина, д. 10" /></label>
                 <label>Телефон <input v-model="form.phone" required placeholder="+375 (00) 000-00-00" /></label>
+                <label>URL фотографии <input v-model="form.photoUrl" placeholder="https://example.com/photo.jpg" /></label>
             </div>
 
             <div class="form-column">
@@ -91,6 +92,11 @@
                 <label>Долгота (Longitude) 
                   <input type="number" step="any" v-model="form.longitude" placeholder="37.6173" />
                 </label>
+                
+                <div v-if="form.photoUrl" class="photo-preview-box">
+                  <span class="preview-label">Предпросмотр:</span>
+                  <img :src="form.photoUrl" alt="Превью аптеки" class="photo-preview" @error="handleImageError" />
+                </div>
             </div>
           </div>
 
@@ -127,7 +133,7 @@ const isLoading = ref(false);
 const searchQuery = ref('');
 
 const form = ref({
-  name: '', district: '', address: '', phone: '', latitude: null, longitude: null
+  name: '', district: '', address: '', phone: '', photoUrl: '', latitude: null, longitude: null
 });
 
 const fetchPharmacies = async () => {
@@ -148,13 +154,14 @@ const openModal = (pharmacy = null) => {
   openBaseModal(pharmacy?.id);
   
   if (pharmacy && pharmacy.id) {
-    form.value = { ...pharmacy };
+    form.value = { ...pharmacy, photoUrl: pharmacy.photoUrl || '' };
   } else {
     form.value = { 
       name: '', 
       district: '', 
       address: '', 
       phone: '', 
+      photoUrl: '',
       latitude: null, 
       longitude: null 
     };
@@ -169,6 +176,7 @@ const savePharmacy = async () => {
       address: form.value.address,
       district: form.value.district,
       phone: form.value.phone,
+      photoUrl: form.value.photoUrl || null,
       latitude: form.value.latitude ? parseFloat(form.value.latitude) : null,
       longitude: form.value.longitude ? parseFloat(form.value.longitude) : null
     };
@@ -210,6 +218,10 @@ const deletePharmacy = async (id) => {
   }
 };
 
+const handleImageError = (e) => {
+  e.target.src = '/assets/pharmacy-placeholder.jpg';
+};
+
 const sortedAndFilteredPharmacies = computed(() => {
   let result = pharmacies.value.filter(p => 
     p.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
@@ -246,5 +258,24 @@ const {
 }
 .text-center {
   text-align: center;
+}
+
+.photo-preview-box {
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.preview-label {
+  font-size: 13px;
+  color: #888;
+  font-weight: 600;
+}
+.photo-preview {
+  width: 100%;
+  max-height: 150px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid #eee;
 }
 </style>

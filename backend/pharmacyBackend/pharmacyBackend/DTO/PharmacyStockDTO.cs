@@ -60,6 +60,7 @@ namespace pharmacyBackend.DTO
         public int Quantity { get; set; }
         public DateTime LastUpdate { get; set; }
         public DateOnly ExpirationDate { get; set; }
+        public int? DiscountPercentage { get; set; }
     }
 
     public class PharmacyStockFullDTO : PharmacyStockDTO
@@ -87,6 +88,8 @@ namespace pharmacyBackend.DTO
         [Required]
         [Range(0.01, 100000, ErrorMessage = "Цена должна быть больше нуля.")]
         public decimal Price { get; set; }
+
+        public int? DiscountPercentage { get; set; }
     }
 
     public class PharmacyAssortmentDTO
@@ -101,5 +104,6 @@ namespace pharmacyBackend.DTO
         public string? PictureUrl { get; set; }
         public DateOnly ExpirationDate { get; set; }
         public DateTime LastUpdate { get; set; }
+        public int? DiscountPercentage { get; set; }
     }
 }

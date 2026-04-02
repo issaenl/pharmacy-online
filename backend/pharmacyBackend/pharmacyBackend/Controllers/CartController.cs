@@ -42,6 +42,7 @@ namespace pharmacyBackend.Controllers
         public async Task<ActionResult<CartDTO>> GetCart()
         {
             var cart = await GetOrCreateCartAsync(GetUserId());
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
             PharmacyDTO? pharmacyDto = null;
             if (cart.PharmacyId.HasValue)
@@ -57,17 +58,28 @@ namespace pharmacyBackend.Controllers
             {
                 PharmacyId = cart.PharmacyId,
                 Pharmacy = pharmacyDto,
-                Items = cart.CartItems.Select(ci => new CartItemDTO
+                Items = cart.CartItems.Select(ci =>
                 {
-                    ProductId = ci.ProductId,
-                    ProductName = ci.Product.Name,
+                    var activeStocks = ci.Product.Stocks
+                        .Where(s => s.Quantity > 0 && s.ExpirationDate > today)
+                        .ToList();
 
-                    UnitPrice = cart.PharmacyId.HasValue
-                        ? (ci.Product.Stocks.FirstOrDefault(s => s.PharmacyId == cart.PharmacyId.Value)?.Price ?? 0)
-                        : (ci.Product.Stocks.Any() ? ci.Product.Stocks.Min(s => s.Price) : 0),
+                    var stock = cart.PharmacyId.HasValue
+                        ? activeStocks.FirstOrDefault(s => s.PharmacyId == cart.PharmacyId.Value)
+                        : null;
 
-                    PictureUrl = ci.Product.PictureUrl,
-                    Quantity = ci.Quantity
+                    return new CartItemDTO
+                    {
+                        ProductId = ci.ProductId,
+                        ProductName = ci.Product.Name,
+
+                        UnitPrice = stock != null ? stock.Price : (activeStocks.Any() ? activeStocks.Min(s => s.Price) : 0),
+
+                        DiscountPercentage = stock != null ? stock.DiscountPercentage : null,
+
+                        PictureUrl = ci.Product.PictureUrl,
+                        Quantity = ci.Quantity
+                    };
                 }).ToList()
             };
 
@@ -153,16 +165,26 @@ namespace pharmacyBackend.Controllers
         public async Task<ActionResult<List<CartItemDTO>>> RecalculatePrice(int pharmacyId, [FromBody] List<AddToCartDTO> items)
         {
             var result = new List<CartItemDTO>();
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
             foreach (var item in items)
             {
                 var product = await _context.Products.Include(p => p.Stocks).FirstOrDefaultAsync(p => p.Id == item.ProductId);
-                var price = product.Stocks.FirstOrDefault(s => s.PharmacyId == pharmacyId)?.Price ?? 0;
+                if (product == null) continue;
+
+                var activeStocks = product.Stocks.Where(s => s.Quantity > 0 && s.ExpirationDate > today).ToList();
+
+                var stock = pharmacyId > 0 ? activeStocks.FirstOrDefault(s => s.PharmacyId == pharmacyId) : null;
 
                 result.Add(new CartItemDTO
                 {
                     ProductId = product.Id,
                     ProductName = product.Name,
-                    UnitPrice = price,
+
+                    UnitPrice = stock != null ? stock.Price : (activeStocks.Any() ? activeStocks.Min(s => s.Price) : 0),
+
+                    DiscountPercentage = stock != null ? stock.DiscountPercentage : null,
+
                     PictureUrl = product.PictureUrl,
                     Quantity = item.Quantity
                 });
@@ -174,7 +196,7 @@ namespace pharmacyBackend.Controllers
         public async Task<ActionResult> SetPharmacy(int pharmacyId)
         {
             var cart = await GetOrCreateCartAsync(GetUserId());
-            cart.PharmacyId = pharmacyId;
+            cart.PharmacyId = pharmacyId == 0 ? null : pharmacyId;
             await _context.SaveChangesAsync();
             return Ok();
         }

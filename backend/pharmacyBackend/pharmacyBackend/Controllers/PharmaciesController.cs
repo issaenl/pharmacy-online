@@ -131,6 +131,7 @@ namespace pharmacyBackend.Controllers
             pharmacy.District = pharma.District;
             pharmacy.Phone = pharma.Phone;
             pharmacy.Rating = pharma.Rating;
+            pharmacy.PhotoUrl = pharma.PhotoUrl;
 
             await _context.SaveChangesAsync();
             return Ok(new { Message = "Аптека успешно обновлена" });

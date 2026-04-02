@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import api from '@/api/api';
 import { useAuthStore } from './authStore';
+import { useOrderStore } from './orderStore';
 import { useToast } from 'vue-toast-notification';
 
 export const useCartStore = defineStore('cart', () => {
@@ -14,6 +15,12 @@ export const useCartStore = defineStore('cart', () => {
       try {
         const response = await api.get('/Cart');
         items.value = response.data.items; 
+
+        const orderStore = useOrderStore();
+        if (response.data.pharmacy) {
+            orderStore.selectedPharmacy = response.data.pharmacy;
+            localStorage.setItem('selectedPharmacy', JSON.stringify(response.data.pharmacy));
+        }
       } catch (error) {
         console.error("Ошибка загрузки корзины с сервера:", error);
       }
@@ -52,7 +59,8 @@ export const useCartStore = defineStore('cart', () => {
         productId: product.id,
         productName: product.name, 
         unitPrice: product.price,  
-        imageUrl: product.imageUrl,
+        discountPercentage: product.discountPercentage,
+        imageUrl: product.imageUrl || product.pictureUrl,
         quantity: quantity
       });
     }
@@ -112,7 +120,14 @@ export const useCartStore = defineStore('cart', () => {
   };
 
   const totalItems = computed(() => items.value.reduce((sum, item) => sum + item.quantity, 0));
-  const totalPrice = computed(() => items.value.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0));
+  
+  const totalPrice = computed(() => items.value.reduce((sum, item) => {
+    let finalUnitPrice = item.unitPrice;
+    if (item.discountPercentage) {
+      finalUnitPrice = item.unitPrice * (1 - item.discountPercentage / 100);
+    }
+    return sum + (finalUnitPrice * item.quantity);
+  }, 0));
 
   return { items, totalItems, totalPrice, loadCart, addToCart, updateQuantity, removeFromCart, clearCart, syncCart, recalculatePrices };
 });

@@ -6,21 +6,38 @@ import { useCartStore } from './cartStore';
 import { useToast } from 'vue-toast-notification';
 
 export const useOrderStore = defineStore('order', () => {
-  const selectedPharmacy = ref(null);
   const authStore = useAuthStore();
   const cartStore = useCartStore();
   const toast = useToast({ position: 'bottom-right' });
+  const savedPharmacy = localStorage.getItem('selectedPharmacy');
+  const selectedPharmacy = ref(savedPharmacy ? JSON.parse(savedPharmacy) : null);
 
   const setPharmacy = async (pharmacy) => {
     selectedPharmacy.value = pharmacy;
-    if (authStore.token) {
-      await api.put(`/Cart/pharmacy/${pharmacy.id}`);
-      await cartStore.loadCart();
-    } else {
+
+    if (pharmacy) {
       localStorage.setItem('selectedPharmacy', JSON.stringify(pharmacy));
-      await cartStore.recalculatePrices(pharmacy.id);
+      
+      if (authStore.token) {
+        await api.put(`/Cart/pharmacy/${pharmacy.id}`);
+        await cartStore.loadCart();
+      } else {
+        await cartStore.recalculatePrices(pharmacy.id);
+      }
+      toast.success(`Выбрана ${pharmacy.name}`);
+      
+    } 
+    else {
+      localStorage.removeItem('selectedPharmacy');
+      
+      if (authStore.token) {
+        await api.put(`/Cart/pharmacy/0`);
+        await cartStore.loadCart();
+      } 
+      else {
+        await cartStore.recalculatePrices(0); 
+      }
     }
-    toast.success(`Выбрана ${pharmacy.name}`);
   };
 
   const checkout = async () => {

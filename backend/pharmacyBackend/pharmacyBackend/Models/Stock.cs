@@ -28,5 +28,7 @@ namespace pharmacyBackend.Models
 
         [Required]
         public DateTime LastUpdate { get; set; } = DateTime.UtcNow;
+
+        public int? DiscountPercentage { get; set; }
     }
 }

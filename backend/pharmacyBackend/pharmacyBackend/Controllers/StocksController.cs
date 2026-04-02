@@ -78,7 +78,8 @@ namespace pharmacyBackend.Controllers
                 Quantity = dto.Quantity,
                 Price = dto.Price,
                 ExpirationDate = expDate,
-                LastUpdate = DateTime.UtcNow
+                LastUpdate = DateTime.UtcNow,
+                DiscountPercentage = dto.DiscountPercentage
             };
             _context.Stocks.Add(stock);
             await _context.SaveChangesAsync();
@@ -115,6 +116,7 @@ namespace pharmacyBackend.Controllers
             stock.Price = dto.Price;
             stock.ExpirationDate = expDate;
             stock.LastUpdate = DateTime.UtcNow;
+            stock.DiscountPercentage = dto.DiscountPercentage;
 
             await _context.SaveChangesAsync();
             return Ok(new { Message = "Наличие успешно обновлено" });

@@ -21,6 +21,7 @@ namespace pharmacyBackend.DTO
         public int Quantity { get; set; }
         public decimal Price => UnitPrice * Quantity;
         public string? PictureUrl { get; set; }
+        public int? DiscountPercentage { get; set; }
 
     }
 

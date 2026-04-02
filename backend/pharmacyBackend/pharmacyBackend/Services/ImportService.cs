@@ -235,33 +235,33 @@ namespace pharmacyBackend.Services
 
                 if (!pharmaciesDict.TryGetValue(pharmacyName, out int pharmacyId))
                 {
-                    errors.Add($"Строка {lineNumber}: Аптека '{values[0]}' не найдена.");
+                    errors.Add($"Строка {lineNumber}: Аптека {values[0]} не найдена.");
                     return;
                 }
 
                 if (allowedPharmacyId.HasValue && allowedPharmacyId.Value != pharmacyId)
                 {
-                    errors.Add($"Строка {lineNumber}: У вас нет прав для изменения остатков в аптеке '{values[0]}'.");
+                    errors.Add($"Строка {lineNumber}: У вас нет прав для изменения остатков в аптеке {values[0]}.");
                     return;
                 }
 
                 if (!productsDict.TryGetValue(productName, out int productId))
                 {
-                    errors.Add($"Строка {lineNumber}: Товар '{values[1]}' не найден.");
+                    errors.Add($"Строка {lineNumber}: Товар {values[1]} не найден.");
                     return;
                 }
 
                 var uniqueKey = $"{pharmacyId}_{productId}";
                 if (existingStocks.Contains(uniqueKey))
                 {
-                    errors.Add($"Строка {lineNumber}: Запас для товара '{values[1]}' в аптеке '{values[0]}' уже существует. Обновите его вручную.");
+                    errors.Add($"Строка {lineNumber}: Запас для товара {values[1]} в аптеке {values[0]} уже существует. Обновите его вручную.");
                     return;
                 }
 
                 var dateString = values[4].Trim().Trim('"');
                 if (!DateOnly.TryParse(dateString, out var expirationDate))
                 {
-                    errors.Add($"Строка {lineNumber}: неверный формат срока годности '{values[4]}'. Ожидается дата (например, 31.12.2025).");
+                    errors.Add($"Строка {lineNumber}: неверный формат срока годности {values[4]}. Ожидается дата (например, 31.12.2025).");
                     return;
                 }
 

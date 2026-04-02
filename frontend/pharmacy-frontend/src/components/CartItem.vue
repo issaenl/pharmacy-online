@@ -7,12 +7,21 @@
             {{ item.productName }}
         </router-link>
         
-        <div class="item-price">
-          <template v-if="!orderStore.selectedPharmacy">от </template>
-          {{ item.unitPrice.toFixed(2) }} р.
+        <div class="price-container">
+          <div v-if="item.discountPercentage" class="old-price">
+            {{ item.unitPrice.toFixed(2) }} р.
+          </div>
+          
+          <div class="item-price" :class="{ 'has-discount': item.discountPercentage }">
+            <template v-if="!orderStore.selectedPharmacy">от </template>
+            {{ finalPrice.toFixed(2) }} р.
+            
+            <span v-if="item.discountPercentage" class="discount-badge">
+              -{{ item.discountPercentage }}%
+            </span>
+          </div>
         </div>
-    </div>
-
+        </div>
 
     <div class="quantity-control">
       <button @click="cartStore.updateQuantity(item.productId, item.quantity - 1)" :disabled="item.quantity <= 1">−</button>
@@ -44,7 +53,7 @@
 </template>
 
 <script setup>
-import { defineProps } from 'vue';
+import { defineProps, computed } from 'vue';
 import { useCartStore } from '@/stores/cartStore';
 import { useFavoriteStore } from '@/stores/favoriteStore';
 import { useOrderStore } from '@/stores/orderStore';
@@ -59,6 +68,12 @@ const props = defineProps({
 const cartStore = useCartStore();
 const favoriteStore = useFavoriteStore();
 const orderStore = useOrderStore();
+
+const finalPrice = computed(() => {
+  if (!props.item.discountPercentage) return props.item.unitPrice;
+  const discountAmount = props.item.unitPrice * (props.item.discountPercentage / 100);
+  return props.item.unitPrice - discountAmount;
+});
 </script>
 
 <style scoped>
@@ -88,16 +103,47 @@ const orderStore = useOrderStore();
         gap: 5px; 
     }
 
-    .item-price { 
-        color: #000; 
-        font-size: 18px; 
-    }
-
     .item-name { 
         color: #000; 
         font-weight: bold;
         font-size: 20px; 
         text-decoration: none;
+    }
+
+    .item-price { 
+        color: #000; 
+        font-size: 18px; 
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .price-container {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .old-price {
+        font-size: 13px;
+        color: #999;
+        text-decoration: line-through;
+        margin-bottom: 2px;
+        line-height: 1;
+    }
+
+    .item-price.has-discount {
+        color: #BB4E58;
+        font-weight: 600;
+    }
+
+    .discount-badge {
+        background: #BB4E58;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: bold;
+        line-height: 1;
     }
 
     .quantity-control { 
