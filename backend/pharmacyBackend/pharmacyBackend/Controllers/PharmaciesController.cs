@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using pharmacyBackend.Data;
 using pharmacyBackend.DTO;
+using pharmacyBackend.Helpers;
 using pharmacyBackend.Models;
 using pharmacyBackend.Services;
 
@@ -188,6 +189,81 @@ namespace pharmacyBackend.Controllers
                 .OrderBy(s => s.ProductName)
                 .ToListAsync();
             return Ok(assortiment);
+        }
+
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<PharmacyFullDTO>>> SearchPharmacies([FromQuery] string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return Ok(new List<PharmacyFullDTO>());
+            }
+
+            string originalQuery = query.Trim().ToLower();
+            string otherLayoutQuery = SearchHelper.ConvertLayout(query);
+
+            var pharmacies = await _context.Pharmacies
+                .Where(p => p.Name.ToLower().Contains(originalQuery) || p.Name.ToLower().Contains(otherLayoutQuery) ||
+                            p.Address.ToLower().Contains(originalQuery) || p.Address.ToLower().Contains(otherLayoutQuery))
+                .ProjectTo<PharmacyFullDTO>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+
+            if (!pharmacies.Any())
+            {
+                var allPharmacies = await _context.Pharmacies
+                    .Select(p => new { p.Id, Name = p.Name.ToLower(), Address = p.Address.ToLower() })
+                    .ToListAsync();
+
+                var matches = allPharmacies
+                    .Select(p =>
+                    {
+                        int nameDist = Math.Min(
+                            SearchHelper.LevensheteinAlgorithm(originalQuery, p.Name),
+                            SearchHelper.LevensheteinAlgorithm(otherLayoutQuery, p.Name)
+                        );
+                        int addrDist = Math.Min(
+                            SearchHelper.LevensheteinAlgorithm(originalQuery, p.Address),
+                            SearchHelper.LevensheteinAlgorithm(otherLayoutQuery, p.Address)
+                        );
+
+                        return new { p.Id, Distance = Math.Min(nameDist, addrDist) };
+                    })
+                    .Where(x => x.Distance <= (originalQuery.Length > 4 ? 4 : 2))
+                    .OrderBy(x => x.Distance)
+                    .Take(5)
+                    .Select(x => x.Id)
+                    .ToList();
+
+                pharmacies = await _context.Pharmacies
+                    .Where(p => matches.Contains(p.Id))
+                    .ProjectTo<PharmacyFullDTO>(_mapper.ConfigurationProvider)
+                    .ToListAsync();
+
+                pharmacies = pharmacies.OrderBy(p => matches.IndexOf(p.Id)).ToList();
+            }
+
+            return Ok(pharmacies);
+        }
+
+        [HttpGet("popular")]
+        public async Task<ActionResult<IEnumerable<PharmacyFullDTO>>> GetPopularPharmacies()
+        {
+            var pharmacies = await _context.Pharmacies
+                .OrderByDescending(p => _context.Orders.Count(o => o.PharmacyId == p.Id))
+                .Take(10)
+                .ProjectTo<PharmacyFullDTO>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+
+            if (!pharmacies.Any())
+            {
+                pharmacies = await _context.Pharmacies
+                    .OrderByDescending(p => p.Rating)
+                    .Take(10)
+                    .ProjectTo<PharmacyFullDTO>(_mapper.ConfigurationProvider)
+                    .ToListAsync();
+            }
+
+            return Ok(pharmacies);
         }
     }
 }

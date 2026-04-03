@@ -21,6 +21,22 @@
 
     <section class="home-section">
       <div class="section-header">
+        <h2>Популярные аптеки</h2>
+        <router-link to="/pharmacies" class="view-all">Все аптеки →</router-link>
+      </div>
+      
+      <div v-if="loading" class="loader">Загрузка...</div>
+      <div v-else class="pharmacies-list">
+        <PharmacyCard 
+          v-for="pharm in popularPharmacies" 
+          :key="pharm.id" 
+          :pharmacy="pharm"
+        />
+      </div>
+    </section>
+
+    <section class="home-section">
+      <div class="section-header">
         <h2>Популярные товары</h2>
         <router-link to="/popular" class="view-all">Посмотреть всё →</router-link>
       </div>
@@ -42,11 +58,13 @@
 import api from '@/api/api';
 import { ref, onMounted } from 'vue';
 import ProductCard from '@/components/ProductCard.vue';
+import PharmacyCard from '@/components/PharmacyCard.vue';
 import TheHeader from '@/components/Header.vue';
 import { useRouter } from 'vue-router';
 
 const newProducts = ref([]);
 const popularProducts = ref([]);
+const popularPharmacies = ref([]);
 const loading = ref(true);
 const router = useRouter();
 
@@ -54,9 +72,10 @@ const fetchData = async () => {
   try {
     loading.value = true;
     
-    const [newRes, popularRes] = await Promise.allSettled([
+    const [newRes, popularRes, pharmRes] = await Promise.allSettled([
       api.get('/Products/new'),
-      api.get('/Products/popular')
+      api.get('/Products/popular'),
+      api.get('/Pharmacies/popular') 
     ]);
     
     if (newRes.status === 'fulfilled') {
@@ -69,6 +88,11 @@ const fetchData = async () => {
       popularProducts.value = popularRes.value.data.slice(0, 4);
     } else {
       console.error("Ошибка загрузки популярных:", popularRes.reason);
+    }
+    if (pharmRes.status === 'fulfilled') {
+      popularPharmacies.value = pharmRes.value.data.slice(0, 10); 
+    } else {
+      console.error("Ошибка загрузки аптек:", pharmRes.reason);
     }
 
   } catch (error) {
@@ -117,11 +141,15 @@ onMounted(fetchData);
     text-decoration: none;
     font-size: 20px;
   }
-
   .products-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 20px;
+  }
+  .pharmacies-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
   }
 
   @media (max-width: 1024px) {
@@ -137,5 +165,4 @@ onMounted(fetchData);
       grid-template-columns: repeat(2, 1fr); 
     }
   }
-
 </style>

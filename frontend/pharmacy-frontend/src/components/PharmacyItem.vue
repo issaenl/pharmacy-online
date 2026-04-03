@@ -26,9 +26,16 @@
 
     <div class="pharmacy-actions">
       <button class="book-btn" @click.stop="$emit('book', pharmacy)">Забронировать</button>
-      <button class="call-btn" :title="pharmacy.pharmacyPhone" @click.stop>
+      
+      <a 
+        v-if="pharmacy.pharmacyPhone" 
+        :href="`tel:${pharmacy.pharmacyPhone}`" 
+        class="call-btn" 
+        :title="pharmacy.pharmacyPhone" 
+        @click.stop>
         <img src="/assets/Phone.svg" alt="Позвонить" class="phone-icon">
-      </button>
+      </a>
+      
     </div>
   </div>
 </template>

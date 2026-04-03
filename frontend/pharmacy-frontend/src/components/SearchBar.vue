@@ -5,7 +5,7 @@
         <input 
           type="text" 
           v-model="searchQuery" 
-          placeholder="Поиск лекарств" 
+          placeholder="Поиск лекарств и аптек" 
           @focus="handleFocus"
           @keyup.enter="goToSearchPage"
         />
@@ -14,7 +14,7 @@
     </div>
 
     <transition name="fade">
-      <div v-if="showDropdown && (results.length || isLoading || showHistoryCondition)" class="search-dropdown">
+      <div v-if="showDropdown && (productResults.length || pharmacyResults.length || isLoading || showHistoryCondition)" class="search-dropdown">
         
         <div v-if="showHistoryCondition" class="history-section">
           <div class="history-header">
@@ -37,20 +37,43 @@
         <template v-else-if="searchQuery.length >= 2">
           <div v-if="isLoading" class="search-message">Ищем лучшие варианты...</div>
           
-          <div v-else-if="results.length">
-            <div 
-              v-for="product in results.slice(0, 8)" 
-              :key="product.id" 
-              class="search-result-item"
-              @click="handleSelect(product.id)"
-            >
-              <img :src="product.pictureUrl || '/assets/no-image.jpg'" class="item-img" />
-              <div class="item-info">
-                <span class="item-name">{{ product.name }}</span>
-                <span class="item-dosage">{{ product.dosageForm }}</span>
+          <div v-else-if="productResults.length || pharmacyResults.length">
+            
+            <div v-if="pharmacyResults.length" class="results-group">
+              <div class="group-title">Аптеки</div>
+              <div 
+                v-for="pharmacy in pharmacyResults" 
+                :key="'pharm-' + pharmacy.id" 
+                class="search-result-item pharmacy-item-result"
+                @click="handlePharmacySelect(pharmacy.id)"
+              >
+                <div class="pharmacy-icon-wrapper">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                </div>
+                <div class="item-info">
+                  <span class="item-name">{{ pharmacy.name }}</span>
+                  <span class="item-dosage">{{ pharmacy.address }}</span>
+                </div>
               </div>
-              <div class="item-price">от {{ product.minPrice }} р.</div>
             </div>
+
+            <div v-if="productResults.length" class="results-group">
+              <div class="group-title">Товары</div>
+              <div 
+                v-for="product in productResults.slice(0, 8)" 
+                :key="'prod-' + product.id" 
+                class="search-result-item"
+                @click="handleProductSelect(product.id)"
+              >
+                <img :src="product.pictureUrl || '/assets/no-image.jpg'" class="item-img" />
+                <div class="item-info">
+                  <span class="item-name">{{ product.name }}</span>
+                  <span class="item-dosage">{{ product.dosageForm }}</span>
+                </div>
+                <div class="item-price">от {{ product.minPrice }} р.</div>
+              </div>
+            </div>
+
           </div>
           <div v-else class="search-message">Ничего не найдено</div>
         </template>
@@ -59,6 +82,7 @@
     </transition>
   </div>
 </template>
+
 <script setup>
 import { ref, watch, onMounted, onUnmounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
@@ -68,7 +92,8 @@ const router = useRouter();
 const searchRef = ref(null);
 
 const searchQuery = ref('');
-const results = ref([]);
+const productResults = ref([]);
+const pharmacyResults = ref([]);
 const isLoading = ref(false);
 const showDropdown = ref(false);
 const searchHistory = ref([]);
@@ -116,7 +141,8 @@ const handleHistorySelect = (item) => {
 
 const performSearch = async () => {
   if (searchQuery.value.trim().length < 2) {
-    results.value = [];
+    productResults.value = [];
+    pharmacyResults.value = [];
     return;
   }
 
@@ -124,10 +150,15 @@ const performSearch = async () => {
   showDropdown.value = true;
 
   try {
-    const { data } = await api.get(`/Products/search?query=${encodeURIComponent(searchQuery.value)}`);
-    results.value = data;
+    const [prodRes, pharmRes] = await Promise.all([
+      api.get(`/Products/search?query=${encodeURIComponent(searchQuery.value)}`),
+      api.get(`/Pharmacies/search?query=${encodeURIComponent(searchQuery.value)}`)
+    ]);
+    
+    productResults.value = prodRes.data;
+    pharmacyResults.value = pharmRes.data;
   } catch (error) {
-    console.error("Search error:", error);
+    console.error(error);
   } finally {
     isLoading.value = false;
   }
@@ -144,11 +175,18 @@ const handleFocus = () => {
   }
 };
 
-const handleSelect = (id) => {
+const handleProductSelect = (id) => {
   saveToHistory(searchQuery.value);
   showDropdown.value = false;
   searchQuery.value = '';
   router.push(`/product/${id}`);
+};
+
+const handlePharmacySelect = (id) => {
+  saveToHistory(searchQuery.value);
+  showDropdown.value = false;
+  searchQuery.value = '';
+  router.push(`/pharmacy/${id}`);
 };
 
 const goToSearchPage = () => {
@@ -282,6 +320,19 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside));
         color: #ccc;
     }
 
+    .results-group {
+        padding-bottom: 10px;
+    }
+
+    .group-title {
+        font-size: 12px;
+        font-weight: 700;
+        color: #888;
+        text-transform: uppercase;
+        padding: 15px 20px 5px;
+        letter-spacing: 0.5px;
+    }
+
     .search-result-item {
         display: flex;
         align-items: center;
@@ -294,6 +345,17 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside));
 
     .search-result-item:hover {
         background: #f9fbf9;
+    }
+
+    .pharmacy-icon-wrapper {
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #E8F4EA;
+        color: #689D6D;
+        border-radius: 10px;
     }
 
     .item-img {
@@ -362,7 +424,7 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside));
             font-size: 14px; 
         }
 
-        .item-img 
+        .item-img, .pharmacy-icon-wrapper
         { 
             width: 35px; 
             height: 35px; 
