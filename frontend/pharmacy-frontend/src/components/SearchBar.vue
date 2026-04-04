@@ -5,7 +5,7 @@
         <input 
           type="text" 
           v-model="searchQuery" 
-          placeholder="Поиск лекарств и аптек" 
+          placeholder="Поиск лекарств, аптек и категорий" 
           @focus="handleFocus"
           @keyup.enter="goToSearchPage"
         />
@@ -14,7 +14,7 @@
     </div>
 
     <transition name="fade">
-      <div v-if="showDropdown && (productResults.length || pharmacyResults.length || isLoading || showHistoryCondition)" class="search-dropdown">
+      <div v-if="showDropdown && (productResults.length || pharmacyResults.length || categoryResults.length || isLoading || showHistoryCondition)" class="search-dropdown">
         
         <div v-if="showHistoryCondition" class="history-section">
           <div class="history-header">
@@ -37,8 +37,32 @@
         <template v-else-if="searchQuery.length >= 2">
           <div v-if="isLoading" class="search-message">Ищем лучшие варианты...</div>
           
-          <div v-else-if="productResults.length || pharmacyResults.length">
+          <div v-else-if="productResults.length || pharmacyResults.length || categoryResults.length">
             
+            <div v-if="categoryResults.length" class="results-group">
+              <div class="group-title">Категории</div>
+              <div 
+                v-for="category in categoryResults" 
+                :key="'cat-' + category.id" 
+                class="search-result-item"
+                @click="handleCategorySelect(category)"
+              >
+                <div class="pharmacy-icon-wrapper category-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="8" y1="6" x2="21" y2="6"></line>
+                    <line x1="8" y1="12" x2="21" y2="12"></line>
+                    <line x1="8" y1="18" x2="21" y2="18"></line>
+                    <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                    <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                    <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                  </svg>
+                </div>
+                <div class="item-info">
+                  <span class="item-name">{{ category.name }}</span>
+                </div>
+              </div>
+            </div>
+
             <div v-if="pharmacyResults.length" class="results-group">
               <div class="group-title">Аптеки</div>
               <div 
@@ -94,6 +118,7 @@ const searchRef = ref(null);
 const searchQuery = ref('');
 const productResults = ref([]);
 const pharmacyResults = ref([]);
+const categoryResults = ref([]);
 const isLoading = ref(false);
 const showDropdown = ref(false);
 const searchHistory = ref([]);
@@ -143,6 +168,7 @@ const performSearch = async () => {
   if (searchQuery.value.trim().length < 2) {
     productResults.value = [];
     pharmacyResults.value = [];
+    categoryResults.value = [];
     return;
   }
 
@@ -150,13 +176,15 @@ const performSearch = async () => {
   showDropdown.value = true;
 
   try {
-    const [prodRes, pharmRes] = await Promise.all([
+    const [prodRes, pharmRes, catRes] = await Promise.all([
       api.get(`/Products/search?query=${encodeURIComponent(searchQuery.value)}`),
-      api.get(`/Pharmacies/search?query=${encodeURIComponent(searchQuery.value)}`)
+      api.get(`/Pharmacies/search?query=${encodeURIComponent(searchQuery.value)}`),
+      api.get(`/Categories/search?query=${encodeURIComponent(searchQuery.value)}`)
     ]);
     
     productResults.value = prodRes.data;
     pharmacyResults.value = pharmRes.data;
+    categoryResults.value = catRes.data;
   } catch (error) {
     console.error(error);
   } finally {
@@ -187,6 +215,13 @@ const handlePharmacySelect = (id) => {
   showDropdown.value = false;
   searchQuery.value = '';
   router.push(`/pharmacy/${id}`);
+};
+
+const handleCategorySelect = (category) => {
+  saveToHistory(searchQuery.value);
+  showDropdown.value = false;
+  searchQuery.value = '';
+  router.push({ path: '/catalog', query: { categoryId: category.id, categoryName: category.name } });
 };
 
 const goToSearchPage = () => {
@@ -356,6 +391,11 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside));
         background: #E8F4EA;
         color: #689D6D;
         border-radius: 10px;
+    }
+    
+    .category-icon {
+        background: #F1F7E8;
+        color: #84A950;
     }
 
     .item-img {

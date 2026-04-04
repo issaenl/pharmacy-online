@@ -60,23 +60,25 @@ namespace pharmacyBackend.Controllers
                 Pharmacy = pharmacyDto,
                 Items = cart.CartItems.Select(ci =>
                 {
-                    var activeStocks = ci.Product.Stocks
-                        .Where(s => s.Quantity > 0 && s.ExpirationDate > today)
-                        .ToList();
+                    var activeStocks = ci.Product.Stocks.Where(s => s.Quantity > 0 && s.ExpirationDate > today).ToList();
+                    var stock = cart.PharmacyId.HasValue ? activeStocks.FirstOrDefault(s => s.PharmacyId == cart.PharmacyId.Value) : null;
 
-                    var stock = cart.PharmacyId.HasValue
-                        ? activeStocks.FirstOrDefault(s => s.PharmacyId == cart.PharmacyId.Value)
-                        : null;
+                    decimal minPriceWithDiscount = 0;
+                    if (activeStocks.Any())
+                    {
+                        minPriceWithDiscount = activeStocks.Min(s =>
+                            s.DiscountPercentage.HasValue
+                            ? s.Price * (1 - (decimal)s.DiscountPercentage.Value / 100)
+                            : s.Price
+                        );
+                    }
 
                     return new CartItemDTO
                     {
                         ProductId = ci.ProductId,
                         ProductName = ci.Product.Name,
-
-                        UnitPrice = stock != null ? stock.Price : (activeStocks.Any() ? activeStocks.Min(s => s.Price) : 0),
-
+                        UnitPrice = stock != null ? stock.Price : minPriceWithDiscount,
                         DiscountPercentage = stock != null ? stock.DiscountPercentage : null,
-
                         PictureUrl = ci.Product.PictureUrl,
                         Quantity = ci.Quantity
                     };
@@ -173,18 +175,24 @@ namespace pharmacyBackend.Controllers
                 if (product == null) continue;
 
                 var activeStocks = product.Stocks.Where(s => s.Quantity > 0 && s.ExpirationDate > today).ToList();
-
                 var stock = pharmacyId > 0 ? activeStocks.FirstOrDefault(s => s.PharmacyId == pharmacyId) : null;
+
+                decimal minPriceWithDiscount = 0;
+                if (activeStocks.Any())
+                {
+                    minPriceWithDiscount = activeStocks.Min(s =>
+                        s.DiscountPercentage.HasValue
+                        ? s.Price * (1 - (decimal)s.DiscountPercentage.Value / 100)
+                        : s.Price
+                    );
+                }
 
                 result.Add(new CartItemDTO
                 {
                     ProductId = product.Id,
                     ProductName = product.Name,
-
-                    UnitPrice = stock != null ? stock.Price : (activeStocks.Any() ? activeStocks.Min(s => s.Price) : 0),
-
+                    UnitPrice = stock != null ? stock.Price : minPriceWithDiscount,
                     DiscountPercentage = stock != null ? stock.DiscountPercentage : null,
-
                     PictureUrl = product.PictureUrl,
                     Quantity = item.Quantity
                 });

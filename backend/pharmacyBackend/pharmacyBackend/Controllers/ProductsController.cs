@@ -55,7 +55,13 @@ namespace pharmacyBackend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProductShortDTO>>> GetProducts([FromQuery] ProductFilterParams filters)
         {
-            var query = _context.Products.AsQueryable();
+            var query = _context.Products.Where(p => p.IsActive == true).AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(filters.CategoryIds))
+            {
+                var ids = filters.CategoryIds.Split(',').Select(int.Parse).ToList();
+                query = query.Where(p => ids.Contains(p.CategoryId));
+            }
 
             if (!string.IsNullOrWhiteSpace(filters.CategoryIds))
             {
@@ -185,10 +191,10 @@ namespace pharmacyBackend.Controllers
             string otherLayoutQuery = SearchHelper.ConvertLayout(query);
 
             var products = await _context.Products
-                .Where(p => p.Name.ToLower().Contains(originalQuery) || p.Name.ToLower().Contains(otherLayoutQuery) && p.IsActive == true)
-                .Include(p => p.Stocks)
-                .ProjectTo<ProductShortDTO>(_mapper.ConfigurationProvider)
-                .ToListAsync();
+                 .Where(p => (p.Name.ToLower().Contains(originalQuery) || p.Name.ToLower().Contains(otherLayoutQuery)) && p.IsActive == true)
+                 .Include(p => p.Stocks)
+                 .ProjectTo<ProductShortDTO>(_mapper.ConfigurationProvider)
+                 .ToListAsync();
 
             if (!products.Any())
             {

@@ -130,7 +130,7 @@ const availableDistricts = ref([]);
 const pageTitle = 'Каталог товаров';
 
 const currentPage = ref(1);
-const itemsPerPage = 2 ;
+const itemsPerPage = 28;
 
 const totalPages = computed(() => {
   return Math.ceil(products.value.length / itemsPerPage);

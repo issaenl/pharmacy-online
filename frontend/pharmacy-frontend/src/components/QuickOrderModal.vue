@@ -17,7 +17,12 @@
 
       <div class="summary">
         <span>Итого:</span>
-        <span class="total-price">{{ totalPrice }} р.</span>
+        <div class="price-block">
+          <span v-if="pharmacy?.discountPercentage" class="old-price">
+            {{ (pharmacy.price * quantity).toFixed(2) }} р.
+          </span>
+          <span class="total-price">{{ totalPrice }} р.</span>
+        </div>
       </div>
 
       <div class="actions">
@@ -46,9 +51,18 @@ const quantity = ref(1);
 
 const maxQuantity = computed(() => props.pharmacy?.quantity || 1);
 
-const totalPrice = computed(() => {
+const finalUnitPrice = computed(() => {
   const price = props.pharmacy?.price || 0;
-  return (price * quantity.value).toFixed(2);
+  const discount = props.pharmacy?.discountPercentage;
+  
+  if (!discount) return price;
+  
+  const discountAmount = price * (discount / 100);
+  return price - discountAmount;
+});
+
+const totalPrice = computed(() => {
+  return (finalUnitPrice.value * quantity.value).toFixed(2);
 });
 
 watch(() => props.isOpen, (newVal) => {
@@ -181,6 +195,21 @@ const confirm = () => {
         font-weight: 700;
         border-top: 1px solid #eee;
         padding-top: 15px;
+    }
+
+    .price-block {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+    }
+
+    .old-price {
+        font-size: 14px;
+        color: #999;
+        text-decoration: line-through;
+        font-weight: normal;
+        margin-bottom: 2px;
+        line-height: 1;
     }
 
     .total-price {

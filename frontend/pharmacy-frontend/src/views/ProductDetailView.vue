@@ -4,7 +4,17 @@
   
   <div v-else-if="product" class="product-page container">
     <nav class="breadcrumbs">
-      Каталог > {{ product.categoryName || 'Лекарства' }} > {{ product.name }}
+      <router-link to="/catalog" class="breadcrumb-link">Каталог</router-link>
+      <span class="separator">></span>
+      
+      <router-link 
+        :to="{ path: '/catalog', query: { categoryId: product.categoryId, categoryName: product.categoryName } }" 
+        class="breadcrumb-link">
+        {{ product.categoryName || 'Лекарства' }}
+      </router-link>
+      
+      <span class="separator">></span>
+      <span class="breadcrumb-link" style="cursor: default; pointer-events: none;">{{ product.name }}</span>
     </nav>
     
     <section class="product-main card">
@@ -33,7 +43,7 @@
         </div>
 
         <div class="purchase-group">
-          <div class="price-range">{{ formatPrice(product.minPrice) }} — {{ formatPrice(product.maxPrice) }} р.</div>
+          <div class="price-range">{{ formatPrice(finalMinPrice) }} — {{ formatPrice(finalMaxPrice) }} р.</div>
           <p class="disclaimer">Внешний вид товара может отличаться от изображенного на фотографии</p>
         </div>
       </div>
@@ -163,7 +173,7 @@ const sortBy = ref('price_asc');
 const viewMode = ref('list'); 
 
 const availableDistricts = computed(() => {
-  const districts = pharmacies.value.map(p => p.pharmacyAddress?.split(',')[0]?.trim() || ''); // Простая заглушка. Лучше если бэкенд будет присылать поле District
+  const districts = pharmacies.value.map(p => p.pharmacyAddress?.split(',')[0]?.trim() || ''); 
   return [...new Set(districts)].filter(Boolean);
 });
 
@@ -305,7 +315,6 @@ onUnmounted(() => {
   if (myMap) myMap.destroy();
 });
 
-
 const isPdfOpen = ref(false);
 const isCheckoutModalOpen = ref(false);
 const selectedCheckoutPharmacy = ref(null);
@@ -320,9 +329,35 @@ const closeInstruction = () => { isPdfOpen.value = false; document.body.style.ov
 
 const formatPrice = (price) => price == null ? '0.00' : Number(price).toFixed(2);
 
+const finalMinPrice = computed(() => {
+  if (pharmacies.value.length > 0) {
+    return Math.min(...pharmacies.value.map(p => 
+      p.discountPercentage ? p.price * (1 - p.discountPercentage / 100) : p.price
+    ));
+  }
+
+  if (!product.value?.discountPercentage) return product.value?.minPrice || 0;
+  return product.value.minPrice * (1 - product.value.discountPercentage / 100);
+});
+
+const finalMaxPrice = computed(() => {
+  if (pharmacies.value.length > 0) {
+    return Math.max(...pharmacies.value.map(p => 
+      p.discountPercentage ? p.price * (1 - p.discountPercentage / 100) : p.price
+    ));
+  }
+  return product.value?.maxPrice || 0;
+});
+
 const addToCart = () => {
   if (!product.value) return;
-  cartStore.addToCart({ id: product.value.id, name: product.value.name, price: product.value.minPrice, imageUrl: product.value.pictureUrl });
+  cartStore.addToCart({ 
+    id: product.value.id, 
+    name: product.value.name, 
+    price: product.value.minPrice, 
+    discountPercentage: product.value.discountPercentage,
+    imageUrl: product.value.pictureUrl 
+  });
 };
 
 const handleBookClick = (pharmacy) => {
@@ -411,9 +446,27 @@ onMounted(async () => {
   }
 
   .breadcrumbs { 
-    color: #888; 
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
     margin-bottom: 25px; 
-    font-size: 18px; 
+    font-size: 16px; 
+  }
+
+  .breadcrumb-link {
+    color: #888;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .breadcrumb-link:hover {
+    color: var(--primary-color, #689D6D);
+  }
+
+  .separator {
+    color: #ccc;
+    font-size: 14px;
   }
 
   .product-main { 

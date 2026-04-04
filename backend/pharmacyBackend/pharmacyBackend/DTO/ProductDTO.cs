@@ -9,6 +9,7 @@ namespace pharmacyBackend.DTO
         public string DosageForm { get; set; } = string.Empty;
         public string? PictureUrl { get; set; } 
         public decimal MinPrice { get; set; }
+        public int? DiscountPercentage { get; set; }
     }
 
     public class ProductMediumDTO : ProductShortDTO

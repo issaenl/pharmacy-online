@@ -9,16 +9,24 @@ namespace pharmacyBackend.Mappers
         {
             //лекарства
             CreateMap<Product, ProductShortDTO>()
-                .ForMember(dest => dest.MinPrice, opt => opt.MapFrom(src =>
-                    src.Stocks.Where(s => s.Quantity > 0 && s.ExpirationDate > DateOnly.FromDateTime(DateTime.UtcNow)).Any()
-                    ? src.Stocks.Where(s => s.Quantity > 0 && s.ExpirationDate > DateOnly.FromDateTime(DateTime.UtcNow)).Min(s => s.Price): 0));
+                 .ForMember(dest => dest.DiscountPercentage, opt => opt.MapFrom(src =>
+                     src.Stocks.Where(s => s.Quantity > 0 && s.DiscountPercentage.HasValue && s.ExpirationDate > DateOnly.FromDateTime(DateTime.UtcNow)).Any()
+                     ? src.Stocks.Where(s => s.Quantity > 0 && s.DiscountPercentage.HasValue && s.ExpirationDate > DateOnly.FromDateTime(DateTime.UtcNow)).Max(s => s.DiscountPercentage)
+                     : null))
+                 .ForMember(dest => dest.MinPrice, opt => opt.MapFrom(src =>
+                     src.Stocks.Where(s => s.Quantity > 0 && s.ExpirationDate > DateOnly.FromDateTime(DateTime.UtcNow)).Any()
+                     ? src.Stocks.Where(s => s.Quantity > 0 && s.ExpirationDate > DateOnly.FromDateTime(DateTime.UtcNow))
+                             .Min(s => s.DiscountPercentage.HasValue ? s.Price - (s.Price * (decimal)s.DiscountPercentage.Value / 100m) : s.Price)
+                     : 0));
 
             CreateMap<Product, ProductMediumDTO>()
-                .IncludeBase<Product, ProductShortDTO>() 
+                .IncludeBase<Product, ProductShortDTO>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
                 .ForMember(dest => dest.MaxPrice, opt => opt.MapFrom(src =>
                     src.Stocks.Where(s => s.Quantity > 0 && s.ExpirationDate > DateOnly.FromDateTime(DateTime.UtcNow)).Any()
-                    ? src.Stocks.Where(s => s.Quantity > 0 && s.ExpirationDate > DateOnly.FromDateTime(DateTime.UtcNow)).Max(s => s.Price): 0));
+                    ? src.Stocks.Where(s => s.Quantity > 0 && s.ExpirationDate > DateOnly.FromDateTime(DateTime.UtcNow))
+                            .Max(s => s.DiscountPercentage.HasValue ? s.Price - (s.Price * (decimal)s.DiscountPercentage.Value / 100m) : s.Price)
+                    : 0));
 
             CreateMap<Product, ProductLongDTO>()
                 .IncludeBase<Product, ProductMediumDTO>()

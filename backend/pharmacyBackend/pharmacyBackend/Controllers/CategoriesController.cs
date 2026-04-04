@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using pharmacyBackend.Data;
 using pharmacyBackend.DTO;
+using pharmacyBackend.Helpers;
 using pharmacyBackend.Models;
 using pharmacyBackend.Services;
 
@@ -152,6 +154,54 @@ namespace pharmacyBackend.Controllers
 
                 category.CategoryTags.Add(new CategoryTag { CategoryId = category.Id, TagId = existTag.Id });
             }
+        }
+
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<CategoryDTO>>> SearchCategories([FromQuery] string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return Ok(new List<CategoryDTO>());
+            }
+
+            string originalQuery = query.Trim().ToLower();
+            string otherLayoutQuery = SearchHelper.ConvertLayout(query);
+
+            var categories = await _context.Categories
+                .Where(c => c.Name.ToLower().Contains(originalQuery) || c.Name.ToLower().Contains(otherLayoutQuery))
+                .ProjectTo<CategoryDTO>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+
+            if (!categories.Any())
+            {
+                var allCategories = await _context.Categories
+                    .Select(c => new { c.Id, Name = c.Name.ToLower() })
+                    .ToListAsync();
+
+                var matches = allCategories
+                    .Select(c =>
+                    {
+                        int distance = Math.Min(
+                            SearchHelper.LevensheteinAlgorithm(originalQuery, c.Name),
+                            SearchHelper.LevensheteinAlgorithm(otherLayoutQuery, c.Name)
+                        );
+                        return new { c.Id, Distance = distance };
+                    })
+                    .Where(x => x.Distance <= (originalQuery.Length > 4 ? 3 : 1))
+                    .OrderBy(x => x.Distance)
+                    .Take(5)
+                    .Select(x => x.Id)
+                    .ToList();
+
+                categories = await _context.Categories
+                    .Where(c => matches.Contains(c.Id))
+                    .ProjectTo<CategoryDTO>(_mapper.ConfigurationProvider)
+                    .ToListAsync();
+
+                categories = categories.OrderBy(c => matches.IndexOf(c.Id)).ToList();
+            }
+
+            return Ok(categories);
         }
     }
 }
