@@ -35,6 +35,8 @@ namespace pharmacyBackend.Controllers
             if (order.Status != OrderStatus.Completed)
                 return BadRequest("Отзыв можно оставить только после того, как заказ будет выполнен.");
 
+            var newStatus = string.IsNullOrWhiteSpace(dto.Comment) ? ReviewStatus.Approved : ReviewStatus.Pending;
+
             var existingReview = await _context.Reviews.FirstOrDefaultAsync(r => r.OrderId == dto.OrderId);
 
             if (existingReview != null)
@@ -44,15 +46,35 @@ namespace pharmacyBackend.Controllers
                     return BadRequest("Вы уже оставили отзыв к этому заказу.");
                 }
 
+                bool wasApproved = existingReview.Status == ReviewStatus.Approved;
+
                 existingReview.Rating = dto.Rating;
                 existingReview.Comment = dto.Comment;
-                existingReview.Status = ReviewStatus.Pending;
+                existingReview.Status = newStatus;
                 existingReview.RejectReason = null;
                 existingReview.CreatedAt = DateTime.UtcNow;
 
                 await _context.SaveChangesAsync();
-                return Ok(new { message = "Ваш исправленный отзыв отправлен на модерацию." });
+                if (wasApproved || newStatus == ReviewStatus.Approved)
+                {
+                    var avgRating = await _context.Reviews
+                        .Where(r => r.PharmacyId == existingReview.PharmacyId && r.Status == ReviewStatus.Approved)
+                        .AverageAsync(r => (double?)r.Rating);
+
+                    var pharmacy = await _context.Pharmacies.FindAsync(existingReview.PharmacyId);
+                    if (pharmacy != null)
+                    {
+                        pharmacy.Rating = avgRating.HasValue ? Math.Round(avgRating.Value, 1) : null;
+                        await _context.SaveChangesAsync();
+                    }
+                }
+
+                string msg = newStatus == ReviewStatus.Approved
+                    ? "Ваш отзыв обновлен и опубликован."
+                    : "Ваш исправленный отзыв отправлен на модерацию.";
+                return Ok(new { message = msg });
             }
+
             var review = new Review
             {
                 UserId = userId,
@@ -60,13 +82,30 @@ namespace pharmacyBackend.Controllers
                 OrderId = dto.OrderId,
                 Rating = dto.Rating,
                 Comment = dto.Comment,
-                Status = ReviewStatus.Pending
+                Status = newStatus
             };
 
             _context.Reviews.Add(review);
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "Спасибо! Ваш отзыв отправлен на модерацию." });
+            if (newStatus == ReviewStatus.Approved)
+            {
+                var avgRating = await _context.Reviews
+                    .Where(r => r.PharmacyId == order.PharmacyId && r.Status == ReviewStatus.Approved)
+                    .AverageAsync(r => (double?)r.Rating);
+
+                var pharmacy = await _context.Pharmacies.FindAsync(order.PharmacyId);
+                if (pharmacy != null)
+                {
+                    pharmacy.Rating = avgRating.HasValue ? Math.Round(avgRating.Value, 1) : null;
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+            string responseMsg = newStatus == ReviewStatus.Approved
+                ? "Спасибо! Ваш отзыв опубликован."
+                : "Спасибо! Ваш отзыв отправлен на модерацию.";
+            return Ok(new { message = responseMsg });
         }
 
 
@@ -185,16 +224,17 @@ namespace pharmacyBackend.Controllers
                 return NotFound("Отзыв не найден.");
 
             bool wasApproved = review.Status == ReviewStatus.Approved;
+            var newStatus = string.IsNullOrWhiteSpace(dto.Comment) ? ReviewStatus.Approved : ReviewStatus.Pending;
 
             review.Rating = dto.Rating;
             review.Comment = dto.Comment;
-            review.Status = ReviewStatus.Pending;
+            review.Status = newStatus;
             review.RejectReason = null;
             review.CreatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
 
-            if (wasApproved)
+            if (wasApproved || newStatus == ReviewStatus.Approved)
             {
                 var avgRating = await _context.Reviews
                     .Where(r => r.PharmacyId == review.PharmacyId && r.Status == ReviewStatus.Approved)
@@ -204,7 +244,10 @@ namespace pharmacyBackend.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            return Ok(new { message = "Отзыв изменен и отправлен на модерацию." });
+            string msg = newStatus == ReviewStatus.Approved
+                ? "Отзыв успешно обновлен."
+                : "Отзыв изменен и отправлен на модерацию.";
+            return Ok(new { message = msg });
         }
 
         [HttpDelete("{id}")]

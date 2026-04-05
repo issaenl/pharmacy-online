@@ -172,7 +172,7 @@ namespace pharmacyBackend.Controllers
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
             var assortiment = await _context.Stocks
                 .Include(s => s.Product)
-                .Where(s => s.PharmacyId == id && s.Quantity > 0 && s.ExpirationDate > today)
+                .Where(s => s.PharmacyId == id && s.Quantity > 0 && s.ExpirationDate > today && s.Product.IsActive == true)
                 .Select(s => new PharmacyAssortmentDTO
                 {
                     ProductId = s.ProductId,
