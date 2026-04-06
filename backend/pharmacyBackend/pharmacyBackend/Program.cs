@@ -3,7 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using pharmacyBackend.BackgroundServices;
 using pharmacyBackend.Data;
+using pharmacyBackend.Hubs;
 using pharmacyBackend.Mappers;
 using pharmacyBackend.Services;
 using System.Security.Claims;
@@ -23,15 +25,22 @@ if (string.IsNullOrEmpty(connectionString))
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 
-builder.Services.AddCors(cors =>
+builder.Services.AddCors(options =>
 {
-    cors.AddPolicy("CorsPolicy", accesses =>
-        accesses.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+    options.AddPolicy("CorsPolicy", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
+    });
 });
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSignalR();
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -68,6 +77,19 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         ValidateIssuer = false,
         RoleClaimType = ClaimTypes.Role
     };
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/notificationHub"))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
+    };
 });
 
 builder.Services.AddScoped<IEmailService, EmailService>();
@@ -76,6 +98,7 @@ builder.Services.AddScoped<ICloudService, CloudService>();
 builder.Services.AddHttpClient<GeocodeService>();
 builder.Services.AddScoped<IImportService, ImportService>();
 builder.Services.AddHostedService<pharmacyBackend.Background_Services.ExpirationService>();
+builder.Services.AddHostedService<ReminderService>();
 
 var app = builder.Build();
 
@@ -88,12 +111,13 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("CorsPolicy");
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<NotificationHub>("/notificationHub");
 
 using (var scope = app.Services.CreateScope())
 {

@@ -1,5 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using pharmacyBackend.Data;
+using pharmacyBackend.Hubs;
+using pharmacyBackend.Models;
 using pharmacyBackend.Services;
 
 namespace pharmacyBackend.Background_Services
@@ -21,12 +24,15 @@ namespace pharmacyBackend.Background_Services
             {
                 try
                 {
-                    using(var scope = _provider.CreateScope())
+                    using (var scope = _provider.CreateScope())
                     {
                         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                         var emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
                         var generator = scope.ServiceProvider.GetRequiredService<IEmailGenerator>();
+                        var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<NotificationHub>>();
+
                         var expirationTime = DateTime.UtcNow.AddHours(-48);
+
                         var expiredOrders = await context.Orders
                             .Include(o => o.User)
                             .Include(o => o.OrderItems)
@@ -35,36 +41,49 @@ namespace pharmacyBackend.Background_Services
                             .Where(o => o.Status == Enums.OrderStatus.Ready && o.ReadyDate != null && o.ReadyDate < expirationTime)
                             .ToListAsync(stoppingToken);
 
-                        foreach(var order in expiredOrders)
+
+                        foreach (var order in expiredOrders)
                         {
                             order.Status = Enums.OrderStatus.Expired;
-                            foreach(var item in order.OrderItems)
+                            foreach (var item in order.OrderItems)
                             {
                                 var stock = item.Product.Stocks.FirstOrDefault(s => s.PharmacyId == order.PharmacyId);
-                                if(stock != null)
+                                if (stock != null)
                                 {
                                     stock.Quantity += item.Quantity;
                                 }
                             }
 
-                            if(order.User != null && !string.IsNullOrEmpty(order.User.Email))
+                            var notification = new Notification
+                            {
+                                UserId = order.UserId,
+                                Message = $"Срок хранения вашего заказа №{order.Id} истек, и он был расформирован."
+                            };
+                            context.Notifications.Add(notification);
+
+                            await context.SaveChangesAsync(stoppingToken);
+
+                            await hubContext.Clients.User(order.UserId.ToString())
+                                .SendAsync("ReceiveNotification", notification, cancellationToken: stoppingToken);
+
+                            if (order.User != null && !string.IsNullOrEmpty(order.User.Email))
                             {
                                 var (subject, htmlBody) = generator.GenerateStatusEmail(order.User, order, Enums.OrderStatus.Expired);
-                                if(!string.IsNullOrEmpty(subject))
+                                if (!string.IsNullOrEmpty(subject))
                                 {
                                     await emailService.SendEmailAsync(order.User.Email, subject, htmlBody);
                                 }
                             }
                         }
 
-                        if(expiredOrders.Any())
+                        if (expiredOrders.Any())
                         {
                             await context.SaveChangesAsync(stoppingToken);
                             _logger.LogInformation($"{expiredOrders.Count} заказов истекли");
                         }
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     _logger.LogError(ex, "Ошибка при проверке срока заказов");
                 }

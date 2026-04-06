@@ -1,10 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using pharmacyBackend.Data;
 using pharmacyBackend.DTO;
 using pharmacyBackend.Enums;
+using pharmacyBackend.Hubs;
+using pharmacyBackend.Migrations;
 using pharmacyBackend.Models;
 using pharmacyBackend.Services;
 using System.Linq;
@@ -20,12 +23,14 @@ namespace pharmacyBackend.Controllers
         private readonly AppDbContext _context;
         private readonly IEmailService _email;
         private readonly IEmailGenerator _generator;
+        private readonly IHubContext<NotificationHub> _hubContext;
 
-        public OrdersController(AppDbContext context, IEmailService emailService, IEmailGenerator emailGenerator)
+        public OrdersController(AppDbContext context, IEmailService emailService, IEmailGenerator emailGenerator, IHubContext<NotificationHub> hubContext)
         {
             _context = context;
             _email = emailService;
             _generator = emailGenerator;
+            _hubContext = hubContext;
         }
 
         [HttpPost("checkout")]
@@ -96,8 +101,16 @@ namespace pharmacyBackend.Controllers
             _context.Orders.Add(order);
             _context.CartItems.RemoveRange(cart.CartItems);
             cart.PharmacyId = null;
-
             await _context.SaveChangesAsync();
+
+            var notification = new Notification
+            {
+                UserId = userId,
+                Message = $"Заказ №{order.Id} успешно забронирован и ожидает сборки."
+            };
+            _context.Notifications.Add(notification);
+            await _context.SaveChangesAsync();
+            await _hubContext.Clients.User(userId.ToString()).SendAsync("ReceiveNotification", notification);
 
             if (user != null && !string.IsNullOrEmpty(user.Email))
             {
@@ -170,6 +183,14 @@ namespace pharmacyBackend.Controllers
 
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
+            var notification = new Notification
+            {
+                UserId = userId,
+                Message = $"Заказ №{order.Id} успешно забронирован и ожидает сборки."
+            };
+            _context.Notifications.Add(notification);
+            await _context.SaveChangesAsync();
+            await _hubContext.Clients.User(userId.ToString()).SendAsync("ReceiveNotification", notification);
 
             if (user != null && !string.IsNullOrEmpty(user.Email))
             {
@@ -262,12 +283,19 @@ namespace pharmacyBackend.Controllers
                 var stock = item.Product.Stocks.FirstOrDefault(s => s.PharmacyId == order.PharmacyId);
                 if(stock != null)
                 {
-                    stock.Quantity = item.Quantity;
+                    stock.Quantity += item.Quantity;
                 }
             }
 
             order.Status = OrderStatus.Cancelled;
+            var notification = new Notification
+            {
+                UserId = userId,
+                Message = $"Ваш заказ №{order.Id} отменен."
+            };
+            _context.Notifications.Add(notification);
             await _context.SaveChangesAsync();
+            await _hubContext.Clients.User(userId.ToString()).SendAsync("ReceiveNotification", notification);
 
             if (order.User != null && !string.IsNullOrEmpty(order.User.Email))
             {
@@ -357,7 +385,22 @@ namespace pharmacyBackend.Controllers
             }
 
             order.Status = orderStatus.Status;
+            string notificationMsg = orderStatus.Status switch
+            {
+                OrderStatus.Ready => $"Ваш заказ №{order.Id} собран и готов к выдаче!",
+                OrderStatus.Completed => $"Вы успешно забрали заказ №{order.Id}. Спасибо за покупку!",
+                OrderStatus.Cancelled => $"Ваш заказ №{order.Id} отменен.",
+                _ => $"Статус вашего заказа №{order.Id} изменен."
+            };
+
+            var notification = new Notification
+            {
+                UserId = order.UserId,
+                Message = notificationMsg
+            };
+            _context.Notifications.Add(notification);
             await _context.SaveChangesAsync();
+            await _hubContext.Clients.User(order.UserId.ToString()).SendAsync("ReceiveNotification", notification);
             if (order.User != null && !string.IsNullOrEmpty(order.User.Email))
             {
                 var (subject, htmlBody) = _generator.GenerateStatusEmail(order.User, order, orderStatus.Status);

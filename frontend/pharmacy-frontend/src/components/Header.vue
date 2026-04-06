@@ -31,6 +31,47 @@
         <SearchBar />
 
         <div class="user-menu">
+            <div class="menu-item notif-wrapper" @click.stop="toggleNotifications" v-if="authStore.user">
+                <div class="icon-container">
+                    <svg class="icon-img" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    <span v-if="notificationStore.unreadCount > 0" class="cart-badge">{{ notificationStore.unreadCount }}</span>
+                </div>
+                <span class="desktop-only">Уведомления</span>
+
+                <transition name="fade">
+                    <div v-if="isNotifOpen" class="notif-dropdown" @click.stop>
+                        
+                        <div v-if="notificationStore.notifications.length === 0" class="notif-empty">
+                            Нет новых уведомлений
+                        </div>
+                        
+                        <div class="notif-list" v-else>
+                            <div 
+                              v-for="n in notificationStore.notifications" 
+                              :key="n.id" 
+                              class="notif-item" 
+                              :class="{ 'is-read': n.isRead }"
+                            >
+                                <div class="notif-top">
+                                    <div class="notif-title-group">
+                                        <span class="notif-dot" v-if="!n.isRead"></span>
+                                        <span class="notif-title">Уведомление</span>
+                                    </div>
+                                    <div class="notif-actions">
+                                        <span class="notif-time">{{ timeAgo(n.createdAt) }}</span>
+                                        <button class="notif-close-btn" @click.stop="removeNotif(n.id)" title="Удалить">✕</button>
+                                    </div>
+                                </div>
+                                <div class="notif-message">{{ n.message }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </transition>
+            </div>
+
             <router-link to="/favorites" class="menu-item" style="text-decoration: none;">
                 <div class="icon-container">
                 <svg class="icon-img"
@@ -56,6 +97,7 @@
                 </div>
                 <span class="desktop-only">Корзина</span>
             </router-link>
+            
             <router-link :to="authStore.user ? '/profile' : '/login'" class="menu-item" style="text-decoration: none;">
                 <img src="/assets/User.svg" alt="Профиль" class="icon-img">
                 <span class="desktop-only">{{ authStore.user ? authStore.user.firstName : 'Войти' }}</span>
@@ -78,21 +120,45 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import SearchBar from '@/components/SearchBar.vue';
 import api from '@/api/api';
 import { useAuthStore } from '@/stores/authStore';
 import { useCartStore } from '@/stores/cartStore';
 import { useFavoriteStore } from '@/stores/favoriteStore';
+import { useNotificationStore } from '@/stores/notificationStore';
 
 const authStore = useAuthStore();
 const cartStore = useCartStore();
 const favoriteStore = useFavoriteStore();
+const notificationStore = useNotificationStore();
+
 const isMenuOpen = ref(false);
 const allCategories = ref([]);
 
+const isNotifOpen = ref(false);
+
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value;
+};
+
+const toggleNotifications = async () => {
+  isNotifOpen.value = !isNotifOpen.value;
+  if (isNotifOpen.value && notificationStore.unreadCount > 0) {
+    await notificationStore.markAsRead();
+  }
+};
+
+const closeNotifOnClickOutside = () => {
+  if (isNotifOpen.value) {
+    isNotifOpen.value = false;
+  }
+};
+
+const formatDate = (dateString) => {
+  return new Date(dateString).toLocaleDateString('ru-RU', { 
+    day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' 
+  });
 };
 
 const targetCategories = [
@@ -113,8 +179,37 @@ onMounted(async () => {
 
   await cartStore.loadCart();
   await favoriteStore.loadFavorites();
-});
 
+  if (authStore.user) {
+    await notificationStore.fetchNotifications();
+    await notificationStore.initSignalR(); 
+  }
+
+  document.addEventListener('click', closeNotifOnClickOutside);
+});
+const timeAgo = (dateString) => {
+  if (!dateString) return '';
+  const past = new Date(dateString.endsWith('Z') ? dateString : dateString + 'Z');
+  const now = new Date();
+  const diffMs = now - past;
+  const diffMins = Math.floor(diffMs / 60000);
+  
+  if (diffMins < 1) return 'только что';
+  if (diffMins < 60) return `${diffMins}м назад`;
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) return `${diffHours}ч назад`;
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays}д назад`;
+};
+
+const removeNotif = async (id) => {
+  await notificationStore.removeNotification(id);
+};
+
+onUnmounted(async () => {
+  document.removeEventListener('click', closeNotifOnClickOutside);
+  await notificationStore.stopSignalR();
+});
 
 const navCategories = computed(() => {
   return targetCategories.map(target => {
@@ -183,17 +278,9 @@ const navCategories = computed(() => {
         transition: 0.3s;
     }
 
-    .bar-top { 
-        transform: rotate(45deg) translate(5px, 6px); 
-    }
-
-    .bar-mid { 
-        opacity: 0; 
-    }
-
-    .bar-bot { 
-        transform: rotate(-45deg) translate(5px, -6px); 
-    }
+    .bar-top { transform: rotate(45deg) translate(5px, 6px); }
+    .bar-mid { opacity: 0; }
+    .bar-bot { transform: rotate(-45deg) translate(5px, -6px); }
 
     .catalog-btn {
         background: #B3CCAE;
@@ -211,7 +298,6 @@ const navCategories = computed(() => {
         font-weight: 500;
     }
 
-
     .user-menu {
         display: flex;
         gap: 20px;
@@ -225,6 +311,128 @@ const navCategories = computed(() => {
         cursor: pointer;
         font-size: 16px;
     }
+
+    .notif-wrapper {
+        position: relative;
+    }
+
+    .notif-dropdown {
+        position: absolute;
+        top: 55px; 
+        right: -80px; 
+        width: 360px;
+        background: white;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        border-radius: 12px;
+        padding: 0;
+        z-index: 1000;
+        color: #333;
+        cursor: default;
+        text-align: left;
+        overflow: hidden;
+    }
+
+    .notif-dropdown::before {
+        content: '';
+        position: absolute;
+        top: -8px;
+        right: 88px;
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-bottom: 8px solid white;
+    }
+
+    .notif-empty {
+        padding: 30px;
+        text-align: center;
+        color: #888;
+        font-size: 16px;
+    }
+
+    .notif-list {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .notif-item {
+        padding: 16px 20px;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        transition: background 0.2s;
+    }
+
+    .notif-item:hover { background: #fdfdfd; }
+    .notif-item:last-child { border-bottom: none; }
+
+    .notif-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .notif-title-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .notif-dot {
+        width: 8px;
+        height: 8px;
+        background-color: #689D6D;
+        border-radius: 50%;
+    }
+
+    .notif-title {
+        font-weight: 700;
+        font-size: 16px;
+        color: #2c3e50;
+    }
+
+    .notif-item.is-read .notif-title {
+        color: #555;
+        font-weight: 600;
+    }
+
+    .notif-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .notif-time {
+        color: #999;
+        font-size: 14px;
+    }
+
+    .notif-close-btn {
+        background: none;
+        border: none;
+        color: #ccc;
+        cursor: pointer;
+        font-size: 14px;
+        padding: 2px 6px;
+        border-radius: 6px;
+        transition: 0.2s;
+        line-height: 1;
+    }
+
+    .notif-close-btn:hover {
+        background: #f0f0f0;
+        color: #BB4E58;
+    }
+
+    .notif-message {
+        font-size: 16px;
+        line-height: 1.5;
+        color: #666;
+        margin: 0;
+    }
+
+    .fade-enter-active, .fade-leave-active { transition: opacity 0.2s, transform 0.2s; }
+    .fade-enter-from, .fade-leave-to { opacity: 0; transform: translateY(-10px); }
 
     .icon-container {
         position: relative;
@@ -293,47 +501,29 @@ const navCategories = computed(() => {
         font-weight: 500;
     }
 
-    .slide-enter-active, .slide-leave-active { 
-        transition: 0.3s; 
-    }
-
-    .slide-enter-from, .slide-leave-to { 
-        transform: translateY(-10px); 
-        opacity: 0; 
-    }
+    .slide-enter-active, .slide-leave-active { transition: 0.3s; }
+    .slide-enter-from, .slide-leave-to { transform: translateY(-10px); opacity: 0; }
 
     @media (max-width: 992px) {
-        .desktop-only { 
-            display: none !important; 
-        }
-
-        .burger-btn { 
-            display: flex; 
-        }
-
-        .search-bar {
-            /* order: 3; */
-            width: 100%;
-            margin-top: 10px;
-        }
+        .desktop-only { display: none !important; }
+        .burger-btn { display: flex; }
+        .search-bar { width: 100%; margin-top: 10px; }
     }
 
     @media (max-width: 600px) {
-        .logo { 
-            font-size: 24px; 
+        .logo { font-size: 24px; }
+        .user-menu { gap: 10px; }
+        .search-bar input, .search-btn { font-size: 16px; padding: 8px; }
+        .search-bar { order: 3; }
+        
+        .notif-dropdown {
+            position: fixed;
+            top: 70px;
+            right: 10px;
+            left: 10px;
+            width: auto;
+            max-height: 70vh;
         }
-
-        .user-menu { 
-            gap: 10px; 
-        }
-
-        .search-bar input, .search-btn { 
-            font-size: 16px; 
-            padding: 8px; 
-        }
-
-         .search-bar {
-            order: 3;
-        }
+        .notif-dropdown::before { display: none; }
     }
 </style>

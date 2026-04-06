@@ -94,6 +94,11 @@ namespace pharmacyBackend.Mappers
                 .ForMember(dest => dest.PictureUrl, opt => opt.MapFrom(src => src.Product.PictureUrl))
                 .ForMember(dest => dest.Price, opt => opt.MapFrom(src =>
                     src.Product.Stocks.Any() ? src.Product.Stocks.Min(s => s.Price) : 0));
+
+
+
+            CreateMap<MedicationReminder, ReminderDTO>();
+            CreateMap<MedicationLog, MedicationLogDTO>();
         } 
     }
 }

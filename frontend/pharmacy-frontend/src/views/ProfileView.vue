@@ -15,6 +15,12 @@
             @click="currentTab = 'info'">
             Профиль
           </button>
+
+          <button 
+            :class="['menu-item', { active: currentTab === 'calendar' }]" 
+            @click="currentTab = 'calendar'">
+            Календарь приема
+          </button>
           
           <button 
             :class="['menu-item', { active: currentTab === 'orders' }]" 
@@ -34,6 +40,7 @@
 
       <main class="profile-content">
         <ProfileInfo v-if="currentTab === 'info'" />
+        <ProfileCalendar v-if="currentTab === 'calendar'" />
         <ProfileOrders v-if="currentTab === 'orders'" />
         <ProfileReviews v-if="currentTab === 'reviews'" />
       </main>
@@ -50,6 +57,7 @@ import TheHeader from '@/components/Header.vue';
 import ProfileInfo from '@/components/ProfileInfo.vue';
 import ProfileOrders from '@/components/ProfileOrders.vue';
 import ProfileReviews from '@/components/ProfileReviews.vue';
+import ProfileCalendar from '@/components/ProfileCalendar.vue';
 
 const authStore = useAuthStore();
 const router = useRouter();

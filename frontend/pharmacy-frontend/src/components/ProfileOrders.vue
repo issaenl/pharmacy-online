@@ -74,12 +74,14 @@
 import { ref, onMounted } from 'vue';
 import api from '@/api/api';
 import { useToast } from 'vue-toast-notification';
+import { useNotificationStore } from '@/stores/notificationStore';
 import OrderItemCard from '@/components/OrderItemCard.vue'; 
 import Modal from '@/components/admin/Modal.vue'; 
 
 const orders = ref([]);
 const isLoading = ref(true);
 const toast = useToast({ position: 'bottom-right' });
+const notificationStore = useNotificationStore();
 
 const showReviewModal = ref(false);
 const selectedOrderId = ref(null);
@@ -107,6 +109,7 @@ const handleCancelOrder = async (orderId) => {
     const response = await api.put(`/Orders/${orderId}/cancel`);
     toast.success(response.data.message || 'Заказ отменен');
     await fetchOrders(); 
+    await notificationStore.fetchNotifications();
   } catch (error) {
     if (error.response?.data) {
       toast.error(error.response.data);

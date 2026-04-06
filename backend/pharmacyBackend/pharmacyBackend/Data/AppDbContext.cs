@@ -19,6 +19,9 @@ namespace pharmacyBackend.Data
         public DbSet<Tag> Tags { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Review> Reviews { get; set; }
+        public DbSet<MedicationReminder> MedicationReminders { get; set; }
+        public DbSet<MedicationLog> MedicationLogs { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
