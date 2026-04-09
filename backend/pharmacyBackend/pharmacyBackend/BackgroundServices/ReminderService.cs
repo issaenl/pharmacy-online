@@ -39,57 +39,62 @@ namespace pharmacyBackend.BackgroundServices
                     foreach (var r in reminders)
                     {
                         bool isDueToday = false;
-
-                        if (r.Frequency == MedicationFrequency.Daily)
-                        {
-                            isDueToday = true;
-                        }
+                        if (r.Frequency == MedicationFrequency.Daily) isDueToday = true;
                         else if (r.Frequency == MedicationFrequency.EveryXDays && r.IntervalDays.HasValue)
                         {
                             var diffDays = (nowUtc.Date - r.StartDate.Date).Days;
-                            if (diffDays % r.IntervalDays.Value == 0)
-                            {
-                                isDueToday = true;
-                            }
+                            if (diffDays % r.IntervalDays.Value == 0) isDueToday = true;
                         }
                         else if (r.Frequency == MedicationFrequency.SpecificDaysOfWeek && !string.IsNullOrEmpty(r.DaysOfWeek))
                         {
-                            var currentDay = nowLocal.DayOfWeek.ToString();
-                            if (r.DaysOfWeek.Contains(currentDay))
-                            {
-                                isDueToday = true;
-                            }
+                            if (r.DaysOfWeek.Contains(nowLocal.DayOfWeek.ToString())) isDueToday = true;
                         }
 
                         if (isDueToday && r.TimesOfDay.Contains(currentTime))
                         {
-                            var msg = $"Пора принять лекарство: {r.MedicationName} ({r.Dosage})";
+                            await SendNotification(context, hubContext, emailService, r,
+                                $"Пора принять лекарство: {r.MedicationName} ({r.Dosage})", stoppingToken);
+                        }
 
-                            var newNotification = new Notification
+                        if (r.RemindToBuy && currentTime == "10:00")
+                        {
+                            var daysUntilEnd = (r.EndDate.Date - nowUtc.Date).Days;
+
+                            if (daysUntilEnd == 3)
                             {
-                                UserId = r.UserId,
-                                Message = msg,
-                                CreatedAt = DateTime.UtcNow,
-                                IsRead = false
-                            };
-
-                            context.Notifications.Add(newNotification);
-                            await context.SaveChangesAsync(stoppingToken);
-
-                            await hubContext.Clients.User(r.UserId.ToString())
-                                .SendAsync("ReceiveNotification", newNotification, cancellationToken: stoppingToken);
-
-                            if (r.User != null && !string.IsNullOrEmpty(r.User.Email))
-                            {
-                                _ = emailService.SendEmailAsync(r.User.Email, "Напоминание о приеме лекарств", msg);
+                                var buyMsg = $"Внимание! Лекарство '{r.MedicationName}' скоро закончится (через 3 дня). Не забудьте купить новую упаковку.";
+                                await SendNotification(context, hubContext, emailService, r, buyMsg, stoppingToken);
                             }
                         }
                     }
+
                     await context.SaveChangesAsync(stoppingToken);
                 }
 
                 var secondsToNextMinute = 60 - DateTime.Now.Second;
                 await Task.Delay(TimeSpan.FromSeconds(secondsToNextMinute), stoppingToken);
+            }
+        }
+        private async Task SendNotification(AppDbContext context, IHubContext<NotificationHub> hubContext,
+            IEmailService emailService, MedicationReminder r, string message, CancellationToken ct)
+        {
+            var newNotification = new Notification
+            {
+                UserId = r.UserId,
+                Message = message,
+                CreatedAt = DateTime.UtcNow,
+                IsRead = false
+            };
+
+            context.Notifications.Add(newNotification);
+            await context.SaveChangesAsync(ct);
+
+            await hubContext.Clients.User(r.UserId.ToString())
+                .SendAsync("ReceiveNotification", newNotification, cancellationToken: ct);
+
+            if (r.User != null && !string.IsNullOrEmpty(r.User.Email))
+            {
+                _ = emailService.SendEmailAsync(r.User.Email, "Уведомление от Аптеки", message);
             }
         }
     }

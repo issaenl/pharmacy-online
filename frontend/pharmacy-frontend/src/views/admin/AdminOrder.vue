@@ -188,6 +188,7 @@ const updateOrderStatus = async (id, newStatus) => {
   try {
     await api.put(`/Orders/${id}/status`, { status: Number(newStatus) });
     toast.success("Статус заказа обновлен");
+    await fetchData();
   } catch (error) {
     toast.error("Ошибка при обновлении статуса");
     await fetchData();

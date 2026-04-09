@@ -4,7 +4,7 @@
   
   <div v-else-if="product" class="product-page container">
     <nav class="breadcrumbs">
-      <router-link to="/catalog" class="breadcrumb-link">Каталог</router-link>
+      <router-link to="/full-catalog" class="breadcrumb-link">Каталог</router-link>
       <span class="separator">></span>
       
       <router-link 

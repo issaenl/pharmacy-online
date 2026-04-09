@@ -14,7 +14,16 @@ export const useCartStore = defineStore('cart', () => {
     if (authStore.token) {
       try {
         const response = await api.get('/Cart');
-        items.value = response.data.items; 
+        
+        items.value = response.data.items.map(newItem => {
+          const existingItem = items.value.find(i => i.productId === newItem.productId);
+          
+          return {
+            ...newItem,
+            imageUrl: newItem.imageUrl || newItem.pictureUrl || existingItem?.imageUrl || null,
+            productName: newItem.productName || existingItem?.productName
+          };
+        });
 
         const orderStore = useOrderStore();
         if (response.data.pharmacy) {
@@ -37,17 +46,27 @@ export const useCartStore = defineStore('cart', () => {
   };
 
   const recalculatePrices = async (pharmacyId) => {
-    if (items.value.length > 0) {
-      try {
-        const requestData = items.value.map(i => ({ productId: i.productId, quantity: i.quantity }));
-        const response = await api.post(`/Cart/recalculate/${pharmacyId}`, requestData);
-        items.value = response.data; 
-        saveLocalCart();
-      } catch (e) {
-        console.error("Ошибка пересчета цен:", e);
-      }
+  if (items.value.length > 0) {
+    try {
+      const requestData = items.value.map(i => ({ productId: i.productId, quantity: i.quantity }));
+      const response = await api.post(`/Cart/recalculate/${pharmacyId}`, requestData);
+      
+      items.value = response.data.map(newItem => {
+        const oldItem = items.value.find(i => i.productId === newItem.productId);
+        
+        return {
+          ...newItem,
+          imageUrl: newItem.imageUrl || newItem.pictureUrl || oldItem?.imageUrl || null,
+          productName: newItem.productName || oldItem?.productName
+        };
+      });
+      
+      saveLocalCart();
+    } catch (e) {
+      console.error("Ошибка пересчета цен:", e);
     }
-  };
+  }
+};
 
   const addToCart = async (product, quantity = 1) => {
     const existing = items.value.find(i => i.productId === product.id);

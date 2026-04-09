@@ -64,9 +64,9 @@
           </div>
 
           <div class="filter-group">
-            <h4 class="filter-title">Наличие в районе</h4>
+            <h4 class="filter-title">Наличие в области</h4>
             <select v-model="filters.district" class="filter-select">
-              <option value="">Любой район</option>
+              <option value="">Любая область</option>
               <option v-for="district in availableDistricts" :key="district" :value="district">
                 {{ district }}
               </option>

@@ -127,6 +127,14 @@
               </div>
               <button type="button" class="btn-add-time" @click="addTime">+ Добавить время</button>
             </div>
+
+            <div class="form-group full-width notification-option">
+              <label class="checkbox-container">
+                <input type="checkbox" v-model="form.remindToBuy">
+                <span class="checkmark"></span>
+                <span class="label-text">Напомнить купить лекарство по окончанию курса приема</span>
+              </label>
+            </div>
           </div>
         </div>
 
@@ -308,9 +316,15 @@ const hasEvents = (date) => {
 };
 
 const form = ref({
-  medicationName: '', dosage: '', startDate: formatDateString(new Date()),
+  medicationName: '', 
+  dosage: '', 
+  startDate: formatDateString(new Date()),
   endDate: formatDateString(new Date(new Date().setDate(new Date().getDate() + 14))),
-  frequency: 0, intervalDays: 2, selectedDays: ['Monday'], timesOfDay: ['08:00']
+  frequency: 0, 
+  intervalDays: 2, 
+  selectedDays: ['Monday'], 
+  timesOfDay: ['08:00'],
+  remindToBuy: false
 });
 
 onMounted(fetchReminders);
@@ -331,7 +345,12 @@ const toggleDay = (val) => {
 const submitReminder = async () => {
   isLoading.value = true;
   try {
-    const payload = { ...form.value, timesOfDay: form.value.timesOfDay.join(', '), daysOfWeek: form.value.selectedDays.join(',') };
+    const payload = { 
+      ...form.value, 
+      timesOfDay: form.value.timesOfDay.join(', '), 
+      daysOfWeek: form.value.selectedDays.join(','),
+      remindToBuy: form.value.remindToBuy
+    };
     if (editingId.value) await api.put(`/Reminders/${editingId.value}`, payload);
     else await api.post('/Reminders', payload);
     toast.success('Сохранено'); isAdding.value = false; fetchReminders();
@@ -343,7 +362,7 @@ const editReminder = (r) => {
   form.value = {
     medicationName: r.medicationName, dosage: r.dosage, startDate: formatDateString(r.startDate), endDate: formatDateString(r.endDate),
     frequency: r.frequency, intervalDays: r.intervalDays || 2, selectedDays: r.daysOfWeek?.split(',') || [],
-    timesOfDay: r.timesOfDay.split(',').map(t => t.trim())
+    timesOfDay: r.timesOfDay.split(',').map(t => t.trim()), remindToBuy: r.remindToBuy || false,
   };
   isAdding.value = true;
 };
@@ -507,6 +526,36 @@ const scheduleForSelectedDay = computed(() => {
   bottom: 4px; 
 }
 .event-dot.other-month-dot { background: #ccc; }
+
+.notification-option {
+  margin-top: 10px;
+  padding: 15px;
+  background: #f9fafb;
+  border-radius: 12px;
+  border: 1px dashed #ddd;
+}
+
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #555;
+  user-select: none;
+}
+
+.checkbox-container input {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #689D6D;
+}
+
+.label-text {
+  line-height: 1.4;
+  font-weight: 500;
+}
 
 .schedule-title { margin: 0 0 15px 0; font-size: 20px; color: #333; }
 .empty-state { text-align: center; padding: 40px; color: #888; font-size: 16px; }
