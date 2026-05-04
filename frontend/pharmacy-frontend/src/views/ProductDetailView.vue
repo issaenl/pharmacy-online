@@ -30,7 +30,10 @@
           </svg>
         </button>
         
-        <img :src="product.pictureUrl || '/assets/no-image.jpg'" :alt="product.name">
+        <img 
+          :src="product.pictureUrl || '/assets/no-image.jpg'" 
+          :alt="product.name"
+          @error="$event.target.src = '/assets/no-image.jpg'">
       </div>
 
       <div class="product-details">
@@ -401,6 +404,8 @@ onMounted(async () => {
     align-items: center;
     justify-content: center;
     flex-shrink: 0; 
+    width: 200px;
+    min-height: 200px;
   }
 
   .wishlist-btn {

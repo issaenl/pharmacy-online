@@ -359,5 +359,67 @@ namespace pharmacyBackend.Controllers
 
             return Ok(result);
         }
+
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{id}/photo")]
+        public async Task<ActionResult> DeleteProductPhoto(int id)
+        {
+            var product = await _context.Products.FindAsync(id);
+            if (product == null || string.IsNullOrEmpty(product.PictureUrl)) return NotFound();
+
+            var publicId = ExtractPublicIdFromUrl(product.PictureUrl);
+            if (publicId != null)
+            {
+                await _cloud.DeleteFileAsync(publicId, CloudinaryDotNet.Actions.ResourceType.Raw);
+            }
+
+            product.PictureUrl = null;
+            await _context.SaveChangesAsync();
+            return Ok(new { Message = "Фото успешно удалено" });
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{id}/pdf")]
+        public async Task<ActionResult> DeleteProductPdf(int id)
+        {
+            var product = await _context.Products.FindAsync(id);
+            if (product == null || string.IsNullOrEmpty(product.PdfUrl)) return NotFound();
+
+            var publicId = ExtractPublicIdFromUrl(product.PdfUrl);
+            if (publicId != null)
+            {
+                await _cloud.DeleteFileAsync(publicId, CloudinaryDotNet.Actions.ResourceType.Raw);
+            }
+
+            product.PdfUrl = null;
+            await _context.SaveChangesAsync();
+            return Ok(new { Message = "Инструкция успешно удалена" });
+        }
+
+        private string ExtractPublicIdFromUrl(string url)
+        {
+            try
+            {
+                var uri = new Uri(url);
+                var path = uri.AbsolutePath;
+                var parts = path.Split('/');
+                var uploadIndex = Array.IndexOf(parts, "upload");
+
+                if (uploadIndex >= 0 && parts.Length > uploadIndex + 1)
+                {
+                    var publicIdParts = parts.Skip(uploadIndex + 1).ToList();
+                    if (publicIdParts[0].StartsWith("v") && publicIdParts[0].Any(char.IsDigit))
+                    {
+                        publicIdParts = publicIdParts.Skip(1).ToList();
+                    }
+                    return string.Join("/", publicIdParts);
+                }
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
     }
 }

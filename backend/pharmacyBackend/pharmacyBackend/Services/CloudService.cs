@@ -31,8 +31,19 @@ namespace pharmacyBackend.Services
             };
 
             var uploadResult = await _cloudinary.UploadAsync(uploadParams);
-
             return uploadResult.SecureUrl.ToString();
+        }
+
+        public async Task<bool> DeleteFileAsync(string publicId, ResourceType resourceType = ResourceType.Image)
+        {
+            var deletionParams = new DeletionParams(publicId)
+            {
+                ResourceType = resourceType
+            };
+
+            var result = await _cloudinary.DestroyAsync(deletionParams);
+
+            return result.Result == "ok";
         }
     }
 }

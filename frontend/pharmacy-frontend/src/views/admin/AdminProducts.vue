@@ -114,10 +114,14 @@
                 :class="{ 'drag-active': dragPhoto }"
                 @click="$refs.photoInput.click()">
                 
-                <span v-if="photoFile" class="file-selected">Новое фото: {{ photoFile.name }}</span>
-                <span v-else-if="form.pictureUrl" class="file-selected">Фото загружено</span>
-                <span v-else>Перетащите фото сюда или кликните</span>
+                <span v-if="photoFile" class="file-selected">Новое фото: {{ photoFile.name }} <button type="button" class="btn-clear" @click.stop="photoFile = null">✕</button></span>
+
+                <div v-else-if="form.pictureUrl" class="file-actions">
+                  <span class="file-selected">Фото загружено</span>
+                  <button type="button" class="btn-delete-cloud" @click.stop="removeExistingFile('photo')" title="Удалить из облака">Удалить ✕</button>
+                </div>
                 
+                <span v-else>Перетащите фото сюда или кликните</span>
                 <input type="file" ref="photoInput" class="hidden-input" @change="handleInput($event, 'photo')" accept="image/*" />
               </div>
 
@@ -130,10 +134,13 @@
                 :class="{ 'drag-active': dragPdf }"
                 @click="$refs.pdfInput.click()">
                 
-                <span v-if="pdfFile" class="file-selected">Новый PDF: {{ pdfFile.name }}</span>
-                <span v-else-if="form.pdfUrl" class="file-selected">Инструкция загружена</span>
-                <span v-else>Перетащите PDF сюда или кликните</span>
+                <span v-if="pdfFile" class="file-selected">Новый PDF: {{ pdfFile.name }} <button type="button" class="btn-clear" @click.stop="pdfFile = null">✕</button></span>
+                <div v-else-if="form.pdfUrl" class="file-actions">
+                  <span class="file-selected">Инструкция загружена</span>
+                  <button type="button" class="btn-delete-cloud" @click.stop="removeExistingFile('pdf')" title="Удалить из облака">Удалить ✕</button>
+                </div>
                 
+                <span v-else>Перетащите PDF сюда или кликните</span>
                 <input type="file" ref="pdfInput" class="hidden-input" @change="handleInput($event, 'pdf')" accept="application/pdf" />
               </div>
             </div>
@@ -314,6 +321,35 @@ const assignFile = (file, type) => {
   if (type === 'pdf' && file.type === 'application/pdf') pdfFile.value = file;
 };
 
+const removeExistingFile = async (fileType) => {
+  if (!isEditing.value) {
+    if (fileType === 'photo') form.value.pictureUrl = null;
+    if (fileType === 'pdf') form.value.pdfUrl = null;
+    return;
+  }
+
+  const fileLabel = fileType === 'photo' ? 'фотографию' : 'инструкцию';
+  if (!confirm(`Вы уверены, что хотите безвозвратно удалить ${fileLabel} из облака?`)) {
+    return;
+  }
+
+  isLoading.value = true;
+  try {
+    const endpoint = `/Products/${currentId.value}/${fileType}`;
+    await api.delete(endpoint);
+    
+    if (fileType === 'photo') form.value.pictureUrl = null;
+    if (fileType === 'pdf') form.value.pdfUrl = null;
+    fetchProducts();
+    toast.success(`${fileLabel === 'фотографию' ? 'Фото удалено' : 'Инструкция удалена'} из облака!`);
+  } catch (error) {
+    toast.error(`Ошибка при удалении ${fileLabel}`);
+    console.error(error);
+  } finally {
+    isLoading.value = false;
+  }
+};
+
 const saveProduct = async () => {
   isLoading.value = true;
   try {
@@ -473,5 +509,43 @@ const deleteProduct = async (id) => {
 .error-list::-webkit-scrollbar-thumb {
   background-color: #fca5a5;
   border-radius: 10px;
+}
+
+.file-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-delete-cloud {
+  background: #BB4E58;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  font-family: var(--main-font);
+  transition: 0.2s;
+}
+
+.btn-delete-cloud:hover {
+  background: #9a3d46;
+}
+
+.btn-clear {
+  background: transparent;
+  color: #BB4E58;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  font-family: var(--main-font);
+  margin-left: 5px;
+}
+
+.btn-clear:hover {
+  color: #9a3d46;
 }
 </style>

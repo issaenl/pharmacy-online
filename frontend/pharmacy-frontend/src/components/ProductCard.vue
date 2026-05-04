@@ -18,7 +18,10 @@
     </button>
     
     <div class="card__image">
-      <img :src="product.pictureUrl || '/assets/no-image.jpg'" alt="image"/>
+       <img 
+          :src="product.pictureUrl || '/assets/no-image.jpg'" 
+          :alt="product.name"
+          @error="$event.target.src = '/assets/no-image.jpg'">
     </div>
 
     <div class="card__info">
