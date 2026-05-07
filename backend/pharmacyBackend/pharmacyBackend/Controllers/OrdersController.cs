@@ -82,18 +82,24 @@ namespace pharmacyBackend.Controllers
                     return BadRequest($"Недостаточно товара {item.Product.Name} в выбранной аптеке");
                 }
 
+                decimal actualPrice = stock.Price;
+                if (stock.DiscountPercentage.HasValue && stock.DiscountPercentage.Value > 0)
+                {
+                    actualPrice = stock.Price * (1 - (stock.DiscountPercentage.Value / 100m));
+                }
+
                 order.OrderItems.Add(new OrderItem
                 {
                     ProductId = item.ProductId,
                     Quantity = item.Quantity,
-                    Price = stock.Price
+                    Price = actualPrice
                 });
 
-                totalOrderPrice += stock.Price * item.Quantity;
+                totalOrderPrice += actualPrice * item.Quantity;
 
                 stock.Quantity -= item.Quantity;
 
-                emailItemsList.AppendLine($"<li>{item.Product.Name} - {item.Quantity} шт. x {stock.Price:F2} р.</li>");
+                emailItemsList.AppendLine($"<li>{item.Product.Name} - {item.Quantity} шт. x {actualPrice:F2} р.</li>");
             }
 
             order.TotalPrice = totalOrderPrice;
@@ -162,6 +168,12 @@ namespace pharmacyBackend.Controllers
                 return NotFound();
             }
 
+            decimal actualPrice = stock.Price;
+            if (stock.DiscountPercentage.HasValue && stock.DiscountPercentage.Value > 0)
+            {
+                actualPrice = stock.Price * (1 - (stock.DiscountPercentage.Value / 100m));
+            }
+
             var order = new Order
             {
                 UserId = userId,
@@ -175,10 +187,10 @@ namespace pharmacyBackend.Controllers
             {
                 ProductId = request.ProductId,
                 Quantity = request.Quantity,
-                Price = stock.Price
+                Price = actualPrice
             });
 
-            order.TotalPrice = stock.Price * request.Quantity;
+            order.TotalPrice = actualPrice * request.Quantity;
             stock.Quantity -= request.Quantity;
 
             _context.Orders.Add(order);
@@ -195,7 +207,7 @@ namespace pharmacyBackend.Controllers
             if (user != null && !string.IsNullOrEmpty(user.Email))
             {
                 var emailItemsList = new StringBuilder();
-                emailItemsList.AppendLine($"<li>{product.Name} - {request.Quantity} шт. x {stock.Price:F2} р.</li>");
+                emailItemsList.AppendLine($"<li>{product.Name} - {request.Quantity} шт. x {actualPrice:F2} р.</li>");
 
                 var cart = new Cart { Pharmacy = pharmacy };
 

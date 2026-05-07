@@ -258,11 +258,15 @@ namespace pharmacyBackend.Services
                     return;
                 }
 
-                var dateString = values[4].Trim().Trim('"');
-                if (!DateOnly.TryParse(dateString, out var expirationDate))
+                var dateString = values[4].Trim().Trim('"').Split(' ')[0];
+
+                if (!DateOnly.TryParse(dateString, System.Globalization.CultureInfo.InvariantCulture, out var expirationDate))
                 {
-                    errors.Add($"Строка {lineNumber}: неверный формат срока годности {values[4]}. Ожидается дата (например, 31.12.2025).");
-                    return;
+                    if (!DateOnly.TryParse(dateString, out expirationDate))
+                    {
+                        errors.Add($"Строка {lineNumber}: неверный формат срока годности {values[4]}. Ожидается дата (например, 31.12.2025).");
+                        return;
+                    }
                 }
 
                 var stock = new Stock
