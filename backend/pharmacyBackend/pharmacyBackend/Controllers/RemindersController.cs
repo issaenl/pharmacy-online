@@ -52,7 +52,11 @@ namespace pharmacyBackend.Controllers
                 Frequency = dto.Frequency,
                 IntervalDays = dto.IntervalDays,
                 DaysOfWeek = dto.DaysOfWeek,
-                RemindToBuy = dto.RemindToBuy
+                RemindToBuy = dto.RemindToBuy,
+                RemindToBuyMethod = dto.RemindToBuyMethod,
+                PackQuantity = dto.PackQuantity,
+                PillsPerPack = dto.PillsPerPack,
+                PillsPerDay = dto.PillsPerDay
             };
 
             _context.MedicationReminders.Add(reminder);
@@ -80,6 +84,10 @@ namespace pharmacyBackend.Controllers
             reminder.IntervalDays = dto.IntervalDays;
             reminder.DaysOfWeek = dto.DaysOfWeek;
             reminder.RemindToBuy = dto.RemindToBuy;
+            reminder.RemindToBuyMethod = dto.RemindToBuyMethod;
+            reminder.PackQuantity = dto.PackQuantity;
+            reminder.PillsPerPack = dto.PillsPerPack;
+            reminder.PillsPerDay = dto.PillsPerDay;
 
             await _context.SaveChangesAsync();
 

@@ -14,7 +14,7 @@
           
           <div class="item-price" :class="{ 'has-discount': item.discountPercentage }">
             <template v-if="!orderStore.selectedPharmacy">от </template>
-            {{ finalPrice.toFixed(2) }} р.
+            {{ finalPrice.toFixed(2) }} <span class="nbrb-icon nbrb-icon-byn"></span>
             
             <span v-if="item.discountPercentage" class="discount-badge">
               -{{ item.discountPercentage }}%

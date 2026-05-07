@@ -69,7 +69,7 @@
             <td>
               <div class="price-cell">
                  <span v-if="stock.discountPercentage" class="old-price">{{ stock.price.toFixed(2) }}</span>
-                 <span :class="{'discounted-price': stock.discountPercentage}">{{ calculateFinalPrice(stock.price, stock.discountPercentage) }} руб.</span>
+                 <span :class="{'discounted-price': stock.discountPercentage}">{{ calculateFinalPrice(stock.price, stock.discountPercentage) }} <span class="nbrb-icon nbrb-icon-byn"></span></span>
               </div>
             </td>
             
@@ -136,7 +136,7 @@
                   <input type="number" min="0" v-model="form.quantity" step="1" required />
                 </label>
                 
-                <label>Оригинальная цена (руб)
+                <label>Оригинальная цена 
                   <input type="number" min="0.01" v-model="form.price" step="0.01" required />
                 </label>
                 

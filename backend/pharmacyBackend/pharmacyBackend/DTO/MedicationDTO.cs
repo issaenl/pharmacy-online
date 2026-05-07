@@ -17,6 +17,11 @@ namespace pharmacyBackend.DTO
         public string? DaysOfWeek { get; set; }
 
         public bool RemindToBuy { get; set; }
+        public int RemindToBuyMethod { get; set; } = 1;
+
+        public int? PackQuantity { get; set; }
+        public int? PillsPerPack { get; set; }
+        public double? PillsPerDay { get; set; }
     }
 
     public class ReminderDTO : ReminderCreateDTO

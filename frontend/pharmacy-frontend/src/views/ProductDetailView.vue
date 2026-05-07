@@ -46,7 +46,7 @@
         </div>
 
         <div class="purchase-group">
-          <div class="price-range">{{ formatPrice(finalMinPrice) }} — {{ formatPrice(finalMaxPrice) }} р.</div>
+          <div class="price-range">{{ formatPrice(finalMinPrice) }} — {{ formatPrice(finalMaxPrice) }} <span class="nbrb-icon nbrb-icon-byn"></span></div>
           <p class="disclaimer">Внешний вид товара может отличаться от изображенного на фотографии</p>
         </div>
       </div>

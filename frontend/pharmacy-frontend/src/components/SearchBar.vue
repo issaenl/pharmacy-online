@@ -94,7 +94,7 @@
                   <span class="item-name">{{ product.name }}</span>
                   <span class="item-dosage">{{ product.dosageForm }}</span>
                 </div>
-                <div class="item-price">от {{ product.minPrice }} р.</div>
+                <div class="item-price">от {{ product.minPrice }}  <span class="nbrb-icon nbrb-icon-byn"></span></div>
               </div>
             </div>
 

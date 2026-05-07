@@ -58,12 +58,30 @@ namespace pharmacyBackend.BackgroundServices
 
                         if (r.RemindToBuy && currentTime == "10:00")
                         {
-                            var daysUntilEnd = (r.EndDate.Date - nowUtc.Date).Days;
-
-                            if (daysUntilEnd == 3)
+                            DateTime runOutDate = r.EndDate.Date;
+                            bool skipReminder = false;
+                            if (r.RemindToBuyMethod == 2 && r.PackQuantity.HasValue && r.PillsPerPack.HasValue && r.PillsPerDay.HasValue && r.PillsPerDay > 0)
                             {
-                                var buyMsg = $"Внимание! Лекарство '{r.MedicationName}' скоро закончится (через 3 дня). Не забудьте купить новую упаковку.";
-                                await SendNotification(context, hubContext, emailService, r, buyMsg, stoppingToken);
+                                var totalPills = r.PackQuantity.Value * r.PillsPerPack.Value;
+                                var daysItLasts = (int)(totalPills / r.PillsPerDay.Value);
+
+                                runOutDate = r.StartDate.Date.AddDays(daysItLasts);
+
+                                if (runOutDate >= r.EndDate.Date)
+                                {
+                                    skipReminder = true;
+                                }
+                            }
+
+                            if (!skipReminder)
+                            {
+                                var daysUntilEnd = (runOutDate - nowUtc.Date).Days;
+
+                                if (daysUntilEnd == 3)
+                                {
+                                    var buyMsg = $"Внимание! Лекарство '{r.MedicationName}' скоро закончится (через 3 дня). Не забудьте купить новую упаковку.";
+                                    await SendNotification(context, hubContext, emailService, r, buyMsg, stoppingToken);
+                                }
                             }
                         }
                     }

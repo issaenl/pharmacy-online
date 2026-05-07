@@ -52,7 +52,7 @@
             <td><strong>{{ order.id }}</strong></td>
             <td>{{ new Date(order.orderDate).toLocaleString() }}</td>
             <td v-if="!isPharmacyAdmin && !selectedPharmacyFilter" class="text-muted">{{ order.pharmacyName }}</td>
-            <td><strong>{{ order.totalPrice.toFixed(2) }} руб.</strong></td>
+            <td><strong>{{ order.totalPrice.toFixed(2) }} <span class="nbrb-icon nbrb-icon-byn"></span></strong></td>
             <td>
               <select 
                 v-model="order.status" 
@@ -115,14 +115,14 @@
               <tr v-for="item in selectedOrder.items" :key="item.productId">
                 <td>{{ item.productName }}</td>
                 <td>{{ item.quantity }} шт.</td>
-                <td>{{ item.price.toFixed(2) }} руб.</td>
-                <td><strong>{{ (item.price * item.quantity).toFixed(2) }} руб.</strong></td>
+                <td>{{ item.price.toFixed(2) }} <span class="nbrb-icon nbrb-icon-byn"></span></td>
+                <td><strong>{{ (item.price * item.quantity).toFixed(2) }} <span class="nbrb-icon nbrb-icon-byn"></span></strong></td>
               </tr>
             </tbody>
           </table>
           
           <div class="total-row">
-            Итого: <strong>{{ selectedOrder.totalPrice.toFixed(2) }} руб.</strong>
+            Итого: <strong>{{ selectedOrder.totalPrice.toFixed(2) }} <span class="nbrb-icon nbrb-icon-byn"></span></strong>
           </div>
         </div>
         

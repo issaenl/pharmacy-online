@@ -35,7 +35,7 @@
       </div>
 
       <div class="price">
-        <span v-if="!exactPrice">от </span>{{ formatPrice(product.minPrice) }} р.
+        <span v-if="!exactPrice">от </span>{{ formatPrice(product.minPrice) }}  <span class="nbrb-icon nbrb-icon-byn"></span>
       </div>
     </div>
 

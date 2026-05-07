@@ -49,7 +49,7 @@
           </div>
           <div class="metric-info">
             <div class="metric-label">Выручка ({{ periodLabel }})</div>
-            <div class="metric-value">{{ formatPrice(revenue) }} р.</div>
+            <div class="metric-value">{{ formatPrice(revenue) }} <span class="nbrb-icon nbrb-icon-byn"></span></div>
           </div>
         </div>
 

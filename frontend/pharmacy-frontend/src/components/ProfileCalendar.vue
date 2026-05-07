@@ -132,8 +132,48 @@
               <label class="checkbox-container">
                 <input type="checkbox" v-model="form.remindToBuy">
                 <span class="checkmark"></span>
-                <span class="label-text">Напомнить купить лекарство по окончанию курса приема</span>
+                <span class="label-text">Напомнить купить лекарство</span>
               </label>
+
+              <div v-if="form.remindToBuy" class="remind-buy-settings">
+                <div class="radio-group">
+                  <label class="radio-label">
+                    <input type="radio" v-model="form.remindToBuyMethod" :value="1">
+                    По окончанию курса
+                  </label>
+                  <label class="radio-label">
+                    <input type="radio" v-model="form.remindToBuyMethod" :value="2">
+                    Рассчитать по количеству таблеток
+                  </label>
+                </div>
+
+                <div v-if="form.remindToBuyMethod === 2" class="calc-grid">
+                  <div class="form-group">
+                    <label>Количество упаковок</label>
+                    <input type="number" v-model="form.packQuantity" min="1">
+                  </div>
+                  <div class="form-group">
+                    <label>В одной упаковке</label>
+                    <input type="number" v-model="form.pillsPerPack" min="1">
+                  </div>
+                  <div class="form-group">
+                    <label>Прием в день (штук)</label>
+                    <input type="number" step="0.5" v-model="form.pillsPerDay" min="0.1">
+                  </div>
+                  
+                  <div class="calc-result" v-if="calculatedDays > 0">
+                    <template v-if="hasEnoughPillsForCourse">
+                      <strong>Лекарства хватит на весь курс</strong><br>
+                      <span class="small-text">Покупать новую упаковку не потребуется (запаса хватит на {{ calculatedDays }} дн.)</span>
+                    </template>
+                    
+                    <template v-else>
+                      Лекарства хватит на: <strong>{{ calculatedDays }} дн.</strong><br>
+                      <span class="small-text">Напомним за 3 дня до {{ calculatedRunOutDate }}</span>
+                    </template>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -324,7 +364,11 @@ const form = ref({
   intervalDays: 2, 
   selectedDays: ['Monday'], 
   timesOfDay: ['08:00'],
-  remindToBuy: false
+  remindToBuy: false,
+  remindToBuyMethod: 1,
+  packQuantity: 1,      
+  pillsPerPack: 20,     
+  pillsPerDay: 1       
 });
 
 onMounted(fetchReminders);
@@ -341,6 +385,36 @@ const toggleDay = (val) => {
   const idx = form.value.selectedDays.indexOf(val);
   if (idx > -1) form.value.selectedDays.splice(idx, 1); else form.value.selectedDays.push(val);
 };
+
+const calculatedDays = computed(() => {
+  if (form.value.packQuantity && form.value.pillsPerPack && form.value.pillsPerDay) {
+    return Math.floor((form.value.packQuantity * form.value.pillsPerPack) / form.value.pillsPerDay);
+  }
+  return 0;
+});
+
+const calculatedRunOutDate = computed(() => {
+  if (calculatedDays.value > 0 && form.value.startDate) {
+    const d = new Date(form.value.startDate);
+    d.setDate(d.getDate() + calculatedDays.value);
+    return d.toLocaleDateString('ru-RU');
+  }
+  return '';
+});
+
+const hasEnoughPillsForCourse = computed(() => {
+  if (calculatedDays.value > 0 && form.value.startDate && form.value.endDate) {
+    const runOut = new Date(form.value.startDate);
+    runOut.setDate(runOut.getDate() + calculatedDays.value);
+    
+    const courseEnd = new Date(form.value.endDate);
+    runOut.setHours(0,0,0,0);
+    courseEnd.setHours(0,0,0,0);
+    
+    return runOut >= courseEnd;
+  }
+  return false;
+});
 
 const submitReminder = async () => {
   isLoading.value = true;
@@ -360,9 +434,19 @@ const submitReminder = async () => {
 const editReminder = (r) => {
   editingId.value = r.id;
   form.value = {
-    medicationName: r.medicationName, dosage: r.dosage, startDate: formatDateString(r.startDate), endDate: formatDateString(r.endDate),
-    frequency: r.frequency, intervalDays: r.intervalDays || 2, selectedDays: r.daysOfWeek?.split(',') || [],
-    timesOfDay: r.timesOfDay.split(',').map(t => t.trim()), remindToBuy: r.remindToBuy || false,
+    medicationName: r.medicationName, 
+    dosage: r.dosage, 
+    startDate: formatDateString(r.startDate), 
+    endDate: formatDateString(r.endDate),
+    frequency: r.frequency, 
+    intervalDays: r.intervalDays || 2, 
+    selectedDays: r.daysOfWeek?.split(',') || [],
+    timesOfDay: r.timesOfDay.split(',').map(t => t.trim()), 
+    remindToBuy: r.remindToBuy || false,
+    remindToBuyMethod: r.remindToBuyMethod || 1,
+    packQuantity: r.packQuantity || 1,
+    pillsPerPack: r.pillsPerPack || 20,
+    pillsPerDay: r.pillsPerDay || 1,
   };
   isAdding.value = true;
 };
@@ -598,6 +682,68 @@ const scheduleForSelectedDay = computed(() => {
 .btn-add-time { background: transparent; border: 2px dashed #ddd; color: #888; padding: 10px; border-radius: 10px; cursor: pointer; font-weight: 600; font-family: inherit; width: fit-content; }
 .form-actions { display: flex; gap: 10px; justify-content: flex-end; }
 
+.remind-buy-settings {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #eaeaea;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #444;
+  cursor: pointer;
+}
+
+.radio-label input[type="radio"] {
+  accent-color: #689D6D;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.calc-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  background: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  border: 1px solid #eaeaea;
+}
+
+.calc-result {
+  grid-column: span 3;
+  margin-top: 5px;
+  padding: 10px;
+  background: #E8F4EA;
+  color: #2c5e33;
+  border-radius: 8px;
+  font-size: 14px;
+  text-align: center;
+  transition: 0.3s;
+}
+
+.calc-result strong {
+  font-size: 16px;
+}
+
+.small-text {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
 @media (max-width: 600px) {
   .header-top { flex-direction: column; align-items: stretch; }
   .header-actions { display: flex; width: 100%; }
@@ -613,5 +759,11 @@ const scheduleForSelectedDay = computed(() => {
   .btn-edit, .btn-delete { flex: 1; text-align: center; }
   .form-grid { grid-template-columns: 1fr; }
   .full-width { grid-column: span 1; }
+  .calc-grid {
+    grid-template-columns: 1fr;
+  }
+  .calc-result {
+    grid-column: span 1;
+  }
 }
 </style>
