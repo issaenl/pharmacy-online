@@ -9,5 +9,7 @@ namespace pharmacyBackend.DTO
         public string? Country { get; set; }
         public string? Manufacturer { get; set; }
         public string? District { get; set; }
+        public bool? InStock { get; set; }
+        public string? SortBy { get; set; }
     }
 }

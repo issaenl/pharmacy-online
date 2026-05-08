@@ -14,7 +14,27 @@
           <button class="close-btn" @click="isMobileFilterOpen = false">✕</button>
         </div>
 
-        <div class="filters-content">
+       <div class="filter-group">
+          <h4 class="filter-title">Сортировка</h4>
+          <div class="custom-select-wrapper" :style="{ zIndex: showSort ? 100 : 11 }" @click.stop>
+            <div class="selected-option" @click="showSort ? closeSort() : (closeAllDropdowns(), toggleSort())">
+              {{ selectedSortName }}
+              <span class="arrow" :class="{ 'arrow-up': showSort }">▼</span>
+            </div>
+            <div v-if="showSort" class="dropdown-menu">
+              <ul class="options-list">
+                <li 
+                  v-for="opt in filteredSort" 
+                  :key="opt.id" 
+                  @click="selectFilter('sortBy', opt.id)" 
+                  :class="{ selected: filters.sortBy === opt.id }"
+                >
+                  {{ opt.name }}
+                </li>
+              </ul>
+            </div>
+          </div>
+
           <div class="filter-group">
             <h4 class="filter-title">Цена</h4>
             <div class="price-inputs">
@@ -34,43 +54,92 @@
           </div>
 
           <div class="filter-group">
+            <h4 class="filter-title">Наличие</h4>
+            <div class="radio-group">
+              <label><input type="radio" v-model="filters.inStock" value="all" /> Все товары</label>
+              <label><input type="radio" v-model="filters.inStock" :value="true" /> Есть в наличии</label>
+              <label><input type="radio" v-model="filters.inStock" :value="false" /> Нет в наличии</label>
+            </div>
+          </div>
+
+          <div class="filter-group">
             <h4 class="filter-title">Категория</h4>
-            <select v-model="filters.categoryId" class="filter-select">
-              <option value="">Все категории</option>
-              <option v-for="cat in availableCategories" :key="cat.id" :value="cat.id">
-                {{ cat.name }}
-              </option>
-            </select>
+            <div class="custom-select-wrapper" :style="{ zIndex: showCat ? 100 : 10 }" @click.stop>
+              <div class="selected-option" @click="showCat ? closeCat() : (closeAllDropdowns(), toggleCat())">
+                {{ selectedCatName }}
+                <span class="arrow" :class="{ 'arrow-up': showCat }">▼</span>
+              </div>
+              <div v-if="showCat" class="dropdown-menu">
+                <input type="text" v-model="searchCat" placeholder="Поиск категории..." class="search-box" @click.stop />
+                <ul class="options-list">
+                  <li @click="selectFilter('categoryId', '')" :class="{ selected: !filters.categoryId }">Все категории</li>
+                  <li v-for="cat in filteredCat" :key="cat.id" @click="selectFilter('categoryId', cat.id)" :class="{ selected: filters.categoryId === cat.id }">
+                    {{ cat.name }}
+                  </li>
+                  <li v-if="filteredCat.length === 0" class="no-options">Категория не найдена</li>
+                </ul>
+              </div>
+            </div>
           </div>
 
           <div class="filter-group">
             <h4 class="filter-title">Страна производства</h4>
-            <select v-model="filters.country" class="filter-select">
-              <option value="">Любая страна</option>
-              <option v-for="country in availableCountries" :key="country" :value="country">
-                {{ country }}
-              </option>
-            </select>
+            <div class="custom-select-wrapper" :style="{ zIndex: showCountry ? 100 : 9 }" @click.stop>
+              <div class="selected-option" @click="showCountry ? closeCountry() : (closeAllDropdowns(), toggleCountry())">
+                {{ selectedCountryName }}
+                <span class="arrow" :class="{ 'arrow-up': showCountry }">▼</span>
+              </div>
+              <div v-if="showCountry" class="dropdown-menu">
+                <input type="text" v-model="searchCountry" placeholder="Поиск страны..." class="search-box" @click.stop />
+                <ul class="options-list">
+                  <li @click="selectFilter('country', '')" :class="{ selected: !filters.country }">Любая страна</li>
+                  <li v-for="c in filteredCountry" :key="c.id" @click="selectFilter('country', c.id)" :class="{ selected: filters.country === c.id }">
+                    {{ c.name }}
+                  </li>
+                  <li v-if="filteredCountry.length === 0" class="no-options">Страна не найдена</li>
+                </ul>
+              </div>
+            </div>
           </div>
 
           <div class="filter-group">
             <h4 class="filter-title">Производитель</h4>
-            <select v-model="filters.manufacturer" class="filter-select">
-              <option value="">Любой производитель</option>
-              <option v-for="man in availableManufacturers" :key="man" :value="man">
-                {{ man }}
-              </option>
-            </select>
+            <div class="custom-select-wrapper" :style="{ zIndex: showMan ? 100 : 8 }" @click.stop>
+              <div class="selected-option" @click="showMan ? closeMan() : (closeAllDropdowns(), toggleMan())">
+                {{ selectedManName }}
+                <span class="arrow" :class="{ 'arrow-up': showMan }">▼</span>
+              </div>
+              <div v-if="showMan" class="dropdown-menu">
+                <input type="text" v-model="searchMan" placeholder="Поиск производителя..." class="search-box" @click.stop />
+                <ul class="options-list">
+                  <li @click="selectFilter('manufacturer', '')" :class="{ selected: !filters.manufacturer }">Любой производитель</li>
+                  <li v-for="m in filteredMan" :key="m.id" @click="selectFilter('manufacturer', m.id)" :class="{ selected: filters.manufacturer === m.id }">
+                    {{ m.name }}
+                  </li>
+                  <li v-if="filteredMan.length === 0" class="no-options">Производитель не найден</li>
+                </ul>
+              </div>
+            </div>
           </div>
 
           <div class="filter-group">
             <h4 class="filter-title">Наличие в области</h4>
-            <select v-model="filters.district" class="filter-select">
-              <option value="">Любая область</option>
-              <option v-for="district in availableDistricts" :key="district" :value="district">
-                {{ district }}
-              </option>
-            </select>
+            <div class="custom-select-wrapper" :style="{ zIndex: showDist ? 100 : 7 }" @click.stop>
+             <div class="selected-option" @click="showDist ? closeDist() : (closeAllDropdowns(), toggleDist())">
+                {{ selectedDistName }}
+                <span class="arrow" :class="{ 'arrow-up': showDist }">▼</span>
+              </div>
+              <div v-if="showDist" class="dropdown-menu">
+                <input type="text" v-model="searchDist" placeholder="Поиск области..." class="search-box" @click.stop />
+                <ul class="options-list">
+                  <li @click="selectFilter('district', '')" :class="{ selected: !filters.district }">Любая область</li>
+                  <li v-for="d in filteredDist" :key="d.id" @click="selectFilter('district', d.id)" :class="{ selected: filters.district === d.id }">
+                    {{ d.name }}
+                  </li>
+                  <li v-if="filteredDist.length === 0" class="no-options">Область не найдена</li>
+                </ul>
+              </div>
+            </div>
           </div>
 
           <button class="reset-btn" @click="resetFilters">Сбросить фильтры</button>
@@ -103,6 +172,7 @@ import { useRoute, onBeforeRouteLeave } from 'vue-router';
 import ProductList from '@/components/ProductList.vue';
 import TheHeader from '@/components/Header.vue';
 import AppPagination from '@/components/AppPagination.vue'; 
+import { useCustomSelect } from '@/logic/customSelect';
 import api from '@/api/api';
 
 const route = useRoute();
@@ -119,7 +189,9 @@ const filters = ref(savedFilters ? JSON.parse(savedFilters) : {
   categoryId: '',
   country: '',
   manufacturer: '',
-  district: ''
+  district: '',
+  inStock: 'all',
+  sortBy: 'default'
 });
 
 const availableCategories = ref([]); 
@@ -128,13 +200,58 @@ const availableManufacturers = ref([]);
 const availableDistricts = ref([]);
 
 const pageTitle = 'Каталог товаров';
-
 const currentPage = ref(1);
 const itemsPerPage = 30;
 
-const totalPages = computed(() => {
-  return Math.ceil(products.value.length / itemsPerPage);
-});
+const sortOptions = ref([
+  { id: 'default', name: 'По умолчанию' },
+  { id: 'price_asc', name: 'Сначала дешевые' },
+  { id: 'price_desc', name: 'Сначала дорогие' },
+  { id: 'name_asc', name: 'По названию (А-Я)' },
+  { id: 'name_desc', name: 'По названию (Я-А)' }
+]);
+
+const { 
+  showDropdown: showSort, filteredItems: filteredSort, 
+  toggleDropdown: toggleSort, closeDropdown: closeSort 
+} = useCustomSelect(sortOptions, 'name');
+
+const { 
+  showDropdown: showCat, searchQuery: searchCat, filteredItems: filteredCat, 
+  toggleDropdown: toggleCat, closeDropdown: closeCat 
+} = useCustomSelect(availableCategories, 'name');
+
+const { 
+  showDropdown: showCountry, searchQuery: searchCountry, filteredItems: filteredCountry, 
+  toggleDropdown: toggleCountry, closeDropdown: closeCountry 
+} = useCustomSelect(availableCountries, 'name');
+
+const { 
+  showDropdown: showMan, searchQuery: searchMan, filteredItems: filteredMan, 
+  toggleDropdown: toggleMan, closeDropdown: closeMan 
+} = useCustomSelect(availableManufacturers, 'name');
+
+const { 
+  showDropdown: showDist, searchQuery: searchDist, filteredItems: filteredDist, 
+  toggleDropdown: toggleDist, closeDropdown: closeDist 
+} = useCustomSelect(availableDistricts, 'name');
+
+const closeAllDropdowns = () => {
+  closeSort(); closeCat(); closeCountry(); closeMan(); closeDist();
+};
+
+const selectedCatName = computed(() => availableCategories.value.find(c => c.id === filters.value.categoryId)?.name || 'Все категории');
+const selectedCountryName = computed(() => filters.value.country || 'Любая страна');
+const selectedManName = computed(() => filters.value.manufacturer || 'Любой производитель');
+const selectedDistName = computed(() => filters.value.district || 'Любая область');
+const selectedSortName = computed(() => sortOptions.value.find(o => o.id === filters.value.sortBy)?.name || 'По умолчанию');
+
+const selectFilter = (field, value) => {
+  filters.value[field] = value;
+  closeAllDropdowns();
+};
+
+const totalPages = computed(() => Math.ceil(products.value.length / itemsPerPage));
 
 const paginatedProducts = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage;
@@ -157,11 +274,14 @@ const fetchProducts = async () => {
       if (filters.value.country) params.append('country', filters.value.country);
       if (filters.value.manufacturer) params.append('manufacturer', filters.value.manufacturer);
       if (filters.value.district) params.append('district', filters.value.district);
+      if (filters.value.inStock !== 'all') params.append('inStock', filters.value.inStock);
+      if (filters.value.sortBy && filters.value.sortBy !== 'default') {
+        params.append('sortBy', filters.value.sortBy);
+      }
 
       response = await api.get(`/Products?${params.toString()}`);
     }
     products.value = response.data;
-
     currentPage.value = 1;
   } catch (error) {
     products.value = [];
@@ -169,7 +289,6 @@ const fetchProducts = async () => {
     isLoading.value = false;
   }
 };
-
 const fetchFilterOptions = async () => {
   try {
     const [countriesRes, manufacturersRes, districtsRes, categoriesRes] = await Promise.all([
@@ -179,11 +298,10 @@ const fetchFilterOptions = async () => {
       api.get('/Categories')
     ]);
 
-    availableCountries.value = countriesRes.data;
-    availableManufacturers.value = manufacturersRes.data;
-    availableDistricts.value = districtsRes.data;
+    availableCountries.value = countriesRes.data.map(i => ({ id: i, name: i }));
+    availableManufacturers.value = manufacturersRes.data.map(i => ({ id: i, name: i }));
+    availableDistricts.value = districtsRes.data.map(i => ({ id: i, name: i }));
     availableCategories.value = categoriesRes.data;
-    
   } catch (error) {
     console.error("Ошибка загрузки списков фильтров:", error);
   }
@@ -191,19 +309,13 @@ const fetchFilterOptions = async () => {
 
 const resetFilters = () => {
   filters.value = {
-    priceMin: null,
-    priceMax: null,
-    prescription: 'all',
-    categoryId: '',
-    country: '',
-    manufacturer: '',
-    district: ''
+    priceMin: null, priceMax: null, prescription: 'all',
+    categoryId: '', country: '', manufacturer: '', district: '', inStock: 'all',
+    sortBy: 'default'
   };
 };
 
-watch(currentPage, () => {
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-});
+watch(currentPage, () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
 
 watch(filters, (newFilters) => {
   sessionStorage.setItem('catalogFilters', JSON.stringify(newFilters));
@@ -216,9 +328,7 @@ onMounted(() => {
 });
 
 onBeforeRouteLeave((to, from, next) => {
-  if (to.name !== 'product') {
-    sessionStorage.removeItem('catalogFilters');
-  }
+  if (to.name !== 'product') sessionStorage.removeItem('catalogFilters');
   next();
 });
 </script>
@@ -380,6 +490,12 @@ onBeforeRouteLeave((to, from, next) => {
     @media (max-width: 992px) {
       .catalog-layout {
         flex-direction: column;
+        gap: 0;
+      }
+
+      .catalog-content {
+        width: 100%;
+        flex: none;
       }
 
       .mobile-filter-toggle {
@@ -418,4 +534,68 @@ onBeforeRouteLeave((to, from, next) => {
         z-index: 999;
       }
     }
+
+.radio-group input[type="radio"] {
+  accent-color: #689D6D;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.custom-select-wrapper .selected-option {
+  background-color: #F5F5F5;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 16px;
+  font-family: var(--main-font);
+  color: #000;
+}
+
+.custom-select-wrapper .selected-option:hover {
+  background-color: #ebebeb;
+}
+
+.custom-select-wrapper .dropdown-menu {
+  top: 100%;
+  bottom: auto;
+  margin-top: 4px;
+  margin-bottom: 0;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  background: white;
+}
+
+.custom-select-wrapper .search-box {
+  border-top: none;
+  border-bottom: 1px solid #eee;
+  border-radius: 10px 10px 0 0;
+  background-color: white;
+}
+
+.custom-select-wrapper .options-list li {
+  padding: 10px 15px;
+  border-bottom: 1px solid #f9f9f9;
+}
+
+.custom-select-wrapper .options-list li:last-child {
+  border-bottom: none;
+}
+
+.custom-select-wrapper .options-list li.selected {
+  background-color: #689D6D;
+  color: white;
+  font-weight: normal;
+}
+
+.custom-select-wrapper .options-list li:hover {
+  background-color: #f0f0f0;
+  color: #000;
+}
+
+.custom-select-wrapper .options-list li.selected:hover {
+  background-color: #5c8b60;
+  color: white;
+}
 </style>

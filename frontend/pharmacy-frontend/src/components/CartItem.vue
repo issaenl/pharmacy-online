@@ -8,26 +8,42 @@
         </router-link>
         
         <div class="price-container">
-          <div v-if="item.discountPercentage" class="old-price">
-            {{ item.unitPrice.toFixed(2) }} р.
-          </div>
-          
-          <div class="item-price" :class="{ 'has-discount': item.discountPercentage }">
-            <template v-if="!orderStore.selectedPharmacy">от </template>
-            {{ finalPrice.toFixed(2) }} <span class="nbrb-icon nbrb-icon-byn"></span>
+          <template v-if="finalPrice > 0">
+            <div v-if="item.discountPercentage" class="old-price">
+              {{ item.unitPrice.toFixed(2) }} р.
+            </div>
             
-            <span v-if="item.discountPercentage" class="discount-badge">
-              -{{ item.discountPercentage }}%
-            </span>
-          </div>
+            <div class="item-price" :class="{ 'has-discount': item.discountPercentage }">
+              <template v-if="!orderStore.selectedPharmacy">от </template>
+              {{ finalPrice.toFixed(2) }} <span class="nbrb-icon nbrb-icon-byn"></span>
+              
+              <span v-if="item.discountPercentage" class="discount-badge">
+                -{{ item.discountPercentage }}%
+              </span>
+            </div>
+          </template>
+
+          <template v-else>
+            <div class="out-of-stock-label">Нет в наличии</div>
+          </template>
         </div>
         </div>
 
-    <div class="quantity-control">
-      <button @click="cartStore.updateQuantity(item.productId, item.quantity - 1)" :disabled="item.quantity <= 1">−</button>
-      <span>{{ item.quantity }}</span>
-      <button @click="cartStore.updateQuantity(item.productId, item.quantity + 1)">+</button>
-    </div>
+        <div v-if="finalPrice > 0" class="quantity-control">
+            <button @click="cartStore.updateQuantity(item.productId, item.quantity - 1)" :disabled="item.quantity <= 1">−</button>
+            <span>{{ item.quantity }}</span>
+            <button @click="cartStore.updateQuantity(item.productId, item.quantity + 1)">+</button>
+            </div>
+
+            <div v-else class="waitlist-action">
+            <button class="waitlist-btn-small" @click="addToWaitlist">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 5px;">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                В лист ожидания
+            </button>
+         </div>
 
     <div class="item-actions">
       <button 
@@ -74,6 +90,10 @@ const finalPrice = computed(() => {
   const discountAmount = props.item.unitPrice * (props.item.discountPercentage / 100);
   return props.item.unitPrice - discountAmount;
 });
+
+const addToWaitlist = () => {
+  alert(`Вы подписаны на уведомление о поступлении товара: ${props.item.productName}`);
+};
 </script>
 
 <style scoped>
@@ -204,6 +224,52 @@ const finalPrice = computed(() => {
 
     .action-btn.is-favorite svg {
         fill: currentColor;
+    }
+
+    .cart-item.is-out-of-stock {
+        background-color: #f9f9f9;
+        opacity: 0.8;
+    }
+
+    .out-of-stock-label {
+        color: #BB4E58;
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    .waitlist-btn-small {
+        background-color: #888;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 8px 12px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: 0.2s;
+    }
+
+    .waitlist-btn-small:hover {
+        background-color: #3d4144;
+    }
+
+    .is-out-of-stock .item-name {
+        color: #666;
+    }
+
+    @media (max-width: 800px) {
+        .waitlist-action {
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .waitlist-btn-small {
+            width: 100%;
+            justify-content: center;
+        }
     }
 
     @media (max-width: 800px) {

@@ -111,10 +111,35 @@
                 </label>
 
                 <label v-if="form.role === 1">Привязка к аптеке
-                    <select v-model="form.pharmacyId" required class="form-select">
-                        <option value="" disabled>Выберите аптеку...</option>
-                        <option v-for="p in pharmacies" :key="p.id" :value="p.id">{{ p.name }}</option>
-                    </select>
+                  <div class="custom-select-wrapper" @click.stop>
+                    <div class="selected-option" @click="togglePharmacyDropdown">
+                      {{ selectedPharmacyName }}
+                      <span class="arrow" :class="{ 'arrow-up': showPharmacyDropdown }">▼</span>
+                    </div>
+
+                    <div v-if="showPharmacyDropdown" class="dropdown-menu">
+                      <ul class="options-list">
+                        <li
+                          v-for="p in filteredPharmacies"
+                          :key="p.id"
+                          @click="selectPharmacy(p)"
+                          :class="{ selected: form.pharmacyId === p.id }"
+                        >
+                          {{ p.name }}
+                        </li>
+                        <li v-if="filteredPharmacies.length === 0" class="no-options">
+                          Аптека не найдена
+                        </li>
+                      </ul>
+                      <input
+                        type="text"
+                        v-model="pharmacySearch"
+                        placeholder="Поиск аптеки..."
+                        class="search-box"
+                        @click.stop
+                      />
+                    </div>
+                  </div>
                 </label>
             </div>
           </div>
@@ -137,7 +162,8 @@ import TablePagination from '@/components/admin/TablePagination.vue';
 import { usePagination } from '@/logic/pagination';
 import { useModal } from '@/logic/modal';
 import { useSorting } from '@/logic/sorting';
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { useCustomSelect } from '@/logic/customSelect';
 import { useToast } from 'vue-toast-notification';
 import api from '@/api/api';
 
@@ -150,6 +176,25 @@ const admins = ref([]);
 const pharmacies = ref([]);
 const isLoading = ref(false);
 const searchQuery = ref('');
+
+const { 
+  showDropdown: showPharmacyDropdown, 
+  searchQuery: pharmacySearch, 
+  filteredItems: filteredPharmacies, 
+  toggleDropdown: togglePharmacyDropdown,
+  closeDropdown: closePharmacyDropdown
+} = useCustomSelect(pharmacies, 'name');
+
+const selectedPharmacyName = computed(() => {
+  if (!form.value.pharmacyId) return 'Выберите аптеку...';
+  const pharm = pharmacies.value.find(p => p.id === form.value.pharmacyId);
+  return pharm ? pharm.name : 'Выберите аптеку...';
+});
+
+const selectPharmacy = (pharm) => {
+  form.value.pharmacyId = pharm.id;
+  closePharmacyDropdown();
+};
 
 const form = ref({ 
   firstName: '', lastName: '', email: '', phone: '', password: '', role: 2, pharmacyId: '' 
@@ -168,7 +213,10 @@ const fetchData = async () => {
   }
 };
 
-onMounted(() => { fetchData(); });
+onMounted(() => { 
+  fetchData(); 
+});
+
 
 const handleResetPassword = async (id) => {
   if (!confirm('Сбросить пароль этого сотрудника до пароля по умолчанию?')) return;

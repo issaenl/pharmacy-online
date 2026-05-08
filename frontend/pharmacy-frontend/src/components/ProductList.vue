@@ -57,7 +57,7 @@ defineProps({
 
     .products-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
         gap: 20px;
     }
 
@@ -74,18 +74,10 @@ defineProps({
         font-size: 24px;
     }
 
-
-    @media (max-width: 1024px) {
-        .products-grid
-        { 
-            grid-template-columns: repeat(3, 1fr); 
-        }
-    }
-
     @media (max-width: 768px) {
-        .products-grid
-        { 
-            grid-template-columns: repeat(2, 1fr); 
+        .products-grid {
+          grid-template-columns: 1fr; 
+          gap: 15px;
         }
     }
 </style>

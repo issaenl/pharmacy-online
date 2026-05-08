@@ -155,14 +155,14 @@ onMounted(fetchData);
   @media (max-width: 1024px) {
     .products-grid
     { 
-      grid-template-columns: repeat(3, 1fr); 
+      grid-template-columns: repeat(2, 1fr); 
     }
   }
 
   @media (max-width: 768px) {
     .products-grid
     { 
-      grid-template-columns: repeat(2, 1fr); 
+      grid-template-columns: repeat(1, 1fr); 
     }
   }
 </style>

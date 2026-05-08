@@ -57,11 +57,7 @@ namespace pharmacyBackend.Controllers
         {
             var query = _context.Products.Where(p => p.IsActive == true).AsQueryable();
 
-            if (!string.IsNullOrWhiteSpace(filters.CategoryIds))
-            {
-                var ids = filters.CategoryIds.Split(',').Select(int.Parse).ToList();
-                query = query.Where(p => ids.Contains(p.CategoryId));
-            }
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
             if (!string.IsNullOrWhiteSpace(filters.CategoryIds))
             {
@@ -70,34 +66,52 @@ namespace pharmacyBackend.Controllers
             }
 
             if (filters.IsPrescription.HasValue)
-            {
                 query = query.Where(p => p.IsPrescription == filters.IsPrescription.Value);
-            }
 
             if (!string.IsNullOrWhiteSpace(filters.Country))
-            {
                 query = query.Where(p => p.Country.ToLower() == filters.Country.ToLower());
-            }
 
             if (!string.IsNullOrWhiteSpace(filters.Manufacturer))
-            {
                 query = query.Where(p => p.Manufacturer.ToLower() == filters.Manufacturer.ToLower());
-            }
 
             if (!string.IsNullOrWhiteSpace(filters.District))
             {
                 query = query.Where(p => p.Stocks.Any(s =>
-                    s.Pharmacy.District.ToLower() == filters.District.ToLower() && s.Quantity > 0));
+                    s.Pharmacy.District.ToLower() == filters.District.ToLower()
+                    && s.Quantity > 0
+                    && s.ExpirationDate >= today));
             }
 
             if (filters.PriceMin.HasValue)
-            {
-                query = query.Where(p => p.Stocks.Any(s => s.Quantity > 0 && s.Price >= filters.PriceMin.Value));
-            }
+                query = query.Where(p => p.Stocks.Any(s => s.Quantity > 0 && s.ExpirationDate >= today && s.Price >= filters.PriceMin.Value));
 
             if (filters.PriceMax.HasValue)
+                query = query.Where(p => p.Stocks.Any(s => s.Quantity > 0 && s.ExpirationDate >= today && s.Price <= filters.PriceMax.Value));
+
+            if (filters.InStock.HasValue)
             {
-                query = query.Where(p => p.Stocks.Any(s => s.Quantity > 0 && s.Price <= filters.PriceMax.Value));
+                if (filters.InStock.Value)
+                    query = query.Where(p => p.Stocks.Any(s => s.Quantity > 0 && s.ExpirationDate >= today));
+                else
+                    query = query.Where(p => !p.Stocks.Any(s => s.Quantity > 0 && s.ExpirationDate >= today));
+            }
+
+            var sortedQuery = query.OrderByDescending(p => p.Stocks.Any(s => s.Quantity > 0 && s.ExpirationDate >= today));
+
+            if (!string.IsNullOrWhiteSpace(filters.SortBy))
+            {
+                query = filters.SortBy.ToLower() switch
+                {
+                    "price_asc" => sortedQuery.ThenBy(p => p.Stocks.Where(s => s.Quantity > 0 && s.ExpirationDate >= today).Min(s => (decimal?)s.Price)),
+                    "price_desc" => sortedQuery.ThenByDescending(p => p.Stocks.Where(s => s.Quantity > 0 && s.ExpirationDate >= today).Min(s => (decimal?)s.Price)),
+                    "name_asc" => sortedQuery.ThenBy(p => p.Name),
+                    "name_desc" => sortedQuery.ThenByDescending(p => p.Name),
+                    _ => sortedQuery.ThenBy(p => p.Id)
+                };
+            }
+            else
+            {
+                query = sortedQuery.ThenBy(p => p.Id);
             }
 
             var products = await query

@@ -86,17 +86,23 @@ onMounted(fetchData);
     color: #666;
   }
 
-  @media (max-width: 1024px) {
-    .products-grid-full 
-    { 
+ @media (max-width: 1024px) {
+    .products-grid-full { 
       grid-template-columns: repeat(3, 1fr); 
     }
   }
 
   @media (max-width: 768px) {
-    .products-grid-full 
-    { 
+    .products-grid-full { 
       grid-template-columns: repeat(2, 1fr); 
+    }
+  }
+
+
+  @media (max-width: 480px) {
+    .products-grid-full { 
+      grid-template-columns: 1fr;
+      gap: 15px;
     }
   }
 </style>

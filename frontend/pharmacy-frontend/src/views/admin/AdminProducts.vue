@@ -90,12 +90,36 @@
                 <label>Страна <input v-model="form.country" required placeholder="Германия"/></label>
                 <label>Форма выпуска <input v-model="form.dosageForm" required placeholder="таблетки"/></label>
                 <label>Категория
-                    <select v-model="form.categoryId" required class="form-select">
-                        <option value="" disabled>Выберите категорию...</option>
-                        <option v-for="cat in categories" :key="cat.id" :value="cat.id">
-                        {{ cat.name }}
-                        </option>
-                    </select>
+                  <div class="custom-select-wrapper" @click.stop>
+                    <div class="selected-option" @click="toggleCategoryDropdown">
+                      {{ selectedCategoryName }}
+                      <span class="arrow" :class="{ 'arrow-up': showCategoryDropdown }">▼</span>
+                    </div>
+
+                   <div v-if="showCategoryDropdown" class="dropdown-menu">
+                      <ul class="options-list">
+                        <li
+                          v-for="cat in filteredCategories"
+                          :key="cat.id"
+                          @click="selectCategory(cat)"
+                          :class="{ selected: form.categoryId === cat.id }"
+                        >
+                          {{ cat.name }}
+                        </li>
+                        <li v-if="filteredCategories.length === 0" class="no-options">
+                          Категория не найдена
+                        </li>
+                      </ul>
+                      
+                      <input
+                        type="text"
+                        v-model="categorySearch"
+                        placeholder="Поиск категории..."
+                        class="search-box"
+                        @click.stop
+                      />
+                    </div>
+                  </div>
                 </label>
               
                 <div class="checkboxes">
@@ -165,7 +189,8 @@ import TablePagination from '@/components/admin/TablePagination.vue';
 import { usePagination } from '@/logic/pagination';
 import { useModal } from '@/logic/modal';
 import { useSorting } from '@/logic/sorting';
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { useCustomSelect } from '@/logic/customSelect';
 import { useToast } from 'vue-toast-notification';
 import api from '@/api/api';
 
@@ -184,6 +209,25 @@ const photoFile = ref(null);
 const pdfFile = ref(null);
 const fileInput = ref(null);
 const importErrors = ref([]);
+
+const { 
+  showDropdown: showCategoryDropdown, 
+  searchQuery: categorySearch, 
+  filteredItems: filteredCategories, 
+  toggleDropdown: toggleCategoryDropdown,
+  closeDropdown: closeCategoryDropdown
+} = useCustomSelect(categories, 'name');
+
+const selectedCategoryName = computed(() => {
+  if (!form.value.categoryId) return 'Выберите категорию...';
+  const cat = categories.value.find(c => c.id === form.value.categoryId);
+  return cat ? cat.name : 'Выберите категорию...';
+});
+
+const selectCategory = (cat) => {
+  form.value.categoryId = cat.id;
+  closeCategoryDropdown();
+};
 
 const form = ref({
   name: '', manufacturer: '', country: '', dosageForm: '',

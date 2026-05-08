@@ -46,7 +46,12 @@
         </div>
 
         <div class="purchase-group">
-          <div class="price-range">{{ formatPrice(finalMinPrice) }} — {{ formatPrice(finalMaxPrice) }} <span class="nbrb-icon nbrb-icon-byn"></span></div>
+          <div v-if="finalMinPrice > 0" class="price-range">
+            {{ formatPrice(finalMinPrice) }} — {{ formatPrice(finalMaxPrice) }} 
+            <span class="nbrb-icon nbrb-icon-byn"></span>
+          </div>
+          <div v-else class="no-stock-label">Нет в наличии</div>
+          
           <p class="disclaimer">Внешний вид товара может отличаться от изображенного на фотографии</p>
         </div>
       </div>
@@ -64,9 +69,25 @@
           Инструкция <span class="arrow">></span>
         </button>
         
-        <button class="btn-primary cart-btn" @click="addToCart">
+        <button 
+          v-if="finalMinPrice > 0"
+          class="btn-primary cart-btn" 
+          @click="addToCart"
+        >
           <img src="/assets/Cart.svg" alt="" class="cart-icon-white">
           В корзину
+        </button>
+
+        <button 
+          v-else
+          class="btn-primary waitlist-btn" 
+          @click="addToWaitlist"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 5px;">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          В лист ожидания
         </button>
       </div>
     </section>
@@ -102,7 +123,7 @@
       </div>
 
       <div v-show="viewMode === 'list'" class="pharmacy-list">
-        <div v-if="filteredPharmacies.length === 0" class="no-stock">Товар временно отсутствует по заданным фильтрам!</div>
+        <div v-if="filteredPharmacies.length === 0" class="no-stock">Товар временно отсутствует</div>
         <PharmacyItem 
           v-for="shop in paginatedPharmacies" 
           :key="shop.id" 
@@ -754,6 +775,40 @@ onMounted(async () => {
     font-weight: bold;
     color: #666;
     z-index: 100;
+  }
+
+  .waitlist-btn {
+    background-color: #888;
+    color: white;
+    border: none;
+    padding: 14px 25px;
+    border-radius: 20px;
+    font-family: var(--main-font);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    transition: background 0.3s ease;
+  }
+
+  .waitlist-btn:hover {
+    background-color: #3d4144;
+  }
+
+  .no-stock-label {
+    font-size: 28px;
+    font-weight: 700;
+    color: #BB4E58;
+    margin-bottom: 5px;
+  }
+
+  @media (max-width: 600px) {
+    .waitlist-btn {
+      font-size: 16px;
+      padding: 12px;
+    }
   }
 
   @media (max-width: 992px) {

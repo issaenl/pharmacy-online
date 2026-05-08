@@ -2,7 +2,7 @@
   <div class="admin-layout">
     <aside class="sidebar">
       <div class="logo">
-        <h2>Админ-панель</h2>
+        <h2>Панель администратора</h2>
       </div>
       <nav class="menu">
         <router-link to="/admin" exact-active-class="active">Главная</router-link>

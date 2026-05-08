@@ -115,16 +115,75 @@
           <div class="form-grid">
             <div class="form-column">
                 <label>Аптека
-                    <select v-model="form.pharmacyId" required class="form-select" :disabled="isEditing || isPharmacyAdmin">
-                        <option value="" disabled>Выберите аптеку...</option>
-                        <option v-for="p in pharmacies" :key="p.id" :value="p.id">{{ p.name }} ({{ p.address }})</option>
-                    </select>
+                  <div class="custom-select-wrapper" :style="{ zIndex: showPharmacyDropdown ? 1000 : 100 }" @click.stop>
+                    <div 
+                      class="selected-option" 
+                      @click="!(isEditing || isPharmacyAdmin) && (closeProductDropdown(), togglePharmacyDropdown())"
+                      :style="(isEditing || isPharmacyAdmin) ? 'background: #f5f5f5; cursor: not-allowed; color: #999;' : ''"
+                    >
+                      {{ selectedPharmacyName }}
+                      <span class="arrow" :class="{ 'arrow-up': showPharmacyDropdown }">▼</span>
+                    </div>
+
+                    <div v-if="showPharmacyDropdown && !(isEditing || isPharmacyAdmin)" class="dropdown-menu">
+                       <input
+                        type="text"
+                        v-model="pharmacySearch"
+                        placeholder="Поиск аптеки..."
+                        class="search-box"
+                        @click.stop
+                      />
+                      
+                      <ul class="options-list">
+                        <li
+                          v-for="p in filteredPharmacies"
+                          :key="p.id"
+                          @click="selectPharmacy(p)"
+                          :class="{ selected: form.pharmacyId === p.id }"
+                        >
+                          {{ p.name }} ({{ p.address }})
+                        </li>
+                        <li v-if="filteredPharmacies.length === 0" class="no-options">Аптека не найдена</li>
+                      </ul>
+                     
+                    </div>
+                  </div>
                 </label>
+
                 <label>Товар
-                    <select v-model="form.productId" required class="form-select" :disabled="isEditing">
-                        <option value="" disabled>Выберите товар...</option>
-                        <option v-for="p in products" :key="p.id" :value="p.id">{{ p.name }} ({{ p.manufacturer }})</option>
-                    </select>
+                  <div class="custom-select-wrapper" :style="{ zIndex: showProductDropdown ? 1000 : 100 }" @click.stop>
+                    <div 
+                      class="selected-option" 
+                      @click="!isEditing && (closePharmacyDropdown(), toggleProductDropdown())"
+                      :style="isEditing ? 'background: #f5f5f5; cursor: not-allowed; color: #999;' : ''"
+                    >
+                      {{ selectedProductName }}
+                      <span class="arrow" :class="{ 'arrow-up': showProductDropdown }">▼</span>
+                    </div>
+
+                    <div v-if="showProductDropdown && !isEditing" class="dropdown-menu">
+                      <input
+                        type="text"
+                        v-model="productSearch"
+                        placeholder="Поиск товара..."
+                        class="search-box"
+                        @click.stop
+                      />
+                      
+                      <ul class="options-list">
+                        <li
+                          v-for="p in filteredProducts"
+                          :key="p.id"
+                          @click="selectProduct(p)"
+                          :class="{ selected: form.productId === p.id }"
+                        >
+                          {{ p.name }} ({{ p.manufacturer }})
+                        </li>
+                        <li v-if="filteredProducts.length === 0" class="no-options">Товар не найден</li>
+                      </ul>
+                      
+                    </div>
+                  </div>
                 </label>
                 <label>Срок годности партии
                   <input type="date" v-model="form.expirationDate" required />
@@ -169,6 +228,7 @@ import TablePagination from '@/components/admin/TablePagination.vue';
 import { usePagination } from '@/logic/pagination';
 import { useModal } from '@/logic/modal';
 import { useSorting } from '@/logic/sorting';
+import { useCustomSelect } from '@/logic/customSelect';
 import { ref, computed, onMounted } from 'vue';
 import { useToast } from 'vue-toast-notification';
 import { useAuthStore } from '@/stores/authStore';
@@ -202,6 +262,44 @@ const form = ref({
   discountPercentage: 0, 
   expirationDate: ''
 });
+
+const { 
+  showDropdown: showPharmacyDropdown, 
+  searchQuery: pharmacySearch, 
+  filteredItems: filteredPharmacies, 
+  toggleDropdown: togglePharmacyDropdown,
+  closeDropdown: closePharmacyDropdown
+} = useCustomSelect(pharmacies, 'name');
+
+const selectedPharmacyName = computed(() => {
+  if (!form.value.pharmacyId) return 'Выберите аптеку...';
+  const p = pharmacies.value.find(x => x.id === form.value.pharmacyId);
+  return p ? `${p.name} (${p.address})` : 'Выберите аптеку...';
+});
+
+const selectPharmacy = (p) => {
+  form.value.pharmacyId = p.id;
+  closePharmacyDropdown();
+};
+
+const { 
+  showDropdown: showProductDropdown, 
+  searchQuery: productSearch, 
+  filteredItems: filteredProducts, 
+  toggleDropdown: toggleProductDropdown,
+  closeDropdown: closeProductDropdown
+} = useCustomSelect(products, 'name');
+
+const selectedProductName = computed(() => {
+  if (!form.value.productId) return 'Выберите товар...';
+  const p = products.value.find(x => x.id === form.value.productId);
+  return p ? `${p.name} (${p.manufacturer})` : 'Выберите товар...';
+});
+
+const selectProduct = (p) => {
+  form.value.productId = p.id;
+  closeProductDropdown();
+};
 
 const calculateFinalPrice = (price, discountPercent) => {
   if (!discountPercent) return Number(price).toFixed(2);
@@ -482,5 +580,22 @@ const {
     border-radius: 8px;
     font-size: 14px;
     margin-top: 10px;
+}
+
+.custom-select-wrapper .dropdown-menu {
+  top: 100%;
+  bottom: auto;
+  margin-top: 4px;
+  margin-bottom: 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.custom-select-wrapper .search-box {
+  border-top: none;
+  border-bottom: 1px solid #eee;
+}
+
+.custom-select-wrapper .options-list {
+  max-height: 140px; 
 }
 </style>
