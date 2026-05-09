@@ -33,6 +33,12 @@
             @click="currentTab = 'reviews'">
             Мои отзывы
           </button>
+
+          <button 
+            :class="['menu-item', { active: currentTab === 'waitlist' }]" 
+            @click="currentTab = 'waitlist'">
+            Лист ожидания
+          </button>
         </nav>
 
         <button @click="handleLogout" class="logout-btn">Выйти из аккаунта</button>
@@ -43,6 +49,7 @@
         <ProfileCalendar v-if="currentTab === 'calendar'" />
         <ProfileOrders v-if="currentTab === 'orders'" />
         <ProfileReviews v-if="currentTab === 'reviews'" />
+        <ProfileWaitlist v-if="currentTab === 'waitlist'" />
       </main>
       
     </div>
@@ -58,6 +65,7 @@ import ProfileInfo from '@/components/ProfileInfo.vue';
 import ProfileOrders from '@/components/ProfileOrders.vue';
 import ProfileReviews from '@/components/ProfileReviews.vue';
 import ProfileCalendar from '@/components/ProfileCalendar.vue';
+import ProfileWaitlist from '@/components/ProfileWaitlist.vue';
 
 const authStore = useAuthStore();
 const router = useRouter();

@@ -9,10 +9,12 @@ namespace pharmacyBackend.Services
     public class ImportService : IImportService
     {
         private readonly AppDbContext _context;
+        private readonly IWaitlistService _waitlistService;
 
-        public ImportService(AppDbContext context)
+        public ImportService(AppDbContext context, IWaitlistService waitlistService)
         {
             _context = context;
+            _waitlistService = waitlistService;
         }
 
         private bool ParseBooleanFlexible(string val)
@@ -147,6 +149,7 @@ namespace pharmacyBackend.Services
         public async Task<ImportDTO> ImportStocksAsync(IFormFile file, int? allowedPharmacyId = null)
         {
             var result = new ImportDTO();
+
             var stocksToAdd = new List<Stock>();
 
             var pharmaciesDict = await _context.Pharmacies
@@ -213,6 +216,14 @@ namespace pharmacyBackend.Services
                 _context.Stocks.AddRange(stocksToAdd);
                 await _context.SaveChangesAsync();
                 result.AddedCount = stocksToAdd.Count;
+                foreach (var stock in stocksToAdd)
+                {
+                    await _waitlistService.CheckWaitlistOnStockUpdateAsync(
+                        stock.ProductId,
+                        stock.PharmacyId,
+                        stock.Quantity
+                    );
+                }
             }
 
             return result;

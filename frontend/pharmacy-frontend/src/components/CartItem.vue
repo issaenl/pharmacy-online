@@ -36,14 +36,20 @@
             </div>
 
             <div v-else class="waitlist-action">
-            <button class="waitlist-btn-small" @click="addToWaitlist">
+            <button class="waitlist-btn-small" @click="openWaitlistModal">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 5px;">
                     <circle cx="12" cy="12" r="10"></circle>
                     <polyline points="12 6 12 12 16 14"></polyline>
                 </svg>
                 В лист ожидания
             </button>
-         </div>
+            </div> 
+            <WaitlistModal 
+                v-if="isModalOpen"
+                :is-open="isModalOpen" 
+                :product-id="item.productId" 
+                @close="isModalOpen = false" />
+         
 
     <div class="item-actions">
       <button 
@@ -69,10 +75,13 @@
 </template>
 
 <script setup>
-import { defineProps, computed } from 'vue';
+import { defineProps, computed, ref } from 'vue';
+import { useAuthStore } from '@/stores/authStore';
+import { useRouter } from 'vue-router';
 import { useCartStore } from '@/stores/cartStore';
 import { useFavoriteStore } from '@/stores/favoriteStore';
 import { useOrderStore } from '@/stores/orderStore';
+import WaitlistModal from '@/components/WaitlistModal.vue';
 
 const props = defineProps({
   item: {
@@ -84,6 +93,10 @@ const props = defineProps({
 const cartStore = useCartStore();
 const favoriteStore = useFavoriteStore();
 const orderStore = useOrderStore();
+const authStore = useAuthStore();
+const router = useRouter();
+
+const isModalOpen = ref(false);
 
 const finalPrice = computed(() => {
   if (!props.item.discountPercentage) return props.item.unitPrice;
@@ -91,8 +104,12 @@ const finalPrice = computed(() => {
   return props.item.unitPrice - discountAmount;
 });
 
-const addToWaitlist = () => {
-  alert(`Вы подписаны на уведомление о поступлении товара: ${props.item.productName}`);
+const openWaitlistModal = () => {
+  if (!authStore.token) {
+    router.push('/login');
+    return;
+  }
+  isModalOpen.value = true;
 };
 </script>
 

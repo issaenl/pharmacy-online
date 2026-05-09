@@ -32,6 +32,10 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await api.get('/Auth/me');
       user.value = response.data;
       localStorage.setItem('user', JSON.stringify(user.value));
+
+      const { useWaitlistStore } = await import('./waitlistStore');
+      useWaitlistStore().fetchWaitlist();
+
     } catch (error) {
       console.error("Ошибка обновления профиля", error);
       if (error.response?.status === 401 || error.response?.status === 404) {
@@ -55,8 +59,13 @@ export const useAuthStore = defineStore('auth', () => {
       try {
         const cartStore = useCartStore();
         const favoriteStore = useFavoriteStore();
+        
+        const { useWaitlistStore } = await import('./waitlistStore');
+        const waitlistStore = useWaitlistStore();
+
         await cartStore.syncCart();
         await favoriteStore.syncFavorites();
+        await waitlistStore.fetchWaitlist();
       } catch (error) {
         console.error(error);
       }
@@ -82,14 +91,19 @@ export const useAuthStore = defineStore('auth', () => {
     delete api.defaults.headers.common['Authorization'];
 
     try {
-      import('@/stores/cartStore').then(({ useCartStore }) => {
+      import('@/stores/cartStore').then(async ({ useCartStore }) => {
         const cartStore = useCartStore();
         const favoriteStore = useFavoriteStore();
+        
+        const { useWaitlistStore } = await import('./waitlistStore');
+        const waitlistStore = useWaitlistStore();
+
         cartStore.items = [];
         favoriteStore.items = [];
+        waitlistStore.items = [];
       });
     } catch (error) {
-      console.error('Ошибка при очистке корзины:', error);
+      console.error('Ошибка при очистке хранилищ:', error);
     }
   };
 

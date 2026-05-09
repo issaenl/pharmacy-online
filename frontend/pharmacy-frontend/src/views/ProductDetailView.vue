@@ -81,8 +81,7 @@
         <button 
           v-else
           class="btn-primary waitlist-btn" 
-          @click="addToWaitlist"
-        >
+          @click="openWaitlistModal">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 5px;">
             <circle cx="12" cy="12" r="10"></circle>
             <polyline points="12 6 12 12 16 14"></polyline>
@@ -91,6 +90,13 @@
         </button>
       </div>
     </section>
+
+    <WaitlistModal 
+      v-if="isWaitlistModalOpen"
+      :is-open="isWaitlistModalOpen" 
+      :product-id="product?.id" 
+      @close="isWaitlistModalOpen = false" 
+    />
 
     <section class="pharmacies-section">
       <div class="pharmacies-header">
@@ -179,6 +185,7 @@ import TheHeader from '@/components/Header.vue';
 import QuickOrderModal from '@/components/QuickOrderModal.vue';
 import api from '@/api/api';
 import AppPagination from '@/components/AppPagination.vue';
+import WaitlistModal from '@/components/WaitlistModal.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -187,6 +194,7 @@ const authStore = useAuthStore();
 const favoriteStore = useFavoriteStore();
 const orderStore = useOrderStore();
 const toast = useToast({ position: 'bottom-right' });
+const isWaitlistModalOpen = ref(false);
 
 const product = ref(null);
 const pharmacies = ref([]);
@@ -382,6 +390,14 @@ const addToCart = () => {
     discountPercentage: product.value.discountPercentage,
     imageUrl: product.value.pictureUrl 
   });
+};
+
+const openWaitlistModal = () => {
+  if (!authStore.token) {
+    router.push('/login');
+    return;
+  }
+  isWaitlistModalOpen.value = true;
 };
 
 const handleBookClick = (pharmacy) => {

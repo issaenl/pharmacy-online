@@ -79,7 +79,7 @@ namespace pharmacyBackend.BackgroundServices
 
                                 if (daysUntilEnd == 3)
                                 {
-                                    var buyMsg = $"Внимание! Лекарство '{r.MedicationName}' скоро закончится (через 3 дня). Не забудьте купить новую упаковку.";
+                                    var buyMsg = $"Лекарство '{r.MedicationName}' скоро закончится (через 3 дня). Не забудьте купить новую упаковку.";
                                     await SendNotification(context, hubContext, emailService, r, buyMsg, stoppingToken);
                                 }
                             }

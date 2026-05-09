@@ -265,5 +265,19 @@ namespace pharmacyBackend.Controllers
 
             return Ok(pharmacies);
         }
+
+        [HttpGet("districts")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetAvailableDistricts()
+        {
+            var districts = await _context.Pharmacies
+                .Where(p => !string.IsNullOrEmpty(p.District))
+                .Select(p => p.District.Trim())
+                .Distinct()
+                .OrderBy(d => d)
+                .ToListAsync();
+
+            return Ok(districts);
+        }
     }
 }

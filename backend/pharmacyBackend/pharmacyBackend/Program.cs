@@ -102,6 +102,7 @@ builder.Services.AddHttpClient<GeocodeService>();
 builder.Services.AddScoped<IImportService, ImportService>();
 builder.Services.AddHostedService<pharmacyBackend.Background_Services.ExpirationService>();
 builder.Services.AddHostedService<ReminderService>();
+builder.Services.AddScoped<IWaitlistService, WaitlistService>();
 
 var app = builder.Build();
 

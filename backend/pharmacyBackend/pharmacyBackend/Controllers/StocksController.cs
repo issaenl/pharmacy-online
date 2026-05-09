@@ -17,12 +17,14 @@ namespace pharmacyBackend.Controllers
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
         private readonly IImportService _import;
+        private IWaitlistService _waitlist;
 
-        public StocksController(AppDbContext context, IMapper mapper, IImportService import)
+        public StocksController(AppDbContext context, IMapper mapper, IImportService import, IWaitlistService waitlist)
         {
             _context = context;
             _mapper = mapper;
             _import = import;
+            _waitlist = waitlist;
         }
 
         [Authorize(Roles = "Admin, PharmacyAdmin")]
@@ -83,6 +85,7 @@ namespace pharmacyBackend.Controllers
             };
             _context.Stocks.Add(stock);
             await _context.SaveChangesAsync();
+            await _waitlist.CheckWaitlistOnStockUpdateAsync(stock.ProductId, stock.PharmacyId, stock.Quantity);
             return Ok(new {Message = "Товар добавлен в наличие в аптеку" });
         }
 
@@ -119,6 +122,7 @@ namespace pharmacyBackend.Controllers
             stock.DiscountPercentage = dto.DiscountPercentage;
 
             await _context.SaveChangesAsync();
+            await _waitlist.CheckWaitlistOnStockUpdateAsync(stock.ProductId, stock.PharmacyId, stock.Quantity);
             return Ok(new { Message = "Наличие успешно обновлено" });
         }
 

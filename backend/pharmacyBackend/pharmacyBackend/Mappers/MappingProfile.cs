@@ -99,6 +99,10 @@ namespace pharmacyBackend.Mappers
 
             CreateMap<MedicationReminder, ReminderDTO>();
             CreateMap<MedicationLog, MedicationLogDTO>();
+
+            CreateMap<WaitlistItem, WaitlistItemDTO>()
+                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name))
+                .ForMember(dest => dest.PictureUrl, opt => opt.MapFrom(src => src.Product.PictureUrl));
         } 
     }
 }

@@ -48,7 +48,7 @@
     <button 
       class="cart-btn" 
       :class="{ 'waitlist-mode': !product.minPrice || product.minPrice <= 0 }"
-      @click.stop="product.minPrice > 0 ? addToCart() : addToWaitlist(product.id)">
+      @click.stop="product.minPrice > 0 ? addToCart() : openWaitlistModal()">
       <svg 
         v-if="product.minPrice > 0" 
         width="24" 
@@ -69,10 +69,20 @@
 
       <span>{{ product.minPrice > 0 ? 'В корзину' : 'В лист ожидания' }}</span>
     </button>
+    
+    <WaitlistModal 
+      v-if="isModalOpen"
+      :is-open="isModalOpen" 
+      :product-id="product.id" 
+      @close="isModalOpen = false" 
+    />
   </div>
 </template>
 
 <script setup>
+import { ref } from 'vue';
+import { useAuthStore } from '@/stores/authStore';
+import WaitlistModal from '@/components/WaitlistModal.vue';
 import { useRouter } from 'vue-router';
 import { useCartStore } from '@/stores/cartStore';
 import { useFavoriteStore } from '@/stores/favoriteStore';
@@ -92,6 +102,9 @@ const props = defineProps({
 const router = useRouter();
 const cartStore = useCartStore();
 const favoriteStore = useFavoriteStore();
+const authStore = useAuthStore();
+
+const isModalOpen = ref(false);
 
 const goToProduct = () => {
   router.push(`/product/${props.product.id}`);
@@ -121,8 +134,12 @@ const formatExpDate = (dateString) => {
   return date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
 };
 
-const addToWaitlist = (productId) => {
-  alert(`Товар ${props.product.name} добавлен в лист ожидания. Мы сообщим вам о поступлении!`);
+const openWaitlistModal = () => {
+  if (!authStore.token) {
+    router.push('/login');
+    return;
+  }
+  isModalOpen.value = true;
 };
 </script>
 

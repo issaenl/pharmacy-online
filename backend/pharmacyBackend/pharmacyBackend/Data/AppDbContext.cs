@@ -22,6 +22,7 @@ namespace pharmacyBackend.Data
         public DbSet<MedicationReminder> MedicationReminders { get; set; }
         public DbSet<MedicationLog> MedicationLogs { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<WaitlistItem> WaitlistItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
