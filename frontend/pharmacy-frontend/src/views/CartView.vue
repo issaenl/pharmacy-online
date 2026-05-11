@@ -43,6 +43,15 @@
           </span>
         </div>
 
+        <div class="prescription-warning" v-if="cartStore.items.length > 0">
+          <svg class="warning-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+          <p>Для выкупа рецептурных препаратов <strong>обязательно</strong> необходимо предъявить в аптеке действующий рецепт от врача.</p>
+        </div>
+
         <div class="pharmacy-selection">
           <button 
             v-if="!orderStore.selectedPharmacy" 
@@ -124,6 +133,9 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+    .prescription-warning { display: flex; align-items: flex-start; gap: 12px; background-color: #FDE8E8; padding: 15px; border-radius: 12px; margin-bottom: 25px; }
+    .warning-icon { width: 24px; height: 24px; color: #BB4E58; flex-shrink: 0; }
+    .prescription-warning p { margin: 0; font-size: 16px; color: #BB4E58; line-height: 1.4; }
     .cart-page { padding: 40px 0; background: var(--background-color); min-height: 80vh; font-family: var(--main-font); }
     .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
     .cart-layout { display: flex; gap: 30px; align-items: flex-start; }

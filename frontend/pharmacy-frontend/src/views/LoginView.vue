@@ -25,6 +25,12 @@
         <button type="submit" class="submit-btn" :disabled="isLoading">
           {{ isLoading ? 'Вход...' : 'Войти' }}
         </button>
+
+        <div class="forgot-password-link" style="text-align: right; margin-bottom: 10px;">
+           <router-link to="/forgot-password" style="font-size: 14px; color: #689D6D; text-decoration: none;">
+             Забыли пароль?
+           </router-link>
+        </div>
       </form>
       
       <p class="auth-links">

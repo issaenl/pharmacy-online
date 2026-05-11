@@ -84,13 +84,15 @@ const handleLogout = () => {
 }
 
 .menu a:hover {
-  background-color: var(--background-color, #F5F5F5);
+  background-color: var(--background-color);
 }
 
 .menu a.active {
-  background-color: var(--primary-light, #B3CCAE);
-  color: var(--primary-color, #689D6D);
-  border-right: 4px solid var(--primary-color, #689D6D);
+  background-color: var(--primary-light);
+  color: var(--primary-color);
+  font-weight: 600;
+  font-size: 20px;
+  border-right: 4px solid var(--primary-color);
 }
 
 .logout-btn {

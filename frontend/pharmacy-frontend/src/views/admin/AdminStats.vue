@@ -12,6 +12,10 @@
           <option value="all">За все время</option>
         </select>
 
+        <button v-if="!isSuperAdmin" class="btn-secondary export-btn" @click="downloadExcel" :disabled="isExporting">
+          {{ isExporting ? 'Сборка...' : 'Создать отчет' }}
+        </button>
+
         <button class="btn-primary refresh-btn" @click="refreshAll" :disabled="isLoading">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :class="{ 'spin': isLoading }"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
           Обновить
@@ -234,6 +238,36 @@ const formatDate = (dateString) => {
     day: '2-digit', month: '2-digit', year: 'numeric'
   });
 };
+
+const isExporting = ref(false);
+const downloadExcel = async () => {
+  isExporting.value = true;
+  try {
+    const pharmacyId = authStore.user?.pharmacyId || 1;
+    
+    const response = await api.get(`/Admin/pharmacy/${pharmacyId}/export?period=${selectedPeriod.value}`, {
+      responseType: 'blob' 
+    });
+
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+  
+    link.setAttribute('download', `Остатки_и_Продажи_${selectedPeriod.value}.xlsx`);
+    
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+    
+    toast.success("Отчет успешно скачан!");
+  } catch (error) {
+    toast.error("Не удалось сгенерировать отчет");
+    console.error(error);
+  } finally {
+    isExporting.value = false;
+  }
+};
 </script>
 
 <style scoped>
@@ -296,6 +330,32 @@ const formatDate = (dateString) => {
 
 .spin {
   animation: spin 1s linear infinite;
+}
+
+.export-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  padding: 10px 20px;
+  border-radius: 12px;
+  background: #fff;
+  color: var(--primary-color);
+  font-family: var(--main-font);
+  border: 2px solid var(--primary-color);
+  cursor: pointer;
+  transition: 0.2s;
+  font-weight: 600;
+}
+
+.export-btn:hover:not(:disabled) {
+  background: var(--primary-color);
+  color: #fff;
+}
+
+.export-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 @keyframes spin {

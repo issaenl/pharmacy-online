@@ -399,7 +399,8 @@ namespace pharmacyBackend.Controllers
             order.Status = orderStatus.Status;
             string notificationMsg = orderStatus.Status switch
             {
-                OrderStatus.Ready => $"Ваш заказ №{order.Id} собран и готов к выдаче!",
+                OrderStatus.Ready => $"Ваш заказ №{order.Id} собран и готов к выдаче! " +
+                $"Для выкупа рецептурных препаратов обязательно необходимо предъявить в аптеке действующий рецепт от врача.",
                 OrderStatus.Completed => $"Вы успешно забрали заказ №{order.Id}. Спасибо за покупку!",
                 OrderStatus.Cancelled => $"Ваш заказ №{order.Id} отменен.",
                 _ => $"Статус вашего заказа №{order.Id} изменен."

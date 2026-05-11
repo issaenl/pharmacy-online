@@ -129,9 +129,26 @@ export const useAuthStore = defineStore('auth', () => {
     await api.delete('/Auth/delete');
     logout();
   };
+  
+  const forgotPassword = async (email) => {
+    try {
+      const response = await api.post('/Auth/forgot-password', { email });
+      return response.data.message;
+    } catch (error) {
+      throw extractErrorMessage(error);
+    }
+  };
+
+  const resetPassword = async (data) => {
+    try {
+      const response = await api.post('/Auth/reset-password', data);
+      return response.data.message;
+    } catch (error) {
+      throw extractErrorMessage(error);
+    }
+  };
 
   return { 
     token, user, 
-    login, register, logout, updateProfile, changePassword, deleteAccount, fetchUser
-  };
+    login, register, logout, updateProfile, changePassword, deleteAccount, fetchUser, forgotPassword, resetPassword };
 });

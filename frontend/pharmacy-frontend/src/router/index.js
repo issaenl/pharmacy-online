@@ -23,6 +23,8 @@ import PharmacyView from '@/views/PharmacyView.vue';
 import AdminReviews from '@/views/admin/AdminReviews.vue';
 import PharmacyAllReviews from '@/views/PharmacyAllReviews.vue';
 import PharmaciesView from '@/views/PharmaciesView.vue';
+import ForgotPassword from '@/views/ForgotPassword.vue';
+import ResetPassword from '@/views/ResetPassword.vue';
 
 const routes = [
   {
@@ -68,7 +70,8 @@ const routes = [
   {
     path: '/profile',
     name: 'profile',
-    component: ProfileView
+    component: ProfileView,
+    meta: { requiresAuth: true }
   },
   {
     path: '/cart',
@@ -95,7 +98,16 @@ const routes = [
     name: 'pahrmacies',
     component: PharmaciesView
   },
-
+  {
+    path: '/forgot-password',
+    name: 'forgot-password',
+    component: ForgotPassword
+  },
+  {
+    path: '/reset-password',
+    name: 'reset-password',
+    component: ResetPassword
+  },
   {
     path: '/admin',
     component: AdminMain,

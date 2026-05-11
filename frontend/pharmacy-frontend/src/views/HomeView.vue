@@ -2,6 +2,17 @@
   <TheHeader />
 
   <main class="container">
+    <div class="info-banner">
+      <svg class="info-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="16" x2="12" y2="12"></line>
+        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+      </svg>
+      <div class="info-text">
+        <strong>Поисковая система:</strong> вы можете искать лекарства не только по названию, но и по симптомам, заболеваниям и показаниям .
+      </div>
+    </div>
+
     <section class="home-section">
       <div class="section-header">
         <h2>Новое в каталоге</h2>
@@ -52,6 +63,8 @@
       </div>
     </section>
   </main>
+
+  <Footer />
 </template>
 
 <script setup>
@@ -60,6 +73,7 @@ import { ref, onMounted } from 'vue';
 import ProductCard from '@/components/ProductCard.vue';
 import PharmacyCard from '@/components/PharmacyCard.vue';
 import TheHeader from '@/components/Header.vue';
+import Footer from '@/components/Footer.vue';
 import { useRouter } from 'vue-router';
 
 const newProducts = ref([]);
@@ -150,6 +164,30 @@ onMounted(fetchData);
     display: flex;
     flex-direction: column;
     gap: 5px;
+  }
+
+  .info-banner {
+    background: #E8F4EA;
+    border: #689D6D 1px solid; 
+    color: #689D6D;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  }
+
+  .info-icon {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+  }
+
+  .info-text {
+    font-size: 18px;
+    line-height: 1.5;
   }
 
   @media (max-width: 1024px) {

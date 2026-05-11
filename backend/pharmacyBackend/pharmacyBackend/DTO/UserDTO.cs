@@ -116,4 +116,25 @@ namespace pharmacyBackend.DTO
         public UserRole Role { get; set; }
         public int? PharmacyId { get; set; }
     }
+
+    public class ForgotPasswordDTO
+    {
+        [Required(ErrorMessage = "Email обязателен.")]
+        [EmailAddress(ErrorMessage = "Некорректный формат email.")]
+        public string Email { get; set; } = string.Empty;
+    }
+
+    public class ResetPasswordDTO
+    {
+        [Required]
+        public string Email { get; set; } = string.Empty;
+
+        [Required]
+        public string Token { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Введите новый пароль.")]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$",
+            ErrorMessage = "Пароль должен содержать минимум 8 символов, одну заглавную, одну строчную букву и одну цифру.")]
+        public string NewPassword { get; set; } = string.Empty;
+    }
 }
