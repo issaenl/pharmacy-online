@@ -162,7 +162,7 @@ import TablePagination from '@/components/admin/TablePagination.vue';
 import { usePagination } from '@/logic/pagination';
 import { useModal } from '@/logic/modal';
 import { useSorting } from '@/logic/sorting';
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
 import { useCustomSelect } from '@/logic/customSelect';
 import { useToast } from 'vue-toast-notification';
 import api from '@/api/api';
@@ -256,6 +256,8 @@ const openModal = (admin = null) => {
 
 const saveAdmin = async () => {
   isLoading.value = true;
+  const previousPage = currentPage.value;
+
   try {
     const payload = { ...form.value };
     
@@ -269,7 +271,11 @@ const saveAdmin = async () => {
       await api.post('/Users/create-admin', payload);
       toast.success("Сотрудник успешно добавлен!"); 
     }
+    
     await fetchData();
+    await nextTick();
+    currentPage.value = previousPage;
+
     closeModal();
   } catch (error) {
     toast.error(error.response?.data?.message || error.response?.data || "Ошибка сохранения");
@@ -285,10 +291,19 @@ const deleteAdmin = async (admin) => {
   }
 
   if (!confirm(`Вы действительно хотите удалить администратора ${admin.firstName}?`)) return;
-  
+  const previousPage = currentPage.value;
+
   try {
     await api.delete(`/Users/delete-admin/${admin.id}`);
+    
     await fetchData();
+    await nextTick();
+    if (previousPage > totalPages.value) {
+      currentPage.value = totalPages.value || 1;
+    } else {
+      currentPage.value = previousPage;
+    }
+
     toast.success("Сотрудник удален");
   } catch (error) {
     toast.error(error.response?.data?.message || "Ошибка при удалении");

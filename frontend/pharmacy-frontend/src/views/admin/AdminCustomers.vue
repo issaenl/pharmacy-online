@@ -98,7 +98,7 @@
 import TablePagination from '@/components/admin/TablePagination.vue';
 import { usePagination } from '@/logic/pagination';
 import { useSorting } from '@/logic/sorting';
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
 import { useToast } from 'vue-toast-notification';
 import api from '@/api/api';
 
@@ -124,9 +124,14 @@ const toggleBan = async (customer) => {
   if (!confirm(`Вы уверены, что хотите ${actionText} клиента ${customer.firstName}?`)) return;
 
   try {
+    const previousPage = currentPage.value;
+
     const response = await api.put(`/Users/ban/${customer.id}`);
     toast.success(response.data.message);
     await fetchCustomers();
+    await nextTick();
+    currentPage.value = previousPage;
+    
   } catch (error) {
     toast.error(error.response?.data || "Произошла ошибка");
   }
@@ -147,9 +152,17 @@ const deleteCustomer = async (customer) => {
   if (!confirm(`Вы собираетесь навсегда удалить клиента ${customer.firstName} (тел: ${customer.phone}). Это действие удалит его корзину и избранное.\n\nПродолжить?`)) return;
 
   try {
+    const previousPage = currentPage.value;
     const response = await api.delete(`/Users/delete-customer/${customer.id}`);
     toast.success(response.data.message);
     await fetchCustomers();
+    await nextTick();
+    if (previousPage > totalPages.value) {
+      currentPage.value = totalPages.value || 1;
+    } else {
+      currentPage.value = previousPage;
+    }
+
   } catch (error) {
     toast.error(error.response?.data || "Ошибка при удалении пользователя. Возможно, к нему привязаны активные заказы.");
   }

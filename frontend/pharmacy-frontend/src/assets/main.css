@@ -58,7 +58,7 @@ body {
   padding: 10px 15px;
   border: 1px solid #ddd;
   border-radius: 8px;
-  font-size: 16px;
+  font-size: 18px;
   font-family: inherit;
 }
 
@@ -97,7 +97,7 @@ th {
 
 .text-muted {
   color: #999;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .sortable {
@@ -111,7 +111,7 @@ th {
 }
 
 .sort-icon {
-  font-size: 10px;
+  font-size: 16px;
   margin-left: 5px;
   color: var(--primary-color);
 }
@@ -124,7 +124,7 @@ th {
   border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
-  font-size: 16px;
+  font-size: 18px;
   font-family: var(--main-font);
   white-space: nowrap;
 }

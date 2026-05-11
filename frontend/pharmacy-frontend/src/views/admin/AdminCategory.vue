@@ -128,7 +128,7 @@ import TablePagination from '@/components/admin/TablePagination.vue';
 import { usePagination } from '@/logic/pagination';
 import { useModal } from '@/logic/modal';
 import { useSorting } from '@/logic/sorting';
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
 import { useToast } from 'vue-toast-notification';
 import api from '@/api/api';
 
@@ -254,7 +254,14 @@ const saveCategory = async () => {
       await api.post('/Categories', payload, axiosConfig);
       toast.success("Категория добавлена!"); 
     }
+
+    const previousPage = currentPage.value;
+
     await fetchCategories();
+
+    await nextTick();
+    currentPage.value = previousPage;
+
     closeModal();
   } catch (error) {
     toast.error(error.response?.data?.message || "Ошибка сохранения");
@@ -266,8 +273,17 @@ const saveCategory = async () => {
 const deleteCategory = async (id) => {
   if (!confirm('Удалить эту категорию?')) return;
   try {
+    const previousPage = currentPage.value;
     const response = await api.delete(`/Categories/${id}`);
     await fetchCategories();
+    await nextTick();
+
+    if (previousPage > totalPages.value) {
+      currentPage.value = totalPages.value || 1;
+    } else {
+      currentPage.value = previousPage;
+    }
+
     toast.success(response.data?.message || "Удалено");
   } catch (error) {
     toast.error(error.response?.data?.message || "Ошибка удаления");

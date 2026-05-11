@@ -133,7 +133,7 @@ import Modal from '@/components/admin/Modal.vue';
 import RatingBadge from '@/components/RatingBadge.vue';
 import { usePagination } from '@/logic/pagination';
 import { useSorting } from '@/logic/sorting';
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
 import { useToast } from 'vue-toast-notification';
 import api from '@/api/api';
 
@@ -173,15 +173,25 @@ const banUser = async (userId, userName, reviewId) => {
     return;
   }
 
+  const previousPage = currentPage.value;
+
   try {
     const banResponse = await api.put(`/Users/ban/${userId}`);
     toast.success(banResponse.data.message || `Пользователь ${userName} заблокирован`);
+    
     if (reviewId) {
       const reason = encodeURIComponent("Aккаунт заблокирован за нарушение правил сервиса.");
       await api.put(`/Reviews/${reviewId}/moderate?newStatus=2&rejectReason=${reason}`);
       toast.success("Отзыв автоматически отклонен");
     }
+    
     await fetchPendingReviews();
+    await nextTick();
+    if (previousPage > totalPages.value) {
+      currentPage.value = totalPages.value || 1;
+    } else {
+      currentPage.value = previousPage;
+    }
     
   } catch (error) {
     console.error(error);
@@ -205,12 +215,22 @@ const submitReject = async () => {
   if (!rejectReasonText.value.trim() || !currentRejectReviewId.value) return;
 
   isSubmitting.value = true;
+  const previousPage = currentPage.value;
+
   try {
     const url = `/Reviews/${currentRejectReviewId.value}/moderate?newStatus=2&rejectReason=${encodeURIComponent(rejectReasonText.value.trim())}`;
     const response = await api.put(url);
     toast.success(response.data.message || "Отзыв успешно отклонен");
     closeRejectModal();
+    
     await fetchPendingReviews();
+    await nextTick();
+    if (previousPage > totalPages.value) {
+      currentPage.value = totalPages.value || 1;
+    } else {
+      currentPage.value = previousPage;
+    }
+
   } catch (error) {
     toast.error("Ошибка при модерации отзыва");
   } finally {
@@ -225,11 +245,20 @@ const moderateReview = async (id, status) => {
   }
 
   if (!confirm('Вы уверены, что хотите одобрить и опубликовать этот отзыв?')) return;
+  const previousPage = currentPage.value;
 
   try {
     const response = await api.put(`/Reviews/${id}/moderate?newStatus=${status}`);
     toast.success(response.data.message || "Статус отзыва обновлен");
+    
     await fetchPendingReviews();
+    await nextTick();
+    if (previousPage > totalPages.value) {
+      currentPage.value = totalPages.value || 1;
+    } else {
+      currentPage.value = previousPage;
+    }
+
   } catch (error) {
     toast.error("Ошибка при модерации отзыва");
   }

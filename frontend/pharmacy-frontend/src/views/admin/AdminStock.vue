@@ -229,7 +229,7 @@ import { usePagination } from '@/logic/pagination';
 import { useModal } from '@/logic/modal';
 import { useSorting } from '@/logic/sorting';
 import { useCustomSelect } from '@/logic/customSelect';
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
 import { useToast } from 'vue-toast-notification';
 import { useAuthStore } from '@/stores/authStore';
 import api from '@/api/api';
@@ -378,8 +378,9 @@ const openModal = (stock = null) => {
 
 const saveStock = async () => {
   isLoading.value = true;
+  const previousPage = currentPage.value;
+
   try {
-    
     const payload = {
         ...form.value,
         discountPercentage: form.value.discountPercentage > 0 ? form.value.discountPercentage : null
@@ -392,7 +393,11 @@ const saveStock = async () => {
       await api.post('/Stocks', payload);
       toast.success("Запас добавлен!"); 
     }
+    
     await fetchData();
+    await nextTick();
+    currentPage.value = previousPage;
+
     closeModal();
   } catch (error) {
     toast.error(error.response?.data?.message || "Ошибка сохранения");
@@ -403,9 +408,19 @@ const saveStock = async () => {
 
 const deleteStock = async (id) => {
   if (!confirm('Удалить этот запас?')) return;
+  const previousPage = currentPage.value;
+
   try {
     await api.delete(`/Stocks/${id}`);
+    
     await fetchData();
+    await nextTick();
+    if (previousPage > totalPages.value) {
+      currentPage.value = totalPages.value || 1;
+    } else {
+      currentPage.value = previousPage;
+    }
+
     toast.success("Запас удален");
   } catch (error) {
     toast.error("Ошибка удаления");
@@ -416,6 +431,8 @@ const resetDiscount = async (stock) => {
   if (!confirm('Сбросить скидку для этого товара?')) return;
   
   isLoading.value = true;
+  const previousPage = currentPage.value;
+
   try {
     const payload = {
       pharmacyId: stock.pharmacyId,
@@ -428,7 +445,11 @@ const resetDiscount = async (stock) => {
 
     await api.put(`/Stocks/${stock.id}`, payload);
     toast.success("Скидка сброшена!");
+    
     await fetchData();
+    await nextTick();
+    currentPage.value = previousPage;
+
   } catch (error) {
     toast.error(error.response?.data?.message || "Ошибка при сбросе скидки");
   } finally {

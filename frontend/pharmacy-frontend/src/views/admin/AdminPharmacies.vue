@@ -119,7 +119,7 @@ import RatingBadge from '@/components/RatingBadge.vue';
 import { usePagination } from '@/logic/pagination';
 import { useModal } from '@/logic/modal';
 import { useSorting } from '@/logic/sorting';
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
 import { useToast } from 'vue-toast-notification';
 import api from '@/api/api';
 
@@ -170,6 +170,8 @@ const openModal = (pharmacy = null) => {
 
 const savePharmacy = async () => {
   isLoading.value = true;
+  const previousPage = currentPage.value;
+
   try {
     const payload = {
       name: form.value.name,
@@ -190,6 +192,9 @@ const savePharmacy = async () => {
     }
     
     await fetchPharmacies();
+    await nextTick();
+    currentPage.value = previousPage;
+
     closeModal();
   } 
   catch (error) {
@@ -208,9 +213,18 @@ const deletePharmacy = async (id) => {
   if (!confirm('Вы уверены, что хотите удалить эту аптеку?')) {
     return;
   }
+  const previousPage = currentPage.value;
+
   try {
     await api.delete(`/Pharmacies/${id}`);
     await fetchPharmacies();
+    await nextTick();
+    if (previousPage > totalPages.value) {
+      currentPage.value = totalPages.value || 1;
+    } else {
+      currentPage.value = previousPage;
+    }
+
     toast.success("Аптека успешно удалена");
   } 
   catch (error) {

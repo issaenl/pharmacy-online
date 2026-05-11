@@ -66,7 +66,7 @@ const handleLogout = () => {
   padding: 0 20px 20px;
   border-bottom: 1px solid #eee;
   margin-bottom: 20px;
-  color: var(--primary-color, #689D6D);
+  color: var(--primary-color);
 }
 
 .menu {
@@ -88,7 +88,7 @@ const handleLogout = () => {
 }
 
 .menu a.active {
-  background-color: var(--primary-light);
+  background-color: #e8f4ea;
   color: var(--primary-color);
   font-weight: 600;
   font-size: 20px;

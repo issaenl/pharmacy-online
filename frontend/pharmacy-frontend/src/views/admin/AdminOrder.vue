@@ -139,7 +139,7 @@ import TablePagination from '@/components/admin/TablePagination.vue';
 import { usePagination } from '@/logic/pagination';
 import { useModal } from '@/logic/modal';
 import { useSorting } from '@/logic/sorting';
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
 import { useToast } from 'vue-toast-notification';
 import { useAuthStore } from '@/stores/authStore';
 import api from '@/api/api';
@@ -185,13 +185,17 @@ const fetchData = async () => {
 onMounted(() => { fetchData(); });
 
 const updateOrderStatus = async (id, newStatus) => {
+  const previousPage = currentPage.value;
+
   try {
     await api.put(`/Orders/${id}/status`, { status: Number(newStatus) });
     toast.success("Статус заказа обновлен");
-    await fetchData();
   } catch (error) {
     toast.error("Ошибка при обновлении статуса");
+  } finally {
     await fetchData();
+    await nextTick();
+    currentPage.value = previousPage;
   }
 };
 

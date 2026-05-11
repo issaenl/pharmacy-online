@@ -189,7 +189,7 @@ import TablePagination from '@/components/admin/TablePagination.vue';
 import { usePagination } from '@/logic/pagination';
 import { useModal } from '@/logic/modal';
 import { useSorting } from '@/logic/sorting';
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
 import { useCustomSelect } from '@/logic/customSelect';
 import { useToast } from 'vue-toast-notification';
 import api from '@/api/api';
@@ -429,7 +429,11 @@ const saveProduct = async () => {
       await api.post('/Products', formData, axiosConfig);
     }
     
+    const previousPage = currentPage.value;
     await fetchProducts();
+    await nextTick();
+    currentPage.value = previousPage;
+
     closeModal();
     toast.success("Товар успешно сохранен!"); 
   } 
@@ -451,8 +455,17 @@ const deleteProduct = async (id) => {
     return;
   }
   try {
+    const previousPage = currentPage.value;
     await api.delete(`/Products/${id}`);
     await fetchProducts();
+    await nextTick();
+
+    if (previousPage > totalPages.value) {
+        currentPage.value = totalPages.value || 1;
+    } else {
+        currentPage.value = previousPage;
+    }
+
     toast.success("Товар успешно удален");
   } 
   catch (error) {
