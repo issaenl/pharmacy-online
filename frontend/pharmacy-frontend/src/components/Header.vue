@@ -21,7 +21,7 @@
             </nav>
         </transition>
 
-        <router-link to="/" class="logo">УниМед</router-link>
+        <router-link to="/" class="logo">Уни<span class="logo-span">Мед</span></router-link>
         
         <router-link to="/full-catalog" class="catalog-btn desktop-only">
             <img src="/assets/FilterLeft.svg" alt="Каталог">
@@ -235,6 +235,11 @@ const navCategories = computed(() => {
         z-index: 100;
     }
 
+    .logo-span
+    {
+        color: #BB4E58;
+    }
+
     .container {
         max-width: 1200px;
         margin: 0 auto;
@@ -253,7 +258,7 @@ const navCategories = computed(() => {
         font-weight: bold;
         color: #fff;
         font-family: var(--logo-font);
-        font-size: 32px;
+        font-size: 38px;
         text-decoration: none;
     }
 
@@ -287,7 +292,7 @@ const navCategories = computed(() => {
         color: white;
         text-decoration: none;
         border: none;
-        padding: 10px 20px;
+        padding: 8px 20px;
         border-radius: 10px;
         display: flex;
         align-items: center;
@@ -309,7 +314,7 @@ const navCategories = computed(() => {
         align-items: center;
         color: #fff;
         cursor: pointer;
-        font-size: 16px;
+        font-size: 18px;
     }
 
     .notif-wrapper {
@@ -346,7 +351,7 @@ const navCategories = computed(() => {
         padding: 30px;
         text-align: center;
         color: #888;
-        font-size: 16px;
+        font-size: 20px;
     }
 
     .notif-list {
@@ -387,7 +392,7 @@ const navCategories = computed(() => {
 
     .notif-title {
         font-weight: 700;
-        font-size: 16px;
+        font-size: 18px;
         color: #2c3e50;
     }
 
@@ -404,7 +409,7 @@ const navCategories = computed(() => {
 
     .notif-time {
         color: #999;
-        font-size: 14px;
+        font-size: 16px;
     }
 
     .notif-close-btn {
@@ -474,7 +479,7 @@ const navCategories = computed(() => {
     .nav-list a {
         font-family: var(--main-font);
         font-weight: 600;
-        font-size: 16px;
+        font-size: 18px;
         color: white;
         text-decoration: none;
     }

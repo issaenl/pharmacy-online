@@ -527,7 +527,7 @@ const scheduleForSelectedDay = computed(() => {
   border: 2px solid #eee; 
   padding: 6px 12px; 
   border-radius: 10px; 
-  font-size: 13px; 
+  font-size: 18px; 
   font-weight: 600; 
   color: #555; 
   cursor: pointer; 
@@ -539,7 +539,7 @@ const scheduleForSelectedDay = computed(() => {
 .header-actions { display: flex; gap: 10px; }
 .btn-primary { background: #BB4E58; color: white; border: none; padding: 10px 20px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; font-family: inherit; }
 .btn-primary:hover:not(:disabled) { filter: brightness(0.9); }
-.btn-outline { background: transparent; color: #689D6D; border: 2px solid #689D6D; padding: 8px 18px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; font-family: inherit; }
+.btn-outline { background: transparent; font-size: 16px; color: #689D6D; border: 2px solid #689D6D; padding: 8px 18px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; font-family: inherit; }
 .btn-outline:hover { background: #E8F4EA; }
 
 .calendar-with-nav {
@@ -595,15 +595,15 @@ const scheduleForSelectedDay = computed(() => {
 }
 
 .day-cell:hover { background: #f0f0f0; }
-.day-number { font-size: 15px; font-weight: 600; }
+.day-number { font-size: 18px; font-weight: 600; }
 .day-cell.is-today { color: #BB4E58; font-weight: 800; }
 .day-cell.is-selected { background: #E8F4EA; border-color: #689D6D; color: #689D6D; }
 .day-cell.is-other-month { color: #ccc; }
 .day-cell.is-other-month:hover { background: #f9f9f9; }
 
 .event-dot { 
-  width: 4px; 
-  height: 4px; 
+  width: 6px; 
+  height: 6px; 
   background: #689D6D; 
   border-radius: 50%; 
   position: absolute; 
@@ -624,7 +624,7 @@ const scheduleForSelectedDay = computed(() => {
   align-items: center;
   gap: 12px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 18px;
   color: #555;
   user-select: none;
 }
@@ -642,26 +642,26 @@ const scheduleForSelectedDay = computed(() => {
 }
 
 .schedule-title { margin: 0 0 15px 0; font-size: 20px; color: #333; }
-.empty-state { text-align: center; padding: 40px; color: #888; font-size: 16px; }
+.empty-state { text-align: center; padding: 40px; color: #888; font-size: 20px; }
 .schedule-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-.med-info h4 { margin: 0 0 5px 0; font-size: 18px; }
-.dosage-text { margin: 0; color: #888; font-size: 14px; }
+.med-info h4 { margin: 0 0 5px 0; font-size: 20px; }
+.dosage-text { margin: 0; color: #888; font-size: 18px; }
 .times-list { display: flex; gap: 15px; }
 .time-pill { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; }
 .pill-check { width: 36px; height: 36px; border-radius: 50%; border: 2px solid #ddd; display: flex; align-items: center; justify-content: center; transition: 0.2s; background: white; }
 .time-pill:hover .pill-check { border-color: #689D6D; }
-.pill-time { font-size: 12px; font-weight: 700; color: #666; }
+.pill-time { font-size: 16px; font-weight: 700; color: #666; }
 .time-pill.is-taken .pill-check { background: #689D6D; border-color: #689D6D; }
 
 .courses-list { display: flex; flex-direction: column; gap: 15px; }
 .course-item { display: flex; justify-content: space-between; align-items: center; padding: 20px; }
-.course-info h4 { margin: 0 0 5px 0; font-size: 18px;}
+.course-info h4 { margin: 0 0 5px 0; font-size: 20px;}
 .course-meta { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
-.meta-tag { background: #f0f0f0; padding: 4px 10px; border-radius: 6px; font-size: 13px; color: #555; font-weight: 500; }
+.meta-tag { background: #f0f0f0; padding: 4px 10px; border-radius: 6px; font-size: 16px; color: #555; font-weight: 500; }
 .course-actions { display: flex; gap: 10px; }
-.btn-edit { background: transparent; color: #689D6D; border: 1px solid #689D6D; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-weight: 600; font-family: inherit; }
+.btn-edit { background: transparent; font-size: 16px; color: #689D6D; border: 1px solid #689D6D; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-weight: 600; font-family: inherit; }
 .btn-edit:hover { background: #E8F4EA; }
-.btn-delete { background: transparent; color: #BB4E58; border: 1px solid #BB4E58; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-weight: 600; font-family: inherit; }
+.btn-delete { background: transparent; font-size: 16px; color: #BB4E58; border: 1px solid #BB4E58; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-weight: 600; font-family: inherit; }
 .btn-delete:hover { background: #FDE8E8; }
 
 .btn-cancel { background: #f0f0f0; color: #333; border: none; padding: 10px 20px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; font-family: inherit; }
@@ -669,17 +669,17 @@ const scheduleForSelectedDay = computed(() => {
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
 .form-group { display: flex; flex-direction: column; gap: 5px; }
 .full-width { grid-column: span 2; }
-.form-group label { font-size: 14px; font-weight: 600; color: #555; }
-.form-group input, .form-group select { padding: 10px; border: 1px solid #ddd; border-radius: 10px; outline: none; font-family: inherit; }
+.form-group label { font-size: 18px; font-weight: 600; color: идфсл; }
+.form-group input, .form-group select { padding: 10px; font-size: 18px; border: 1px solid #ddd; border-radius: 10px; outline: none; font-family: inherit; }
 .form-group input:focus, .form-group select:focus { border-color: #689D6D; }
 .weekdays-selector { display: flex; gap: 8px; flex-wrap: wrap; }
-.weekday-btn { width: 40px; height: 40px; border-radius: 50%; border: 1px solid #ddd; cursor: pointer; background: white; font-weight: 600; color: #555; font-family: inherit; }
+.weekday-btn { width: 40px; height: 40px; font-size: 18px; border-radius: 50%; border: 1px solid #ddd; cursor: pointer; background: white; font-weight: 600; color: #555; font-family: inherit; }
 .weekday-btn.active { background: #E8F4EA; border-color: #689D6D; color: #689D6D; }
 .time-inputs-list { display: flex; flex-direction: column; gap: 10px; }
 .time-input-row { display: flex; gap: 10px; align-items: center; }
 .time-picker { flex: 1; max-width: 150px; }
 .btn-remove-time { background: #FDE8E8; color: #BB4E58; border: none; width: 38px; height: 38px; border-radius: 10px; cursor: pointer; }
-.btn-add-time { background: transparent; border: 2px dashed #ddd; color: #888; padding: 10px; border-radius: 10px; cursor: pointer; font-weight: 600; font-family: inherit; width: fit-content; }
+.btn-add-time { background: transparent; border: 2px dashed #ddd; color: #888; padding: 10px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 18px; font-family: inherit; width: fit-content; }
 .form-actions { display: flex; gap: 10px; justify-content: flex-end; }
 
 .remind-buy-settings {
@@ -701,7 +701,7 @@ const scheduleForSelectedDay = computed(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
+  font-size: 18px;
   color: #444;
   cursor: pointer;
 }
@@ -726,21 +726,20 @@ const scheduleForSelectedDay = computed(() => {
 .calc-result {
   grid-column: span 3;
   margin-top: 5px;
-  padding: 10px;
+  padding: 15px;
   background: #E8F4EA;
   color: #2c5e33;
   border-radius: 8px;
-  font-size: 14px;
   text-align: center;
   transition: 0.3s;
 }
 
 .calc-result strong {
-  font-size: 16px;
+  font-size: 20px;
 }
 
 .small-text {
-  font-size: 12px;
+  font-size: 18px;
   opacity: 0.8;
 }
 

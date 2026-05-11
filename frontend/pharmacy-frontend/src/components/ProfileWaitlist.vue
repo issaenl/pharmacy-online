@@ -186,10 +186,6 @@ const confirmClearAll = async () => {
   overflow: hidden;
 }
 
-.item-name:hover {
-  color: var(--primary-color, #689D6D);
-}
-
 .waitlist-meta {
   display: flex;
   align-items: center;
@@ -204,13 +200,13 @@ const confirmClearAll = async () => {
   color: #689D6D;
   padding: 4px 10px;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 600;
 }
 
 .date-added {
   color: #999;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .item-actions { 
@@ -227,7 +223,7 @@ const confirmClearAll = async () => {
   padding: 5px; 
   opacity: 0.6; 
   transition: 0.2s; 
-  color: #BB4E58;
+  color: #555;
 }
 
 .action-btn:hover { 

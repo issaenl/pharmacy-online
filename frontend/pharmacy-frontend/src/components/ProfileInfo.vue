@@ -252,7 +252,7 @@ const handlePhoneInput = (event) => {
     .banned-content p {
         margin: 0;
         color: #BB4E58;
-        font-size: 15px;
+        font-size: 18px;
         line-height: 1.4;
     }
 
@@ -264,7 +264,7 @@ const handlePhoneInput = (event) => {
         background: none; 
         border: none; 
         color: #689D6D; 
-        font-size: 16px; 
+        font-size: 18px; 
         font-weight: 600; 
         cursor: pointer; 
         padding: 0; 
@@ -296,7 +296,7 @@ const handlePhoneInput = (event) => {
     }
 
     .info-group label { 
-        font-size: 14px; 
+        font-size: 18px; 
         color: #888; 
     }
 
@@ -320,7 +320,7 @@ const handlePhoneInput = (event) => {
     }
 
     .edit-form .form-group label {
-        font-size: 14px; 
+        font-size: 18px; 
         color: #888; 
     }
 
@@ -330,7 +330,7 @@ const handlePhoneInput = (event) => {
         border: 1px solid #ddd; 
         border-radius: 10px; 
         font-family: var(--main-font); 
-        font-size: 16px; 
+        font-size: 18px; 
         background: #F9F9F9; 
         transition: 0.2s; 
         box-sizing: border-box;
@@ -409,7 +409,7 @@ const handlePhoneInput = (event) => {
     }
 
     .danger-text { 
-        font-size: 14px; 
+        font-size: 18px; 
         color: #BB4E58; 
         margin: 0; 
         max-width: 600px; 

@@ -2,7 +2,7 @@
   <div v-if="isOpen" class="modal-overlay" @click.stop="closeModal">
     <div class="modal-content waitlist-modal" @click.stop>
       <div class="form-group">
-        <label>Выберите регион:</label>
+        <label style="font-size: 18px;">Выберите регион:</label>
         <select v-model="selectedDistrict" class="form-select" :disabled="isLoadingDistricts">
           <option v-if="isLoadingDistricts" value="">Загрузка регионов...</option>
           <option v-for="district in availableDistricts" :key="district" :value="district">
@@ -87,7 +87,7 @@ const submit = async () => {
 <style scoped>
     .warning-text {
       color: #BB4E58;
-      font-size: 14px;
+      font-size: 18px;
       margin-top: -15px;
       margin-bottom: 20px;
       font-weight: 600;
@@ -97,8 +97,6 @@ const submit = async () => {
       cursor: not-allowed;
     }
     .waitlist-modal { max-width: 450px; padding: 25px 30px; }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-    .modal-header h3 { margin: 0; font-size: 22px; }
-    .modal-desc { color: #666; font-size: 14px; margin-bottom: 20px; }
+    .modal-desc { color: #666; font-size: 18px; margin-bottom: 20px; }
     .form-group { margin-bottom: 25px; }
 </style>

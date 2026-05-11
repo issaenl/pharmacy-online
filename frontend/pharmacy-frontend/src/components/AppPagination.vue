@@ -66,27 +66,27 @@ const changePage = (page) => {
   border-radius: 50%; 
   border: none; 
   cursor: pointer; 
-  font-size: 16px; 
+  font-size: 20px; 
   font-weight: 600; 
   transition: all 0.2s ease; 
-  background: #f0f0f0; 
+  background: #DCDCDC;
   color: #333; 
   font-family: var(--main-font);
 }
 
 .page-arrow { 
   color: #888; 
-  background: #f0f0f0; 
+  background: #DCDCDC;
 }
 
 .page-arrow:not(:disabled):hover { 
-  background: #e0e0e0; 
-  color: #000; 
+  background: var(--primary-light);
+  color: white; 
 }
 
 .page-arrow:disabled { 
   cursor: not-allowed; 
-  opacity: 0.5; 
+  opacity: 0.4; 
 }
 
 .page-num.active { 
@@ -95,7 +95,8 @@ const changePage = (page) => {
 }
 
 .page-num:not(.active):hover { 
-  background: #e5e5e5; 
+  background: var(--primary-light);
+  color: white; 
 }
 
 @media (max-width: 600px) {

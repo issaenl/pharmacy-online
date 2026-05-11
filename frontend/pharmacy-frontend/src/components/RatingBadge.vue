@@ -31,7 +31,7 @@ const badgeClass = computed(() => {
   padding: 4px 8px;
   border-radius: 12px;
   font-weight: bold;
-  font-size: 14px;
+  font-size: 16px;
   white-space: nowrap;
 }
 

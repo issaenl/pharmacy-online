@@ -270,7 +270,7 @@ const confirmSelection = () => {
 
     .selected-info p {
       margin: 0;
-      font-size: 16px;
+      font-size: 18px;
       color: #000;
     }
 
@@ -280,7 +280,7 @@ const confirmSelection = () => {
       border: none;
       padding: 12px;
       border-radius: 10px;
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 600;
       cursor: pointer;
       align-self: flex-start;

@@ -181,10 +181,10 @@ const deleteReview = async () => {
   gap: 15px;
 }
 
-.pharmacy-name { font-weight: 700; font-size: 18px; color: #333; margin-bottom: 4px; }
-.review-date { font-size: 14px; color: #888; }
+.pharmacy-name { font-weight: 700; font-size: 20px; color: #333; margin-bottom: 4px; }
+.review-date { font-size: 18px; color: #888; }
 
-.review-status { padding: 6px 12px; border-radius: 8px; font-size: 14px; font-weight: 600; }
+.review-status { padding: 6px 12px; border-radius: 8px; font-size: 18px; font-weight: 600; }
 .status-pending { background: #fcf1d6; color: #d97706; }
 .status-approved { background: #E8F4EA; color: var(--primary-color, #689D6D); }
 .status-rejected { background: #FDE8E8; color: #BB4E58; }
@@ -225,13 +225,13 @@ const deleteReview = async () => {
 .review-body { display: flex; flex-direction: column; gap: 10px; }
 .rating-stars { font-size: 24px; color: #e5e7eb; letter-spacing: 2px; }
 .star.filled { color: #F3C301; }
-.comment-text { font-size: 16px; color: #333; margin: 0; line-height: 1.5; font-style: italic; }
+.comment-text { font-size: 18px; color: #333; margin: 0; line-height: 1.5; font-style: italic; }
 .comment-empty { font-size: 15px; color: #aaa; margin: 0; font-style: italic; }
 
 .reject-reason-block { margin-top: 20px; background: #fff5f5; border-radius: 12px; padding: 15px; border: 1px solid #FDE8E8; }
 .reject-title { color: #BB4E58; font-weight: 700; font-size: 15px; margin-bottom: 5px; }
-.reject-text { color: #333; font-size: 15px; margin: 0 0 10px 0; line-height: 1.4; }
-.reject-hint { font-size: 13px; color: #888; }
+.reject-text { color: #333; font-size: 18px; margin: 0 0 10px 0; line-height: 1.4; }
+.reject-hint { font-size: 16px; color: #888; }
 
 .review-edit-form {
   background: #F9F9F9;
@@ -240,7 +240,7 @@ const deleteReview = async () => {
   border: 1px solid #eee;
 }
 
-.edit-label { display: block; font-weight: 600; margin-bottom: 8px; color: #555; font-size: 14px;}
+.edit-label { display: block; font-weight: 600; margin-bottom: 8px; color: #555; font-size: 18px;}
 
 .rating-stars-edit {
   font-size: 32px; color: #e5e7eb; letter-spacing: 5px; margin-bottom: 15px; cursor: pointer;
@@ -251,7 +251,7 @@ const deleteReview = async () => {
 
 .edit-textarea {
   width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;
-  font-family: inherit; font-size: 15px; resize: vertical; margin-bottom: 15px;
+  font-family: inherit; font-size: 18px; resize: vertical; margin-bottom: 15px;
   box-sizing: border-box; outline: none; transition: 0.2s;
 }
 .edit-textarea:focus { border-color: var(--primary-color, #689D6D); }
@@ -265,6 +265,7 @@ const deleteReview = async () => {
   border-radius: 8px; 
   font-weight: 600; 
   font-family: var(--main-font);
+  font-size: 16px;
   cursor: pointer; 
   transition: 0.2s;
 }

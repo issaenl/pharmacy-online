@@ -169,7 +169,7 @@ onMounted(() => {
     }
 
     .empty-icon { width: 64px; height: 64px; opacity: 0.3; margin-bottom: 20px; }
-    .empty-state p { font-size: 18px; color: #666; margin-bottom: 20px; }
+    .empty-state p { font-size: 20px; color: #666; margin-bottom: 20px; }
 
     .go-catalog-btn {
         display: inline-block;
@@ -199,7 +199,7 @@ onMounted(() => {
     }
 
     .rating-block label, .comment-block label {
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 600;
       color: #333;
       margin-bottom: 10px;
@@ -228,7 +228,7 @@ onMounted(() => {
       border-radius: 12px;
       border: 1px solid #ddd;
       font-family: var(--main-font);
-      font-size: 15px;
+      font-size: 18px;
       resize: vertical;
       outline: none;
     }
@@ -254,9 +254,9 @@ onMounted(() => {
     }
 
     .cancel-btn {
-      background: transparent;
-      border: 1px solid #ccc;
-      color: #666;
+      background: #f0f0f0; 
+      color: #333;
+      border: none;
     }
 
     .submit-btn {

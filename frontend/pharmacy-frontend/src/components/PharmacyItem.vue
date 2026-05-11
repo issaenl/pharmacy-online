@@ -17,7 +17,7 @@
       <div v-if="pharmacy.discountPercentage" class="old-price">{{ formatPrice(pharmacy.price) }} р.</div>
       
       <div class="pharmacy-price" :class="{'has-discount': pharmacy.discountPercentage}">
-        {{ formatPrice(finalPrice) }} р.
+        {{ formatPrice(finalPrice) }} <span class="nbrb-icon nbrb-icon-byn"></span>
       </div>
       <div :class="['pharmacy-quantity', { 'low-stock': pharmacy.quantity < 10 }]">
         {{ pharmacy.quantity }} шт.
@@ -106,18 +106,18 @@ const formatExpDate = (dateString) => {
     .pharmacy-main-info { display: flex; flex-direction: column; gap: 4px; }
     .pharmacy-address-col { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
     .pharmacy-address { font-weight: 600; font-size: 16px; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .expiration-date { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 600; background: #E8F4EA; color: #689D6D; padding: 4px 10px; border-radius: 8px; width: fit-content; }
+    .expiration-date { display: inline-flex; align-items: center; gap: 5px; font-size: 16px; font-weight: 600; background: #E8F4EA; color: #689D6D; padding: 4px 10px; border-radius: 8px; width: fit-content; }
     .pharmacy-name { font-size: 20px; color: #000; }
 
     .pharmacy-pricing { display: flex; flex-direction: column; align-items: center; }
-    .discount-badge { background: #BB4E58; color: white; padding: 2px 6px; border-radius: 6px; font-size: 12px; font-weight: bold; line-height: 1; margin-bottom: 2px; }
-    .old-price { text-decoration: line-through; color: #999; font-size: 13px; line-height: 1; margin-bottom: 2px; }
+    .discount-badge { background: #BB4E58; color: white; padding: 2px 6px; border-radius: 6px; font-size: 16px; font-weight: bold; line-height: 1; margin-bottom: 2px; }
+    .old-price { text-decoration: line-through; color: #999; font-size: 16px; line-height: 1; margin-bottom: 2px; }
     .pharmacy-price { font-weight: 600; font-size: 20px; text-align: center; }
     .pharmacy-price.has-discount { color: #BB4E58; }
 
-    .pharmacy-quantity { text-align: center; color: #B4AFAC; }
+    .pharmacy-quantity { text-align: center; color: #B4AFAC; font-weight: 500; }
     .pharmacy-quantity.low-stock { color: #BB4E58; font-weight: 700; }
-    .update-time { font-size: 12px; color: #B4AFAC; }
+    .update-time { font-size: 16px; color: #B4AFAC; }
 
     .pharmacy-actions { display: flex; gap: 10px; justify-content: flex-end; align-items: center; }
     .book-btn { background: #BB4E58; color: white; border: none; padding: 8px 20px; border-radius: 15px; cursor: pointer; font-weight: 500; font-size: 20px; font-family: var(--main-font); white-space: nowrap; }

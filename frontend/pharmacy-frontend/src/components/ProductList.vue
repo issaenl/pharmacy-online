@@ -52,6 +52,7 @@ defineProps({
 
     .results-count {
         color: #888;
+        font-size: 18px;
         margin-top: 5px;
     }
 

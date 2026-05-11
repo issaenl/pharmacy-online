@@ -79,14 +79,14 @@ onMounted(() => {
 }
 
 .empty-state p {
-  font-size: 18px;
+  font-size: 20px;
   color: #333;
   font-weight: 600;
   margin: 0 0 10px 0;
 }
 
 .hint-text {
-  font-size: 14px;
+  font-size: 18px;
   color: #888;
 }
 

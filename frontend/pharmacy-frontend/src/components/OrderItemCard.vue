@@ -164,7 +164,7 @@ const cancelOrder = () => {
         margin-bottom: 5px;
     }
 
-    .order-date { font-size: 14px; color: #888; }
+    .order-date { font-size: 16px; color: #888; }
 
     .header-center {
         flex: 1;
@@ -172,7 +172,7 @@ const cancelOrder = () => {
     }
 
     .order-pharmacy {
-        font-size: 14px;
+        font-size: 16px;
         color: #000;
         margin-bottom: 5px;
     }
@@ -181,7 +181,7 @@ const cancelOrder = () => {
         display: inline-block;
         padding: 6px 10px;
         border-radius: 6px;
-        font-size: 16px;
+        font-size: 18px;
         font-weight: 600;
     }
 
@@ -292,7 +292,7 @@ const cancelOrder = () => {
 
     .order-item-row:last-child { border-bottom: none; padding-bottom: 0; }
 
-    .item-name { flex: 2; color: #000; font-weight: 500; }
+    .item-name { flex: 2; color: #000; font-weight: 500;}
     .item-qty-price { flex: 1; color: #888; text-align: center; }
     .item-total { flex: 1; color: #000; font-weight: 600; text-align: right; }
 

@@ -130,7 +130,7 @@ const confirm = () => {
 
     .product-name {
         font-weight: 700;
-        font-size: 18px;
+        font-size: 20px;
         margin: 0;
         color: #333;
     }
@@ -139,11 +139,11 @@ const confirm = () => {
         font-weight: 600;
         color: #BB4E58;
         margin: 0;
-        font-size: 16px;
+        font-size: 18px;
     }
 
     .pharmacy-address {
-        font-size: 14px;
+        font-size: 18px;
         color: #B4AFAC;
         margin: 0;
     }
@@ -176,7 +176,7 @@ const confirm = () => {
     }
 
     .quantity-selector button:disabled {
-        opacity: 0.5;
+        opacity: 0.4;
         cursor: not-allowed;
     }
 
@@ -204,7 +204,7 @@ const confirm = () => {
     }
 
     .old-price {
-        font-size: 14px;
+        font-size: 18px;
         color: #999;
         text-decoration: line-through;
         font-weight: normal;

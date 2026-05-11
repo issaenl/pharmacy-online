@@ -49,7 +49,7 @@ defineEmits(['prev', 'next']);
   transition: 0.2s;
   font-weight: 500;
   font-family: var(--main-font);
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .btn-page:hover:not(:disabled) {
@@ -58,13 +58,13 @@ defineEmits(['prev', 'next']);
 }
 
 .btn-page:disabled {
-  background: #f1f5f9;
-  color: #94a3b8;
+  background: #DCDCDC;
+  color: #828282;
   cursor: not-allowed;
 }
 
 .page-info {
-  font-size: 16px;
-  color: #64748b;
+  font-size: 18 px;
+  color: #555;
 }
 </style>

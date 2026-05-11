@@ -75,7 +75,7 @@
 }
 
 .footer-title {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: bold;
   margin-bottom: 20px;
   color: #ffffff;
@@ -93,7 +93,7 @@
 .footer-list a {
   color: #ffffff;
   text-decoration: none;
-  font-size: 14px;
+  font-size: 18px;
   transition: opacity 0.2s ease;
 }
 
@@ -105,7 +105,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 14px;
+  font-size: 18px;
 }
 
 .footer-bottom {
@@ -114,7 +114,7 @@
   align-items: center;
   padding-top: 25px;
   border-top: 1px solid rgba(255, 255, 255, 0.2);
-  font-size: 12px;
+  font-size: 18px;
 }
 
 .copyright {

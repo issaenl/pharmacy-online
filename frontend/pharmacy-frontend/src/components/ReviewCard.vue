@@ -69,10 +69,10 @@ const formattedDate = computed(() => {
 }
 
 .user-meta { display: flex; flex-direction: column; }
-.author-name { font-weight: 600; font-size: 15px; color: #333; }
-.bubble-stars { color: #e5e7eb; font-size: 14px; letter-spacing: 1px; line-height: 1; margin-top: 2px;}
+.author-name { font-weight: 600; font-size: 18px; color: #333; }
+.bubble-stars { color: #e5e7eb; font-size: 18px; letter-spacing: 1px; line-height: 1; margin-top: 2px;}
 .bubble-stars .filled { color: var(--primary-color, #689D6D); } 
 
-.review-date { font-size: 13px; color: #aaa; }
-.bubble-text { font-size: 15px; color: #444; line-height: 1.5; margin: 0; font-style: italic; }
+.review-date { font-size: 16px; color: #777; }
+.bubble-text { font-size: 18px; color: #444; line-height: 1.5; margin: 0; }
 </style>

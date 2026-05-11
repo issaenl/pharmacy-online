@@ -128,8 +128,8 @@ const openWaitlistModal = () => {
     }
 
     .item-img { 
-        width: 80px; 
-        height: 80px; 
+        width: 100px; 
+        height: 100px; 
         object-fit: contain; 
     }
 
@@ -149,7 +149,7 @@ const openWaitlistModal = () => {
 
     .item-price { 
         color: #000; 
-        font-size: 18px; 
+        font-size: 20px; 
         display: flex;
         align-items: center;
         gap: 8px;
@@ -161,7 +161,7 @@ const openWaitlistModal = () => {
     }
 
     .old-price {
-        font-size: 13px;
+        font-size: 18px;
         color: #999;
         text-decoration: line-through;
         margin-bottom: 2px;
@@ -171,6 +171,7 @@ const openWaitlistModal = () => {
     .item-price.has-discount {
         color: #BB4E58;
         font-weight: 600;
+        font-size: 20px;
     }
 
     .discount-badge {
@@ -178,7 +179,7 @@ const openWaitlistModal = () => {
         color: white;
         padding: 2px 6px;
         border-radius: 6px;
-        font-size: 12px;
+        font-size: 18px;
         font-weight: bold;
         line-height: 1;
     }
@@ -196,7 +197,7 @@ const openWaitlistModal = () => {
         background: none; 
         border: none; 
         font-size: 18px; 
-        color: #888; 
+        color: #828282; 
         cursor: pointer; 
         padding: 0 5px; 
     }
@@ -208,7 +209,7 @@ const openWaitlistModal = () => {
 
     .quantity-control span { 
         font-weight: 600; 
-        font-size: 16px; 
+        font-size: 18px; 
         min-width: 20px; 
         text-align: center; 
     }
@@ -251,7 +252,7 @@ const openWaitlistModal = () => {
     .out-of-stock-label {
         color: #BB4E58;
         font-weight: bold;
-        font-size: 16px;
+        font-size: 18px;
     }
 
     .waitlist-btn-small {
@@ -259,8 +260,8 @@ const openWaitlistModal = () => {
         color: white;
         border: none;
         border-radius: 12px;
-        padding: 8px 12px;
-        font-size: 14px;
+        padding: 12px 12px;
+        font-size: 16px;
         font-weight: 600;
         cursor: pointer;
         display: flex;

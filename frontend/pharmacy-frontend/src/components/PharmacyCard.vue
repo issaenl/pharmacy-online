@@ -71,11 +71,11 @@ const goToPharmacy = () => {
     .pharmacy-name { font-size: 20px; color: #000; font-weight: 600; }
     
     .rating-wrapper { display: flex; align-items: center; }
-    .no-rating { font-size: 13px; color: #999; }
+    .no-rating { font-size: 16px; color: #999; }
 
     .pharmacy-address-col { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
-    .pharmacy-address { font-weight: 600; font-size: 16px; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .pharmacy-district { font-size: 14px; color: #888; }
+    .pharmacy-address { font-weight: 600; font-size: 18px; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .pharmacy-district { font-size: 16px; color: #888; }
 
     .pharmacy-actions { display: flex; gap: 10px; justify-content: flex-end; align-items: center; }
     
@@ -88,7 +88,7 @@ const goToPharmacy = () => {
         border-radius: 15px; 
         cursor: pointer; 
         font-weight: 600; 
-        font-size: 16px; 
+        font-size: 18px; 
         font-family: var(--main-font); 
         white-space: nowrap; 
         transition: 0.2s;
@@ -105,7 +105,6 @@ const goToPharmacy = () => {
 
     @media (max-width: 1024px) {
         .pharmacy-item { grid-template-columns: 1.5fr 1fr minmax(180px, auto); padding: 15px; border-radius: 20px; }
-        .pharmacy-name { font-size: 16px; }
         .details-btn { font-size: 14px; padding: 10px 15px; }
     }
 

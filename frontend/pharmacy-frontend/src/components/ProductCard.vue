@@ -207,7 +207,7 @@ const openWaitlistModal = () => {
   }
 
   .title { 
-    font-size: 18px; 
+    font-size: 20px; 
     color: #000000; 
     margin: 0 0 5px; 
     line-height: 1.2;
@@ -221,12 +221,17 @@ const openWaitlistModal = () => {
   }
 
   .dosage {
-    font-size: 14px;
+    font-size: 16px;
     color: #999;
-    white-space: nowrap;
+    line-height: 1.2;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    text-overflow: ellipsis;
-    height: 1.2em;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
   }
 
   .card__text-block {
@@ -243,7 +248,7 @@ const openWaitlistModal = () => {
   .expiration-date { 
     display: inline-flex; 
     align-items: center; 
-    font-size: 14px; 
+    font-size: 16px; 
     font-weight: 600; 
     background: #E8F4EA;
     color: #689D6D;
@@ -254,7 +259,7 @@ const openWaitlistModal = () => {
   }
 
   .price { 
-    font-size: 20px; 
+    font-size: 22px; 
     margin-bottom: 15px;
     margin-top: auto; 
   }
@@ -304,12 +309,12 @@ const openWaitlistModal = () => {
   @media (max-width: 1024px) {
     .title 
     { 
-      font-size: 16px; 
+      font-size: 20px; 
     }
 
     .price 
     { 
-      font-size: 18px; 
+      font-size: 20px; 
     }
 
     .card__image 
@@ -338,13 +343,13 @@ const openWaitlistModal = () => {
 
     .title 
     { 
-      font-size: 14px; 
+      font-size: 18px; 
       margin-bottom: 5px; 
     }
 
     .price 
     { 
-      font-size: 16px; 
+      font-size: 20px; 
       margin-bottom: 10px; 
     }
 
