@@ -49,7 +49,7 @@
             <td>
               <img :src="product.pictureUrl || '/placeholder.jpg'" class="product-thumb" alt="Фото" />
             </td>
-            <td>{{ product.name }}</td>
+            <td><strong>{{ product.name }}</strong></td>
             <td>{{ product.manufacturer }}</td>
             <td class="text-center">
                 <input 
@@ -496,20 +496,18 @@ const deleteProduct = async (id) => {
 .status-badge {
   padding: 5px 10px;
   border-radius: 20px;
-  font-size: 12px;
+  font-size: 16px;
   font-weight: bold;
 }
 
 .status-badge.active {
   background: #E8F4EA;
   color: #689D6D;
-  font-size: 14px;
 }
 
 .status-badge.inactive {
   background: #FDE8E8;
   color: #BB4E58;
-  font-size: 14px;
 }
 
 .checkboxes {
@@ -537,7 +535,7 @@ const deleteProduct = async (id) => {
   transition: 0.3s;
   background: var(--background-color);
   color: #666;
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .drop-zone.drag-active {

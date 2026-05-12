@@ -381,12 +381,12 @@ const {
 .role-badge {
   padding: 5px 10px;
   border-radius: 20px;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 600;
 }
 
 .role-super {
-  background-color: #fcf1d6;
+  background-color: #fff7e3;
   color: #F3C301;
 }
 

@@ -86,7 +86,7 @@ const handleReset = async () => {
 .auth-container h2 { margin-bottom: 20px; font-family: var(--main-font); color: #000; }
 .form-group { margin-bottom: 15px; text-align: left; }
 .form-group label { display: block; margin-bottom: 5px; font-size: 18px; color: #000; }
-.form-group input { width: 100%; padding: 12px; border: none; border-radius: 10px; background-color: #F5F5F5; font-family: var(--main-font); font-size: 16px; }
+.form-group input { width: 100%; padding: 12px; border: none; border-radius: 10px; background-color: #F5F5F5; font-family: var(--main-font); font-size: 18px; }
 .submit-btn { width: 100%; padding: 12px; background: #689D6D; color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: 600; font-family: var(--main-font); cursor: pointer; margin-top: 10px; transition: 0.2s; }
 .submit-btn:hover { background: #5a885e; }
 .submit-btn:disabled { background: #B3CCAE; cursor: not-allowed; }

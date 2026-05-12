@@ -361,7 +361,7 @@ onBeforeRouteLeave((to, from, next) => {
       border: none;
       padding: 12px 20px;
       border-radius: 15px;
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 600;
       font-family: var(--main-font);
       cursor: pointer;
@@ -426,7 +426,7 @@ onBeforeRouteLeave((to, from, next) => {
       border: none;
       border-radius: 10px;
       font-family: var(--main-font);
-      font-size: 16px;
+      font-size: 18px;
     }
 
     .price-separator {
@@ -444,7 +444,7 @@ onBeforeRouteLeave((to, from, next) => {
       align-items: center;
       gap: 8px;
       cursor: pointer;
-      font-size: 16px;
+      font-size: 18px;
       color: #000;
     }
 
@@ -454,7 +454,7 @@ onBeforeRouteLeave((to, from, next) => {
       background-color: #F5F5F5;
       border: none;
       border-radius: 10px;
-      font-size: 16px;
+      font-size: 18px;
       font-family: var(--main-font);
       cursor: pointer;
     }
@@ -547,7 +547,6 @@ onBeforeRouteLeave((to, from, next) => {
   border: none;
   border-radius: 10px;
   padding: 10px 12px;
-  font-size: 16px;
   font-family: var(--main-font);
   color: #000;
 }

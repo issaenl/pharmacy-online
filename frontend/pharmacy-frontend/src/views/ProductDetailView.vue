@@ -493,7 +493,7 @@ onMounted(async () => {
     flex-wrap: wrap;
     gap: 8px;
     margin-bottom: 25px; 
-    font-size: 16px; 
+    font-size: 18px; 
   }
 
   .breadcrumb-link {
@@ -507,8 +507,8 @@ onMounted(async () => {
   }
 
   .separator {
-    color: #ccc;
-    font-size: 14px;
+    color: #888;
+    font-size: 18px;
   }
 
   .product-main { 
@@ -546,14 +546,14 @@ onMounted(async () => {
   }
 
   .manufacturer { 
-    color: #B4AFAC; 
-    font-size: 18px; 
+    color: #777; 
+    font-size: 20px; 
     margin: 5px 0; 
   }
 
   .prescription-status { 
     color: #689D6D; 
-    font-size: 18px; 
+    font-size: 20px; 
     font-weight: 500; 
   }
 
@@ -562,14 +562,14 @@ onMounted(async () => {
   }
 
   .price-range { 
-    font-size: 28px; 
+    font-size: 32px; 
     font-weight: 500; 
     color: #333; 
   }
 
   .disclaimer { 
-    font-size: 14px; 
-    color: #ccc; 
+    font-size: 16px; 
+    color: #888; 
     margin: 0; 
   }
 
@@ -651,7 +651,7 @@ onMounted(async () => {
 
   .pdf-title {
     color: white;
-    font-size: 16px;
+    font-size: 20px;
     font-weight: 500;
     font-family: var(--main-font);
     white-space: nowrap;
@@ -723,7 +723,7 @@ onMounted(async () => {
     font-family: inherit;
     font-weight: 600;
     color: #666;
-    font-size: 15px;
+    font-size: 18px;
     transition: 0.2s;
   }
 
@@ -750,7 +750,7 @@ onMounted(async () => {
 
   .filter-group label {
     font-weight: 600;
-    font-size: 16px;
+    font-size: 18px;
   }
 
   .filter-select {
@@ -759,7 +759,7 @@ onMounted(async () => {
     border: 1px solid #ddd;
     outline: none;
     font-family: inherit;
-    font-size: 16px;
+    font-size: 18px;
     min-width: 150px;
   }
 

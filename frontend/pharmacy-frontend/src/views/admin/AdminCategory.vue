@@ -335,12 +335,12 @@ const {
 }
 
 .form-column label {
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .form-column input,
 .form-column textarea {
-  font-size: 15px;
+  font-size: 18px;
 }
 
 .form-column textarea {
@@ -349,7 +349,7 @@ const {
 
 .info-box {
   padding: 10px;
-  font-size: 14px;
+  font-size: 18px;
   margin-bottom: 5px;
 }
 
@@ -365,7 +365,7 @@ const {
   color: #689d6d;
   padding: 4px 10px;
   border-radius: 12px;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 600;
   display: inline-flex;
   align-items: center;
@@ -377,7 +377,7 @@ const {
   color: #689d6d;
   border-radius: 12px;
   padding: 3px 8px;
-  font-size: 12px;
+  font-size: 14px;
   cursor: pointer;
   transition: 0.2s;
   font-weight: 600;
@@ -410,7 +410,7 @@ const {
   border: 1px solid #ddd;
   border-radius: 8px;
   font-family: inherit;
-  font-size: 15px;
+  font-size: 18px;
   font-weight: normal;
 }
 

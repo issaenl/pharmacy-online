@@ -114,7 +114,7 @@ onMounted(fetchPharmacies);
   background: #fff;
   border-radius: 20px;
   color: #888;
-  font-size: 18px;
+  font-size: 20px;
 }
 
 .pharmacies-list {

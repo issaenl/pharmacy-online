@@ -26,8 +26,8 @@
           {{ isLoading ? 'Вход...' : 'Войти' }}
         </button>
 
-        <div class="forgot-password-link" style="text-align: right; margin-bottom: 10px;">
-           <router-link to="/forgot-password" style="font-size: 14px; color: #689D6D; text-decoration: none;">
+        <div class="forgot-password-link" style="text-align: right; margin-top: 5px;">
+           <router-link to="/forgot-password" style="font-size: 18px; color: #689D6D; text-decoration: none;">
              Забыли пароль?
            </router-link>
         </div>
@@ -136,7 +136,7 @@ const handleLogin = async () => {
         border-radius: 10px;
         background-color: #F5F5F5;
         font-family: var(--main-font);
-        font-size: 16px;
+        font-size: 18px;
     }
 
     .submit-btn {

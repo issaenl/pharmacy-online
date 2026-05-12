@@ -298,7 +298,7 @@ const {
   padding: 6px 10px;
   border-radius: 6px;
   font-family: inherit;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: bold;
   cursor: pointer;
   border: 1px solid transparent;
@@ -335,7 +335,7 @@ const {
     }
 
 .order-details {
-  font-size: 15px;
+  font-size: 18px;
   margin-top: 20px;
 }
 
@@ -367,7 +367,7 @@ const {
 
 .total-row {
   text-align: right;
-  font-size: 18px;
+  font-size: 20px;
   margin-top: 15px;
 }
 </style>

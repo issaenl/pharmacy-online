@@ -89,6 +89,7 @@ th {
   background: var(--background-color);
   color: #000;
   font-weight: 600;
+  font-size: 18px;
 }
 
 .text-center {
@@ -96,7 +97,7 @@ th {
 }
 
 .text-muted {
-  color: #999;
+  color: #888;
   font-size: 16px;
 }
 

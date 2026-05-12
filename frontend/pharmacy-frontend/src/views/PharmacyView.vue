@@ -287,7 +287,7 @@ onMounted(async () => {
 
 .title-row { display: flex; align-items: center; gap: 15px; margin-bottom: 5px; }
 .pharmacy-title { font-size: 32px; font-weight: 700; color: #000; margin: 0; }
-.last-update { font-size: 14px; color: #888; margin: 0; }
+.last-update { font-size: 18px; color: #777; margin: 0; }
 
 .pharmacy-info-card {
   background: #fff;
@@ -300,7 +300,7 @@ onMounted(async () => {
 .info-grid { display: flex; gap: 40px; }
 .info-column { flex: 1; display: flex; flex-direction: column; gap: 20px; }
 .info-block { display: flex; flex-direction: column; gap: 8px; }
-.info-label { font-size: 14px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+.info-label { font-size: 16px; color: #555; text-transform: uppercase; letter-spacing: 0.5px; }
 .info-text { font-size: 18px; color: #333; margin: 0; line-height: 1.4; }
 
 .phone-link {
@@ -309,7 +309,7 @@ onMounted(async () => {
 .phone-link:hover { text-decoration: underline; opacity: 0.8; }
 
 .map-link {
-  display: inline-flex; align-items: center; gap: 5px; color: var(--primary-color, #689D6D); text-decoration: none; font-size: 16px; font-weight: 500; margin-top: 5px;
+  display: inline-flex; align-items: center; gap: 5px; color: var(--primary-color, #689D6D); text-decoration: none; font-size: 18px; font-weight: 500; margin-top: 5px;
 }
 .map-link:hover { text-decoration: underline; }
 
@@ -352,7 +352,7 @@ onMounted(async () => {
 }
 
 .star-label {
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 600;
   color: #333;
   width: 40px;
@@ -381,7 +381,7 @@ onMounted(async () => {
 
 .count-label {
   width: 30px;
-  font-size: 14px;
+  font-size: 18px;
   color: #555;
   text-align: right;
 }
@@ -411,7 +411,7 @@ onMounted(async () => {
 .rating-stars-big .filled { color: var(--primary-color, #689D6D); }
 
 .rating-count {
-  font-size: 14px;
+  font-size: 18px;
   color: #555;
   font-weight: 500;
 }
@@ -467,6 +467,7 @@ onMounted(async () => {
 
 .empty-reviews-state {
   text-align: center;
+  font-size: 20px;
   color: #888;
   padding: 20px;
   background: #f9f9f9;

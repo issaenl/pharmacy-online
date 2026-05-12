@@ -149,9 +149,9 @@ onMounted(async () => {
 }
 
 .back-link {
-  color: #888;
+  color: #555;
   text-decoration: none;
-  font-size: 16px;
+  font-size: 20px;
   display: inline-block;
   margin-bottom: 15px;
   transition: 0.2s;
@@ -171,7 +171,7 @@ onMounted(async () => {
   text-align: center;
   padding: 50px;
   color: #888;
-  font-size: 18px;
+  font-size: 20px;
   background: white;
   border-radius: 20px;
 }
@@ -202,7 +202,7 @@ onMounted(async () => {
   background: white;
   border: 2px solid #E5E7EB;
   border-radius: 12px;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 500;
   color: #555;
   cursor: pointer;
@@ -235,7 +235,7 @@ onMounted(async () => {
 
 .count-text {
   color: #888;
-  font-size: 14px;
+  font-size: 18px;
   font-weight: normal;
 }
 

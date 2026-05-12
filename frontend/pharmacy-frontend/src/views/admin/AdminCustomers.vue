@@ -224,7 +224,7 @@ const {
 .role-badge {
   padding: 5px 10px;
   border-radius: 20px;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 600;
 }
 

@@ -324,7 +324,7 @@ const {
   color: #333;
   padding: 4px 8px;
   border-radius: 6px;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 600;
 }
 
@@ -333,8 +333,7 @@ const {
 }
 
 .comment-text {
-  font-style: italic;
-  color: #555;
+  color: #000;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -372,7 +371,7 @@ const {
 
 .empty-state {
   padding: 60px !important;
-  font-size: 16px;
+  font-size: 20px;
 }
 
 .reject-form {
@@ -383,8 +382,8 @@ const {
 }
 
 .reject-hint {
-  font-size: 14px;
-  color: #666;
+  font-size: 18px;
+  color: #555;
   margin: 0;
 }
 
@@ -394,7 +393,7 @@ const {
   border-radius: 10px;
   border: 1px solid #ddd;
   font-family: inherit;
-  font-size: 15px;
+  font-size: 18px;
   resize: vertical;
   outline: none;
   transition: border-color 0.2s;
@@ -415,7 +414,7 @@ const {
   padding: 10px 20px;
   border-radius: 8px;
   font-weight: 600;
-  font-size: 15px;
+  font-size: 16px;
   cursor: pointer;
   font-family: inherit;
   transition: 0.2s;

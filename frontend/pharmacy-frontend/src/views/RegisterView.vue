@@ -125,7 +125,7 @@ const handlePhoneInput = (event) => {
         border-radius: 10px;
         background-color: #F5F5F5;
         font-family: var(--main-font);
-        font-size: 16px;
+        font-size: 18px;
     }
 
     .submit-btn {
@@ -155,7 +155,7 @@ const handlePhoneInput = (event) => {
     .error-msg { 
         color: #BB4E58; 
         font-weight: 600;
-        font-size: 16px; 
+        font-size: 18px; 
         margin-bottom: 10px; 
     }
 

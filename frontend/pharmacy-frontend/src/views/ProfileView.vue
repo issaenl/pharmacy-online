@@ -162,7 +162,7 @@ const handleLogout = () => {
       text-align: left; 
       padding: 12px 15px; 
       border-radius: 10px; 
-      font-size: 16px; 
+      font-size: 18px; 
       cursor: pointer; 
       color: #555; 
       transition: 0.2s; 
@@ -186,7 +186,7 @@ const handleLogout = () => {
       color: #BB4E58; 
       padding: 12px; 
       border-radius: 10px; 
-      font-size: 16px; 
+      font-size: 18px; 
       font-weight: 600; 
       cursor: pointer; 
       transition: 0.2s; 

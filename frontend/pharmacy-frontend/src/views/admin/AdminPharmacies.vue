@@ -281,13 +281,13 @@ const {
   gap: 8px;
 }
 .preview-label {
-  font-size: 13px;
+  font-size: 16px;
   color: #888;
   font-weight: 600;
 }
 .photo-preview {
   width: 100%;
-  max-height: 150px;
+  max-height: 200px;
   object-fit: cover;
   border-radius: 12px;
   border: 1px solid #eee;

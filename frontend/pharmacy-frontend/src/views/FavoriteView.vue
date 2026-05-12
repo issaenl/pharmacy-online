@@ -12,7 +12,7 @@
 
       <div v-else-if="favoriteStore.items.length === 0" class="empty-state">
         <p>В избранном пока нет товаров</p>
-        <router-link to="/catalog" class="go-catalog-btn">В каталог</router-link>
+        <router-link to="/full-catalog" class="go-catalog-btn">В каталог</router-link>
       </div>
 
       <div v-else class="favorites-grid">
@@ -79,7 +79,7 @@ onMounted(async () => {
         text-align: center;
         padding: 50px 0;
         color: #888;
-        font-size: 18px;
+        font-size: 22px;
     }
 
     .go-catalog-btn {

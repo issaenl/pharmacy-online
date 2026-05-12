@@ -300,7 +300,7 @@ const downloadExcel = async () => {
   border-radius: 12px; 
   border: 1px solid #ddd; 
   font-family: inherit; 
-  font-size: 15px; 
+  font-size: 18px; 
   outline: none; 
   background: #fff; 
   cursor: pointer;
@@ -314,7 +314,7 @@ const downloadExcel = async () => {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 16px;
+  font-size: 18px;
   padding: 10px 20px;
   border-radius: 12px;
   background: var(--primary-color);
@@ -336,7 +336,7 @@ const downloadExcel = async () => {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 16px;
+  font-size: 18px;
   padding: 10px 20px;
   border-radius: 12px;
   background: #fff;
@@ -396,8 +396,8 @@ const downloadExcel = async () => {
 }
 
 .pharmacy-title .label {
-  font-size: 13px;
-  color: #888;
+  font-size: 16px;
+  color: #555;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -419,7 +419,7 @@ const downloadExcel = async () => {
   align-items: center;
   padding: 8px 16px;
   border-radius: 12px;
-  font-size: 15px;
+  font-size: 18px;
   color: #888;
   font-weight: normal;
   background: #f9f9f9;
@@ -503,13 +503,13 @@ const downloadExcel = async () => {
 }
 
 .metric-label {
-  font-size: 16px;
+  font-size: 18px;
   color: #888;
   font-weight: 500;
 }
 
 .metric-value {
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 700;
   color: #000;
 }
@@ -537,7 +537,7 @@ const downloadExcel = async () => {
 
 .panel-title {
   margin: 0 0 20px 0;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
   color: #333;
 }
@@ -584,18 +584,18 @@ const downloadExcel = async () => {
   justify-content: center;
   border-radius: 50%;
   font-weight: bold;
-  font-size: 14px;
+  font-size: 18px;
 }
 
 .item-name {
   font-weight: 600;
-  font-size: 16px;
+  font-size: 18px;
   color: #000000;
 }
 
 .qty-badge {
   font-weight: 700;
-  font-size: 15px;
+  font-size: 18px;
   color: var(--primary-color);
 }
 
@@ -608,7 +608,7 @@ const downloadExcel = async () => {
   color: #BB4E58;
   padding: 4px 10px;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 600;
 }
 
@@ -619,15 +619,15 @@ const downloadExcel = async () => {
 }
 
 .meta-pharmacy {
-  font-size: 14px;
-  color: #888;
+  font-size: 16px;
+  color: #555;
 }
 
 .empty-state {
   text-align: center;
   padding: 30px;
-  color: #999;
-  font-size: 15px;
+  color: #555;
+  font-size: 18px;
   background: #fafafa;
   border-radius: 12px;
   border: 1px dashed #ddd;

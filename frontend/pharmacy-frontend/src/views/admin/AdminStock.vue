@@ -542,13 +542,13 @@ const {
 }
 
 .price-cell {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .old-price {
-    font-size: 12px;
+    font-size: 16px;
     text-decoration: line-through;
     color: #999;
     line-height: 1;
@@ -557,6 +557,7 @@ const {
 .discounted-price {
     color: var(--accent-color, #BB4E58);
     font-weight: 600;
+    font-size: 18px;
 }
 
 .discount-wrapper {
@@ -570,7 +571,7 @@ const {
     color: var(--accent-color, #BB4E58);
     padding: 4px 8px;
     border-radius: 6px;
-    font-size: 13px;
+    font-size: 18px;
     font-weight: bold;
 }
 
@@ -599,7 +600,7 @@ const {
     color: #689D6D;
     padding: 10px;
     border-radius: 8px;
-    font-size: 14px;
+    font-size: 18px;
     margin-top: 10px;
 }
 
