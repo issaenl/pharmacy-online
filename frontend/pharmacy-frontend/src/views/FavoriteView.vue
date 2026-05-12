@@ -30,6 +30,8 @@
       </div>
     </div>
   </div>
+
+  <Footer />
 </template>
 
 <script setup>
@@ -37,6 +39,7 @@ import { onMounted } from 'vue';
 import { useFavoriteStore } from '@/stores/favoriteStore';
 import TheHeader from '@/components/Header.vue';
 import ProductCard from '@/components/ProductCard.vue';
+import Footer from '@/components/Footer.vue';
 
 const favoriteStore = useFavoriteStore();
 

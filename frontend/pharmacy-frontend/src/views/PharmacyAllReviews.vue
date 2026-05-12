@@ -62,6 +62,8 @@
       </div>
     </div>
   </div>
+
+    <Footer />
 </template>
 
 <script setup>
@@ -71,6 +73,7 @@ import { useToast } from 'vue-toast-notification';
 import TheHeader from '@/components/Header.vue';
 import ReviewCard from '@/components/ReviewCard.vue';
 import AppPagination from '@/components/AppPagination.vue';
+import Footer from '@/components/Footer.vue';
 import api from '@/api/api';
 
 const route = useRoute();

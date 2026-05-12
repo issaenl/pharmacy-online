@@ -164,6 +164,8 @@
 
     </div>
   </div>
+
+  <Footer />
 </template>
 
 <script setup>
@@ -173,6 +175,7 @@ import ProductList from '@/components/ProductList.vue';
 import TheHeader from '@/components/Header.vue';
 import AppPagination from '@/components/AppPagination.vue'; 
 import { useCustomSelect } from '@/logic/customSelect';
+import Footer from '@/components/Footer.vue';
 import api from '@/api/api';
 
 const route = useRoute();

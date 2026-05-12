@@ -21,6 +21,8 @@
       />
     </div>
   </main>
+
+  <Footer />
 </template>
 
 <script setup>
@@ -29,6 +31,7 @@ import { useRoute, useRouter } from 'vue-router';
 import api from '@/api/api';
 import ProductCard from '@/components/ProductCard.vue';
 import TheHeader from '@/components/Header.vue';
+import Footer from '@/components/Footer.vue';
 
 const route = useRoute();
 const router = useRouter();

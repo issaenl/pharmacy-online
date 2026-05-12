@@ -30,6 +30,8 @@
       </div>
     </div>
   </div>
+
+  <Footer />
 </template>
 
 <script setup>
@@ -38,6 +40,7 @@ import api from '@/api/api';
 import TheHeader from '@/components/Header.vue';
 import PharmacyCard from '@/components/PharmacyCard.vue';
 import AppPagination from '@/components/AppPagination.vue';
+import Footer from '@/components/Footer.vue';
 
 const pharmacies = ref([]);
 const isLoading = ref(true);

@@ -39,7 +39,7 @@
         <div class="summary-row total-price-row">
           <span class="total-price">
             <template v-if="!orderStore.selectedPharmacy">от </template>
-            {{ cartStore.totalPrice.toFixed(2) }} р.
+            {{ cartStore.totalPrice.toFixed(2) }} <span class="nbrb-icon nbrb-icon-byn"></span>
           </span>
         </div>
 
@@ -87,6 +87,8 @@
 
     </div>
   </div>
+
+  <Footer />
 </template>
 
 <script setup>
@@ -98,6 +100,7 @@ import { useOrderStore } from '@/stores/orderStore';
 import TheHeader from '@/components/Header.vue';
 import CartItem from '@/components/CartItem.vue';
 import PharmacyModal from '@/components/PharmacyModal.vue';
+import Footer from '@/components/Footer.vue';
 import { useToast } from 'vue-toast-notification';
 
 const cartStore = useCartStore();

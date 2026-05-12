@@ -130,6 +130,8 @@
     </section>
 
   </div>
+
+  <Footer />
 </template>
 
 <script setup>
@@ -140,6 +142,7 @@ import ProductCard from '@/components/ProductCard.vue';
 import TheHeader from '@/components/Header.vue';
 import AppPagination from '@/components/AppPagination.vue';
 import ReviewCard from '@/components/ReviewCard.vue';
+import Footer from '@/components/Footer.vue';
 import api from '@/api/api';
 
 const route = useRoute();

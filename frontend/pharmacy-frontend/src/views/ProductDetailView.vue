@@ -170,6 +170,8 @@
       @confirm="submitQuickCheckout"
     />
   </div>
+
+  <Footer />
 </template>
 
 <script setup>
@@ -186,6 +188,7 @@ import QuickOrderModal from '@/components/QuickOrderModal.vue';
 import api from '@/api/api';
 import AppPagination from '@/components/AppPagination.vue';
 import WaitlistModal from '@/components/WaitlistModal.vue';
+import Footer from '@/components/Footer.vue';
 
 const route = useRoute();
 const router = useRouter();

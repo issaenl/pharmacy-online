@@ -15,6 +15,8 @@
       />
     </div>
   </div>
+
+  <Footer />
 </template>
 
 <script setup>
@@ -23,6 +25,7 @@ import { useRoute } from 'vue-router';
 import ProductList from '@/components/ProductList.vue';
 import TheHeader from '@/components/Header.vue';
 import AppPagination from '@/components/AppPagination.vue';
+import Footer from '@/components/Footer.vue';
 import api from '@/api/api';
 
 const route = useRoute();

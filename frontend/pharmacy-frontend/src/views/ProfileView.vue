@@ -54,6 +54,8 @@
       
     </div>
   </div>
+
+  <Footer />
 </template>
 
 <script setup>
@@ -66,6 +68,7 @@ import ProfileOrders from '@/components/ProfileOrders.vue';
 import ProfileReviews from '@/components/ProfileReviews.vue';
 import ProfileCalendar from '@/components/ProfileCalendar.vue';
 import ProfileWaitlist from '@/components/ProfileWaitlist.vue';
+import Footer from '@/components/Footer.vue';
 
 const authStore = useAuthStore();
 const router = useRouter();
