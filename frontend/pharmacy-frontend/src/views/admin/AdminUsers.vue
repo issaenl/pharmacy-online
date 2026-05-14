@@ -219,11 +219,11 @@ onMounted(() => {
 
 
 const handleResetPassword = async (id) => {
-  if (!confirm('Сбросить пароль этого сотрудника до пароля по умолчанию?')) return;
+  if (!confirm('Сбросить пароль этого сотрудника и отправить новый ему на email?')) return;
   
   try {
     const response = await api.put(`/Users/${id}/reset-password`);
-    toast.success("Пароль успешно сброшен!");
+    toast.success(response.data.message || "Пароль успешно сброшен и отправлен на email!");
   } catch (error) {
     toast.error(error.response?.data?.message || "Ошибка при сбросе пароля");
   }

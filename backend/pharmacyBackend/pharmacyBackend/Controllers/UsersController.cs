@@ -5,6 +5,7 @@ using pharmacyBackend.Data;
 using pharmacyBackend.DTO;
 using pharmacyBackend.Enums;
 using pharmacyBackend.Models;
+using pharmacyBackend.Services;
 using PhoneNumbers;
 
 namespace pharmacyBackend.Controllers
@@ -16,10 +17,12 @@ namespace pharmacyBackend.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IConfiguration _configuration;
-        public UsersController(AppDbContext context, IConfiguration configuration)
+        private readonly IEmailService _emailService;
+        public UsersController(AppDbContext context, IConfiguration configuration, IEmailService emailService)
         {
             _context = context;
             _configuration = configuration;
+            _emailService = emailService;
         }
 
         [HttpGet("customers")]
@@ -104,13 +107,26 @@ namespace pharmacyBackend.Controllers
                 return BadRequest(new { message = "Этот метод предназначен только для покупателей" });
             }
 
-            var defaultPassword = _configuration["DefaultPassword:Password"];
+            if (string.IsNullOrWhiteSpace(user.Email))
+            {
+                return BadRequest(new { message = "У этого покупателя не указан email. Восстановление пароля невозможно." });
+            }
 
-            user.Password = BCrypt.Net.BCrypt.HashPassword(defaultPassword);
+            var newPassword = GenerateRandomPassword(10);
+            user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
 
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = $"Пароль успешно сброшен на: {defaultPassword}" });
+            var emailBody = $@"
+                <h3>Сброс пароля</h3>
+                <p>Здравствуйте, {user.FirstName}!</p>
+                <p>Ваш пароль был успешно сброшен администратором. Ваш новый пароль для входа:</p>
+                <h2>{newPassword}</h2>
+                <p>Рекомендуем изменить этот пароль в личном кабинете после входа и удалить это письмо.</p>";
+
+            await _emailService.SendEmailAsync(user.Email, "Сброс пароля", emailBody);
+
+            return Ok(new { message = "Новый пароль успешно сгенерирован и отправлен покупателю на email" });
         }
 
 
@@ -229,7 +245,6 @@ namespace pharmacyBackend.Controllers
 
             return Ok();
         }
-
         [Authorize(Roles = "Admin")]
         [HttpPut("{id}/reset-password")]
         public async Task<ActionResult> ResetPassword(int id)
@@ -246,12 +261,33 @@ namespace pharmacyBackend.Controllers
                 return BadRequest(new { message = "Сброс пароля главного системного администратора запрещен" });
             }
 
-            var defaultPassword = _configuration["DefaultPassword:Password"];
-            user.Password = BCrypt.Net.BCrypt.HashPassword(defaultPassword);
+            if (string.IsNullOrWhiteSpace(user.Email))
+            {
+                return BadRequest(new { message = "У этого администратора не указан email. Восстановление пароля невозможно." });
+            }
+
+            var newPassword = GenerateRandomPassword(12);
+            user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
 
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = $"Пароль сброшен на: {defaultPassword}" });
+            var emailBody = $@"
+                <h3>Данные для входа обновлены</h3>
+                <p>Здравствуйте, {user.FirstName}!</p>
+                <p>Ваш пароль был успешно сброшен администратором. Ваш новый пароль для входа:</p>
+                <h2>{newPassword}</h2>
+                <p>Рекомендуем изменить этот пароль в личном кабинете после входа и удалить это письмо..</p>";
+
+            await _emailService.SendEmailAsync(user.Email, "Новый пароль администратора", emailBody);
+
+            return Ok(new { message = "Новый пароль сгенерирован и отправлен сотруднику на email" });
+        }
+
+        private string GenerateRandomPassword(int length)
+        {
+            const string validChars = "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*?_-";
+            var random = new Random();
+            return new string(Enumerable.Repeat(validChars, length).Select(s => s[random.Next(s.Length)]).ToArray());
         }
     }
 }

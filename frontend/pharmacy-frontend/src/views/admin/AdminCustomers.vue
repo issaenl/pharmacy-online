@@ -138,11 +138,11 @@ const toggleBan = async (customer) => {
 };
 
 const resetPassword = async (customer) => {
-  if (!confirm(`Сбросить пароль для клиента ${customer.firstName} до значения по умолчанию?`)) return;
-
+  if (!confirm(`Сбросить пароль для клиента ${customer.firstName} и отправить новый ему на email?`)) return;
+  
   try {
     const response = await api.put(`/Users/reset-customer-password/${customer.id}`);
-    toast.success("Пароль успешно сброшен!");
+    toast.success(response.data.message || "Пароль успешно сброшен и отправлен на email!");
   } catch (error) {
     toast.error(error.response?.data?.message || "Ошибка при сбросе пароля");
   }
